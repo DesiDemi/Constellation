@@ -322,8 +322,9 @@
     <div class="resource res-energy"><span class="icon">⚡</span><span id="res-energy">50</span><span class="rate" id="rate-energy">+1/s</span></div>
     <div class="resource res-credit"><span class="icon">💰</span><span id="res-credit">200</span></div>
     <div class="resource res-data"><span class="icon">📊</span><span id="res-data">0</span></div>
-    <button id="ach-btn" title="Achievements" onclick="toggleAchievements()">🏆 <span id="ach-count">0/16</span></button>
+    <button id="ach-btn" title="Achievements" onclick="toggleAchievements()">🏆 <span id="ach-count">0/20</span></button>
     <div id="day-counter">Day 1</div>
+    <div class="resource" style="color:#ff6e6e;gap:4px;"><span class="icon">❤️</span><span id="res-hp">100</span>/<span id="res-maxhp">100</span></div>
   </div>
   <div id="main">
     <div id="left-panel">
@@ -343,12 +344,32 @@
         <div class="tab-btn active" onclick="switchTab('modules')">🔧 Modules</div>
         <div class="tab-btn" onclick="switchTab('research')">🔬 Research</div>
         <div class="tab-btn" onclick="switchTab('crew')">👥 Crew</div>
+        <div class="tab-btn" onclick="switchTab('defense')">🛡️ Defense</div>
         <div class="tab-btn" onclick="switchTab('market')">💱 Trade</div>
       </div>
       <div class="tab-content active" id="tab-modules"></div>
       <div class="tab-content" id="tab-research"></div>
       <div class="tab-content" id="tab-crew"></div>
       <div class="tab-content" id="tab-market"></div>
+      <div class="tab-content" id="tab-defense"></div>
+
+      <!-- Combat overlay -->
+      <div id="combat-overlay" style="display:none;flex-direction:column;gap:8px;background:rgba(255,60,60,0.08);border:2px solid var(--danger);border-radius:12px;padding:12px;margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="alien-icon" style="font-size:32px;">🛸</span>
+          <div style="flex:1;">
+            <div style="font-weight:700;color:var(--danger);" id="alien-name">Alien Scout</div>
+            <div style="width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;margin-top:4px;">
+              <div id="alien-hp-bar" style="height:100%;background:var(--danger);border-radius:4px;width:100%;transition:width 0.3s;"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:2px;"><span id="alien-hp-text">30/30</span> HP</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="attackAlien()" id="attack-btn" style="flex:1;background:var(--danger);font-size:13px;">⚔️ Attack! (<span id="attack-dmg">10</span> dmg)</button>
+        </div>
+        <div style="font-size:10px;color:var(--text-dim);text-align:center;" id="alien-threat">⚠️ Attacking in 3s for 4 damage</div>
+      </div>
     </div>
   </div>
 </div>
@@ -451,6 +472,19 @@ const EVENTS = [
   ]},
 ];
 
+const ALIEN_TYPES = [
+  { id:'scout', name:'Alien Scout', icon:'🛸', hp:30, damage:4, atkSpeed:3, reward:{credits:60,data:10}, speed:0.6 },
+  { id:'fighter', name:'Alien Fighter', icon:'👾', hp:60, damage:8, atkSpeed:2.5, reward:{credits:120,data:25}, speed:0.8 },
+  { id:'cruiser', name:'Heavy Cruiser', icon:'🦑', hp:100, damage:15, atkSpeed:2, reward:{credits:250,data:50}, speed:0.5 },
+  { id:'mothership', name:'👑 Mothership', icon:'🛸', hp:250, damage:25, atkSpeed:3, reward:{credits:600,data:150}, speed:0.3 },
+];
+
+const DEFENSE_MODULES = [
+  { id:'laser', name:'Laser Turret', icon:'🔫', desc:'Auto-attacks aliens', cost:100, scale:1.6, max:6, effect:l=>`${l*5} dmg/sec` },
+  { id:'cannon', name:'Plasma Cannon', icon:'💥', desc:'Manual attack damage boost', cost:150, scale:1.7, max:5, effect:l=>`+${l*8} manual dmg` },
+  { id:'repair', name:'Repair Bay', icon:'🏥', desc:'Auto-repair station HP', cost:200, scale:1.7, max:5, effect:l=>`+${l*3} HP every 5s` },
+];
+
 const ACHIEVEMENTS = [
   { id:'first_exp', name:'First Steps', desc:'Launch your first expedition', icon:'🚀', check:()=>state.totalExpeditions>=1 },
   { id:'ten_exp', name:'Veteran Explorer', desc:'Complete 10 expeditions', icon:'🏅', check:()=>state.successfulExpeditions>=10 },
@@ -468,6 +502,11 @@ const ACHIEVEMENTS = [
   { id:'full_research', name:'Master Scientist', desc:'Complete all research', icon:'🧬', check:()=>state.researchCompleted.length>=RESEARCH.length },
   { id:'big_exp', name:'Into the Void', desc:'Complete a Void Leap expedition', icon:'🕳️', check:()=>state.voidLeaps>=1 },
   { id:'day30', name:'Month in Space', desc:'Reach Day 30', icon:'📅', check:()=>state.day>=30 },
+  // Combat
+  { id:'first_kill', name:'First Blood', desc:'Defeat your first alien', icon:'⚔️', check:()=>state.aliensDefeated>=1 },
+  { id:'ten_kills', name:'Alien Hunter', desc:'Defeat 10 aliens', icon:'🎯', check:()=>state.aliensDefeated>=10 },
+  { id:'boss_kill', name:'Giant Slayer', desc:'Defeat a Mothership', icon:'💀', check:()=>state.mothershipsDefeated>=1 },
+  { id:'survivor', name:'Survivor', desc:'Survive with less than 20 HP', icon:'❤️‍🩹', check:()=>state.stationHP<=20&&state.stationHP>0 },
 ];
 
 // ==================== STATE ====================
@@ -479,9 +518,15 @@ const state = {
   eventsHandled:0, voidLeaps:0,
   achievements:[], newAchievement:false,
   eventActive:false,
+  // Combat
+  stationHP:100, maxHP:100,
+  aliensDefeated:0, mothershipsDefeated:0,
+  currentAlien:null, // {type, hp, maxHp, name, icon, damage, attackTimer, x, y, speed}
+  combatLog:[],
 };
 
 MODULES.forEach(m=>{ state.modules[m.id]=0; });
+DEFENSE_MODULES.forEach(m=>{ state.modules[m.id]=0; });
 
 // ==================== CANVAS ====================
 const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
@@ -547,6 +592,26 @@ function drawStation(cx,cy,scale){
     ctx.beginPath(); ctx.arc(0,0,50+state.modules.quantum*3,0,Math.PI*2); ctx.setLineDash([4,8]); ctx.stroke(); ctx.setLineDash([]);
   }
 
+  // Laser turrets
+  if(state.modules.laser>0){
+    for(let i=0;i<Math.min(state.modules.laser,3);i++){
+      const lx=-55-i*20;
+      ctx.fillStyle='#223'; ctx.fillRect(lx,-4,9,8);
+      ctx.strokeStyle='rgba(100,200,255,0.5)'; ctx.lineWidth=1; ctx.strokeRect(lx,-4,9,8);
+      ctx.fillStyle='#66ccff'; ctx.fillRect(lx+2,-2,2,4);
+    }
+  }
+
+  // Plasma cannons
+  if(state.modules.cannon>0){
+    for(let i=0;i<Math.min(state.modules.cannon,2);i++){
+      const cx=50+i*22;
+      ctx.fillStyle='#330'; ctx.beginPath(); ctx.arc(cx,5,7,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(255,150,50,0.6)'; ctx.stroke();
+      ctx.fillStyle='#ff8800'; ctx.beginPath(); ctx.arc(cx,5,4,0,Math.PI*2); ctx.fill();
+    }
+  }
+
   ctx.restore();
 }
 
@@ -591,6 +656,64 @@ function draw(){
   particles.push({x:sx,y:sy,life:1,vx:(Math.random()-0.5)*0.5,vy:-Math.random()*0.8-0.3});
   particles=particles.filter(p=>{ p.x+=p.vx; p.y+=p.vy; p.life-=0.02; ctx.fillStyle=`rgba(150,200,255,${p.life*0.5})`; ctx.fillRect(p.x,p.y,1,1); return p.life>0; });
   if(particles.length>150) particles.splice(0,particles.length-150);
+
+  // Draw alien ship
+  if(state.currentAlien){
+    const alien=state.currentAlien;
+    alien.x-=alien.speed;
+    if(alien.x<sx+60){ alien.x=sx+60; }
+
+    ctx.save();
+    ctx.translate(alien.x,alien.y);
+    const bob=Math.sin(t*4)*3;
+
+    // Alien body
+    ctx.fillStyle='#ff4444';
+    ctx.beginPath();
+    ctx.ellipse(0,bob,22,12,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle='rgba(255,100,100,0.8)'; ctx.lineWidth=2;
+    ctx.stroke();
+
+    // Dome
+    ctx.fillStyle='rgba(255,200,200,0.6)';
+    ctx.beginPath(); ctx.arc(0,bob-5,9,Math.PI,0); ctx.fill();
+
+    // Engine glow
+    const eg2=ctx.createRadialGradient(-3,bob+14,0,-3,bob+14,10);
+    eg2.addColorStop(0,'rgba(255,80,80,0.9)'); eg2.addColorStop(1,'rgba(255,0,0,0)');
+    ctx.fillStyle=eg2; ctx.beginPath(); ctx.arc(-3,bob+14,10,0,Math.PI*2); ctx.fill();
+
+    // Threat line to station
+    ctx.setLineDash([4,8]); ctx.strokeStyle='rgba(255,0,0,0.3)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,bob); ctx.lineTo(sx-alien.x,sy-alien.y-bob); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // HP bar
+    const hpPct=alien.hp/alien.maxHp;
+    ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(-20,bob-22,40,5);
+    ctx.fillStyle=hpPct>0.5?'#ff4444':hpPct>0.25?'#ff8800':'#ff0000';
+    ctx.fillRect(-20,bob-22,40*hpPct,5);
+
+    // Name
+    ctx.fillStyle='white'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(alien.name,0,bob-28);
+
+    ctx.restore();
+  }
+
+  // Laser turret beams
+  if(state.currentAlien&&state.modules.laser>0){
+    const alien=state.currentAlien;
+    ctx.strokeStyle='rgba(100,200,255,0.8)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(sx, sy-10);
+    ctx.lineTo(alien.x-22, alien.y+Math.sin(t*4)*3);
+    ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(sx, sy-10);
+    ctx.lineTo(alien.x-22, alien.y+Math.sin(t*4)*3);
+    ctx.stroke();
+  }
 
   requestAnimationFrame(draw);
 }
@@ -908,12 +1031,109 @@ function trade(from,to,amount){
   updateUI();
 }
 
+// ==================== COMBAT ====================
+let combatTimer=null, alienAttackTimer=null;
+
+function spawnAlien(){
+  if(state.currentAlien) return;
+  // Scale difficulty based on day
+  let maxType=0;
+  if(state.day>5) maxType=1;
+  if(state.day>15) maxType=2;
+  if(state.day>30) maxType=3;
+  const typeIdx=Math.floor(Math.random()*(maxType+1));
+  const at=ALIEN_TYPES[typeIdx];
+  state.currentAlien={
+    type:at, hp:at.hp, maxHp:at.hp,
+    name:at.name, icon:at.icon, damage:at.damage, reward:at.reward,
+    atkSpeed:at.atkSpeed, speed:at.speed,
+    x:canvas.width*0.85, y:canvas.height*0.35+Math.random()*canvas.height*0.3,
+    attackTimer:0,
+  };
+  showToast(`⚠️ ALIEN ATTACK! ${at.icon} ${at.name} approaching!`);
+  addLog(`🚨 ${at.icon} ${at.name} detected! Prepare defenses!`,'danger');
+  updateCombatUI();
+}
+
+function attackAlien(){
+  if(!state.currentAlien) return;
+  const baseDmg=10;
+  const cannonDmg=state.modules.cannon*8;
+  const dmg=baseDmg+cannonDmg;
+
+  // Visual feedback
+  const btn=document.getElementById('attack-btn');
+  btn.style.transform='scale(0.9)';
+  setTimeout(()=>btn.style.transform='',150);
+
+  state.currentAlien.hp-=dmg;
+  addLog(`⚔️ Hit ${state.currentAlien.name} for ${dmg} damage!`,'');
+
+  if(state.currentAlien.hp<=0){
+    defeatAlien();
+  }
+  updateCombatUI();
+}
+
+function defeatAlien(){
+  const alien=state.currentAlien;
+  state.aliensDefeated++;
+  if(alien.type.id==='mothership') state.mothershipsDefeated++;
+
+  const reward=alien.reward;
+  state.credits+=reward.credits||0;
+  state.data+=reward.data||0;
+  showToast(`💀 ${alien.name} defeated! +${reward.credits}💰 +${reward.data}📊`);
+  addLog(`💀 ${alien.name} destroyed! +${reward.credits} credits, +${reward.data} data`,'good');
+
+  // Random extra reward
+  if(Math.random()<0.3){
+    const star=STAR_TYPES[Math.floor(Math.random()*STAR_TYPES.length)];
+    if(!state.discoveredStars.find(s=>s.name===star.name)){
+      state.discoveredStars.push(star);
+      showToast(`🌟 Salvaged: ${star.name}!`);
+    }
+  }
+
+  state.currentAlien=null;
+  document.getElementById('combat-overlay').style.display='none';
+  scheduleAlienAttack();
+  checkAchievements();
+  updateUI();
+}
+
+function updateCombatUI(){
+  if(!state.currentAlien) return;
+  const alien=state.currentAlien;
+  document.getElementById('combat-overlay').style.display='flex';
+  document.getElementById('alien-icon').textContent=alien.icon;
+  document.getElementById('alien-name').textContent=alien.name;
+  const hpPct=(alien.hp/alien.maxHp)*100;
+  document.getElementById('alien-hp-bar').style.width=hpPct+'%';
+  document.getElementById('alien-hp-text').textContent=`${Math.max(0,alien.hp)}/${alien.maxHp}`;
+
+  const baseDmg=10;
+  const cannonDmg=state.modules.cannon*8;
+  document.getElementById('attack-dmg').textContent=baseDmg+cannonDmg;
+
+  const threatTime=Math.max(0,Math.ceil(alien.atkSpeed-alien.attackTimer));
+  document.getElementById('alien-threat').textContent=`⚠️ Attacking in ${threatTime}s for ${alien.damage} damage`;
+}
+
+function scheduleAlienAttack(){
+  if(combatTimer) clearTimeout(combatTimer);
+  const delay=40000+Math.random()*80000;
+  combatTimer=setTimeout(spawnAlien,delay);
+}
+
 // ==================== UI RENDER ====================
 function updateUI(){
   document.getElementById('res-energy').textContent=Math.floor(state.energy);
   document.getElementById('res-credit').textContent=Math.floor(state.credits);
   document.getElementById('res-data').textContent=Math.floor(state.data);
   document.getElementById('day-counter').textContent=`Day ${state.day}`;
+  document.getElementById('res-hp').textContent=Math.floor(state.stationHP);
+  document.getElementById('res-maxhp').textContent=state.maxHP;
 
   let eGen=state.modules.solar+state.modules.fusion*5;
   if(state.researchCompleted.includes('dark_matter')) eGen+=3;
@@ -931,6 +1151,7 @@ function updateUI(){
   renderModulesTab();
   renderResearchTab();
   renderCrewTab();
+  renderDefenseTab();
   renderMarketTab();
   renderAchievements();
   document.getElementById('catalog-count').textContent=state.discoveredStars.length;
@@ -1047,6 +1268,22 @@ function renderMarketTab(){
   `;
 }
 
+function renderDefenseTab(){
+  const container=document.getElementById('tab-defense');
+  container.innerHTML='';
+  DEFENSE_MODULES.forEach(mod=>{
+    const level=state.modules[mod.id]||0;
+    let cost=Math.floor(mod.cost*Math.pow(mod.scale,level));
+    if(state.crew.some(c=>c.type==='engineer')) cost=Math.floor(cost*0.85);
+    const maxed=level>=mod.max,canBuy=state.credits>=cost&&!maxed;
+    const div=document.createElement('div');
+    div.className='card';
+    div.innerHTML=`<div class="card-icon">${mod.icon}</div><div class="card-info"><div class="card-name">${mod.name} <span class="card-level">Lv.${level}/${mod.max}</span></div><div class="card-desc">${mod.effect(level)}</div>${maxed?'<span style="color:#69f0ae;font-size:10px">MAXED</span>':`<button class="small" ${!canBuy?'disabled':''}>💰 ${cost}</button>`}</div>`;
+    if(canBuy&&!maxed) div.querySelector('button').addEventListener('click',e=>{ e.stopPropagation(); buyModule(mod); });
+    container.appendChild(div);
+  });
+}
+
 function showToast(msg){
   const toast=document.getElementById('toast');
   toast.textContent=msg; toast.style.display='block';
@@ -1084,12 +1321,52 @@ setInterval(()=>{
   if(state.tick%25===0) state.day++;
   if(state.tick%10===0) checkAchievements();
 
+  // Combat: alien attack timer
+  if(state.currentAlien){
+    state.currentAlien.attackTimer+=1;
+    if(state.currentAlien.attackTimer>=state.currentAlien.atkSpeed){
+      // Alien attacks station
+      const shieldReduction=state.modules.shield*0.05;
+      const dmg=Math.floor(state.currentAlien.damage*(1-shieldReduction));
+      state.stationHP=Math.max(0,state.stationHP-dmg);
+      addLog(`💥 ${state.currentAlien.name} hit station for ${dmg} damage!`,'danger');
+      state.currentAlien.attackTimer=0;
+
+      if(state.stationHP<=0){
+        addLog('💀 STATION DESTROYED! Game Over!','danger');
+        showToast('☠️ Station destroyed! Game Over...');
+        state.currentAlien=null;
+        document.getElementById('combat-overlay').style.display='none';
+        // Penalty: lose half resources
+        state.credits=Math.floor(state.credits*0.5);
+        state.data=Math.floor(state.data*0.5);
+        state.stationHP=state.maxHP;
+        scheduleAlienAttack();
+      }
+    }
+    updateCombatUI();
+  }
+
+  // Laser turret auto-damage
+  if(state.currentAlien&&state.modules.laser>0){
+    const laserDmg=state.modules.laser*5;
+    state.currentAlien.hp-=laserDmg;
+    if(state.currentAlien.hp<=0) defeatAlien();
+    else updateCombatUI();
+  }
+
+  // Repair bay healing
+  if(state.stationHP<state.maxHP&&state.modules.repair>0&&state.tick%5===0){
+    state.stationHP=Math.min(state.maxHP,state.stationHP+state.modules.repair*3);
+  }
+
   updateUI();
 },1000);
 
 // ==================== INIT ====================
 updateUI();
 scheduleEvent();
+scheduleAlienAttack();
 addLog('Welcome to Star Labs Research Station! 🚀','good');
 addLog('Complete the tutorial or skip to start playing.','');
 </script>
