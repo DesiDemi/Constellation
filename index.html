@@ -163,6 +163,18 @@
     border: 1px solid var(--accent);
     color: var(--accent);
   }
+  #music-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: white;
+    font-size: 18px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  #music-btn:hover { border-color: var(--accent); background: var(--button); }
+  #music-btn.muted { opacity: 0.4; }
 
   /* Log */
   #log-area {
@@ -202,10 +214,14 @@
 </style>
 </head>
 <body>
+<audio id="bgm" loop preload="auto">
+  <source src="Dop Dip Dup.mp3" type="audio/mpeg">
+</audio>
 <canvas id="canvas"></canvas>
 <div id="ui">
   <div id="topbar">
     <h1>✦ STAR LABS</h1>
+    <button id="music-btn" title="Toggle Music" onclick="toggleMusic()">🔊</button>
     <div class="resource res-energy"><span class="icon">⚡</span><span id="res-energy">50</span><span class="rate" id="rate-energy">+1/s</span></div>
     <div class="resource res-credit"><span class="icon">💰</span><span id="res-credit">200</span></div>
     <div class="resource res-data"><span class="icon">📊</span><span id="res-data">0</span></div>
@@ -851,6 +867,32 @@ setInterval(() => {
 
   updateUI();
 }, 1000);
+
+// ==================== MUSIC ====================
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.4;
+
+function toggleMusic() {
+  const btn = document.getElementById('music-btn');
+  if (bgm.paused) {
+    bgm.play().catch(() => {});
+    btn.textContent = '🔊';
+    btn.classList.remove('muted');
+  } else {
+    bgm.pause();
+    btn.textContent = '🔇';
+    btn.classList.add('muted');
+  }
+}
+
+// Try autoplay on first click anywhere
+let musicStarted = false;
+document.addEventListener('click', () => {
+  if (!musicStarted) {
+    bgm.play().catch(() => {});
+    musicStarted = true;
+  }
+}, { once: false });
 
 // ==================== INIT ====================
 updateUI();
