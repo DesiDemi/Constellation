@@ -7,8 +7,8 @@
 <style>
   :root {
     --bg: #0a0a1a;
-    --panel: rgba(10, 14, 30, 0.92);
-    --border: rgba(100, 140, 255, 0.25);
+    --panel: rgba(10, 14, 30, 0.94);
+    --border: rgba(100, 140, 255, 0.2);
     --accent: #6eb5ff;
     --gold: #ffd866;
     --energy: #4fc3f7;
@@ -18,199 +18,259 @@
     --success: #69f0ae;
     --text: #c8d6e5;
     --text-dim: #7a8ba6;
-    --button: rgba(60, 90, 160, 0.6);
+    --button: rgba(60, 90, 160, 0.5);
     --button-hover: rgba(90, 130, 220, 0.7);
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg); color: var(--text);
     font-family: 'Segoe UI', system-ui, sans-serif;
-    height: 100vh; overflow: hidden;
-    user-select: none;
+    height: 100vh; overflow: hidden; user-select: none;
   }
-  canvas { position: fixed; top: 0; left: 0; z-index: 0; }
-  #ui { position: relative; z-index: 1; height: 100vh; display: flex; flex-direction: column; }
+  canvas { position:fixed; top:0; left:0; z-index:0; }
+  #ui { position:relative; z-index:1; height:100vh; display:flex; flex-direction:column; }
 
-  /* Top bar */
+  /* TOP BAR */
   #topbar {
-    display: flex; align-items: center; gap: 20px;
-    padding: 12px 20px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+    display:flex; align-items:center; gap:12px;
+    padding:10px 16px; background:var(--panel);
+    border-bottom:1px solid var(--border); flex-shrink:0;
   }
   #topbar h1 {
-    font-size: 22px; font-weight: 700;
-    background: linear-gradient(135deg, #6eb5ff, #b39ddb);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-right: 10px;
-    letter-spacing: 1px;
-  }
-  .resource {
-    display: flex; align-items: center; gap: 6px;
-    background: rgba(255,255,255,0.04);
-    padding: 6px 14px; border-radius: 20px;
-    font-size: 14px; font-weight: 600;
-  }
-  .resource .icon { font-size: 18px; }
-  .res-energy { color: var(--energy); }
-  .res-credit { color: var(--credit); }
-  .res-data { color: var(--data); }
-  .rate { font-size: 11px; opacity: 0.7; margin-left: 4px; }
-  #day-counter { margin-left: auto; font-size: 13px; color: var(--text-dim); }
-
-  /* Main content */
-  #main {
-    display: flex; flex: 1; min-height: 0;
-  }
-
-  /* Left panel - Actions */
-  #left-panel {
-    width: 320px; min-width: 320px;
-    padding: 16px;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; gap: 14px;
-    overflow-y: auto;
-  }
-  .section-title {
-    font-size: 12px; text-transform: uppercase; letter-spacing: 2px;
-    color: var(--text-dim); margin-bottom: 6px;
-    font-weight: 600;
-  }
-  .expedition-card {
-    background: var(--button);
-    border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px;
-    cursor: pointer; transition: all 0.2s;
-    display: flex; flex-direction: column; gap: 6px;
-  }
-  .expedition-card:hover:not(.disabled) {
-    background: var(--button-hover);
-    border-color: var(--accent);
-    transform: translateX(3px);
-  }
-  .expedition-card.disabled { opacity: 0.4; cursor: not-allowed; }
-  .expedition-card.active {
-    border-color: var(--success);
-    background: rgba(105, 240, 174, 0.1);
-  }
-  .exp-name { font-weight: 700; font-size: 15px; }
-  .exp-details { font-size: 12px; color: var(--text-dim); display: flex; gap: 14px; flex-wrap: wrap; }
-  .exp-details span { display: flex; align-items: center; gap: 3px; }
-  .exp-progress { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
-  .exp-progress-bar { height: 100%; background: var(--success); transition: width 1s linear; border-radius: 2px; }
-
-  /* Center - Station View info */
-  #center-panel {
-    flex: 1;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    position: relative;
-  }
-  #station-info {
-    position: absolute; bottom: 20px;
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px 24px;
-    text-align: center;
-  }
-  #station-info h3 { font-size: 18px; margin-bottom: 4px; }
-  #station-info p { font-size: 13px; color: var(--text-dim); }
-
-  /* Right panel - Modules & Research */
-  #right-panel {
-    width: 340px; min-width: 340px;
-    padding: 16px;
-    background: var(--panel);
-    border-left: 1px solid var(--border);
-    display: flex; flex-direction: column; gap: 14px;
-    overflow-y: auto;
-  }
-  .module-card, .research-card {
-    background: var(--button);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px;
-    display: flex; align-items: center; gap: 10px;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .module-card:hover, .research-card:hover:not(.locked) {
-    background: var(--button-hover);
-    border-color: var(--accent);
-  }
-  .research-card.locked { opacity: 0.35; cursor: not-allowed; }
-  .research-card.completed { border-color: var(--success); opacity: 0.6; }
-  .mod-icon { font-size: 28px; min-width: 36px; text-align: center; }
-  .mod-info { flex: 1; }
-  .mod-name { font-weight: 700; font-size: 14px; }
-  .mod-desc { font-size: 11px; color: var(--text-dim); }
-  .mod-cost { font-size: 11px; color: var(--gold); font-weight: 600; }
-  .mod-level { font-size: 11px; color: var(--accent); }
-
-  button {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-weight: 700; font-size: 13px;
-    cursor: pointer; transition: all 0.2s;
-  }
-  button:hover { filter: brightness(1.2); transform: scale(1.03); }
-  button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; filter: none; }
-  button.secondary {
-    background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
+    font-size:20px; font-weight:700;
+    background:linear-gradient(135deg, #6eb5ff, #b39ddb);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:1px;
   }
   #music-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: white;
-    font-size: 18px;
-    padding: 4px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
+    background:transparent; border:1px solid var(--border);
+    color:white; font-size:16px; padding:4px 8px; border-radius:6px;
+    cursor:pointer; transition:all 0.2s;
   }
-  #music-btn:hover { border-color: var(--accent); background: var(--button); }
-  #music-btn.muted { opacity: 0.4; }
+  #music-btn:hover { border-color:var(--accent); background:var(--button); }
+  #music-btn.muted { opacity:0.4; }
+  .resource {
+    display:flex; align-items:center; gap:5px;
+    background:rgba(255,255,255,0.04); padding:5px 12px;
+    border-radius:16px; font-size:13px; font-weight:600;
+  }
+  .resource .icon { font-size:16px; }
+  .res-energy { color:var(--energy); }
+  .res-credit { color:var(--credit); }
+  .res-data { color:var(--data); }
+  .rate { font-size:10px; opacity:0.7; margin-left:3px; }
+  #day-counter { margin-left:auto; font-size:12px; color:var(--text-dim); }
+  #ach-btn {
+    margin-left:4px; background:transparent; border:1px solid var(--border);
+    color:var(--gold); font-size:16px; padding:4px 8px; border-radius:6px;
+    cursor:pointer; transition:all 0.2s;
+  }
+  #ach-btn:hover { border-color:var(--gold); background:rgba(255,216,100,0.1); }
+  #ach-btn.has-new { animation: pulseGold 1s infinite; }
+  @keyframes pulseGold {
+    0%,100% { box-shadow:0 0 0 rgba(255,216,100,0); }
+    50% { box-shadow:0 0 12px rgba(255,216,100,0.5); }
+  }
 
-  /* Log */
+  /* MAIN */
+  #main { display:flex; flex:1; min-height:0; }
+
+  /* LEFT PANEL */
+  #left-panel {
+    width:310px; min-width:310px; padding:12px;
+    background:var(--panel); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; gap:10px; overflow-y:auto;
+  }
+  .section-title {
+    font-size:11px; text-transform:uppercase; letter-spacing:2px;
+    color:var(--text-dim); font-weight:600;
+  }
+  .expedition-card {
+    background:var(--button); border:1px solid var(--border);
+    border-radius:10px; padding:10px; cursor:pointer;
+    transition:all 0.2s; display:flex; flex-direction:column; gap:4px;
+  }
+  .expedition-card:hover:not(.disabled) {
+    background:var(--button-hover); border-color:var(--accent); transform:translateX(2px);
+  }
+  .expedition-card.disabled { opacity:0.4; cursor:not-allowed; }
+  .expedition-card.active { border-color:var(--success); background:rgba(105,240,174,0.08); }
+  .exp-name { font-weight:700; font-size:14px; }
+  .exp-details { font-size:11px; color:var(--text-dim); display:flex; gap:10px; flex-wrap:wrap; }
+  .exp-progress { height:3px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+  .exp-progress-bar { height:100%; background:var(--success); transition:width 1s linear; border-radius:2px; }
+
+  /* RIGHT PANEL - Tabbed */
+  #right-panel {
+    width:340px; min-width:340px; padding:10px;
+    background:var(--panel); border-left:1px solid var(--border);
+    display:flex; flex-direction:column; gap:8px; overflow-y:auto;
+  }
+  .tab-row { display:flex; gap:4px; }
+  .tab-btn {
+    flex:1; background:var(--button); border:1px solid var(--border);
+    color:var(--text-dim); padding:6px; border-radius:6px;
+    font-size:11px; font-weight:600; cursor:pointer; text-align:center;
+    transition:all 0.2s;
+  }
+  .tab-btn:hover { color:white; border-color:var(--accent); }
+  .tab-btn.active { color:white; border-color:var(--accent); background:var(--button-hover); }
+  .tab-content { display:none; flex-direction:column; gap:8px; }
+  .tab-content.active { display:flex; }
+
+  .card {
+    background:var(--button); border:1px solid var(--border);
+    border-radius:8px; padding:8px 10px; display:flex; align-items:center;
+    gap:8px; cursor:pointer; transition:all 0.2s;
+  }
+  .card:hover:not(.locked):not(.hired) {
+    background:var(--button-hover); border-color:var(--accent);
+  }
+  .card.locked { opacity:0.35; cursor:not-allowed; }
+  .card.hired { border-color:var(--success); background:rgba(105,240,174,0.06); }
+  .card.completed { border-color:var(--success); opacity:0.5; }
+  .card-icon { font-size:24px; min-width:32px; text-align:center; }
+  .card-info { flex:1; }
+  .card-name { font-weight:700; font-size:13px; }
+  .card-desc { font-size:10px; color:var(--text-dim); }
+  .card-cost { font-size:10px; color:var(--gold); font-weight:600; }
+  .card-level { font-size:10px; color:var(--accent); font-weight:600; }
+
+  button {
+    background:var(--accent); color:var(--bg); border:none;
+    padding:6px 14px; border-radius:6px; font-weight:700;
+    font-size:11px; cursor:pointer; transition:all 0.2s;
+  }
+  button:hover { filter:brightness(1.2); transform:scale(1.02); }
+  button:disabled { opacity:0.35; cursor:not-allowed; transform:none; filter:none; }
+  button.small { padding:4px 10px; font-size:10px; }
+  button.secondary {
+    background:transparent; border:1px solid var(--accent); color:var(--accent);
+  }
+
+  /* LOG */
   #log-area {
-    position: fixed; bottom: 60px; left: 340px; right: 360px;
-    max-height: 120px; overflow-y: auto;
-    pointer-events: none; z-index: 2;
+    position:fixed; bottom:50px; left:330px; right:360px;
+    max-height:100px; overflow-y:auto; pointer-events:none; z-index:2;
   }
   .log-entry {
-    font-size: 12px; padding: 3px 0;
-    color: var(--text-dim);
-    animation: fadeUp 4s forwards;
-    text-align: center;
+    font-size:11px; padding:2px 0; color:var(--text-dim);
+    animation:fadeUp 4s forwards; text-align:center;
   }
   @keyframes fadeUp {
-    0% { opacity: 1; transform: translateY(0); }
-    80% { opacity: 0.6; }
-    100% { opacity: 0; transform: translateY(-20px); }
+    0% { opacity:1; transform:translateY(0); }
+    80% { opacity:0.5; }
+    100% { opacity:0; transform:translateY(-16px); }
   }
-  .log-entry.good { color: var(--success); }
-  .log-entry.discovery { color: var(--gold); }
+  .log-entry.good { color:var(--success); }
+  .log-entry.discovery { color:var(--gold); }
+  .log-entry.danger { color:var(--danger); }
 
-  /* Toast */
+  /* TOAST */
   #toast {
-    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-    background: var(--panel); border: 1px solid var(--gold);
-    color: var(--gold); padding: 10px 24px; border-radius: 20px;
-    font-weight: 700; z-index: 5;
-    animation: toastPop 2.5s forwards;
-    pointer-events: none;
+    position:fixed; top:80px; left:50%; transform:translateX(-50%);
+    background:var(--panel); border:1px solid var(--gold);
+    color:var(--gold); padding:10px 24px; border-radius:20px;
+    font-weight:700; z-index:5; pointer-events:none;
+    animation:toastPop 3s forwards; display:none;
   }
   @keyframes toastPop {
-    0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
-    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-    80% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    0% { opacity:0; transform:translateX(-50%) translateY(10px); }
+    15% { opacity:1; transform:translateX(-50%) translateY(0); }
+    80% { opacity:1; }
+    100% { opacity:0; transform:translateX(-50%) translateY(-10px); }
   }
+
+  /* TUTORIAL OVERLAY */
+  #tutorial-overlay {
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.85); z-index:10;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #tutorial-card {
+    background:var(--panel); border:1px solid var(--accent);
+    border-radius:16px; padding:30px; max-width:480px;
+    text-align:center; animation:slideIn 0.4s ease;
+  }
+  @keyframes slideIn {
+    from { opacity:0; transform:translateY(30px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  #tutorial-card h2 {
+    font-size:24px; margin-bottom:8px;
+    background:linear-gradient(135deg, #6eb5ff, #b39ddb);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  #tutorial-card p { font-size:14px; color:var(--text-dim); margin-bottom:6px; line-height:1.5; }
+  #tutorial-card .tut-icon { font-size:48px; margin-bottom:12px; }
+  #tutorial-nav { display:flex; gap:8px; justify-content:center; margin-top:16px; }
+  .tut-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--text-dim); transition:all 0.3s;
+  }
+  .tut-dot.active { background:var(--accent); width:24px; border-radius:4px; }
+
+  /* EVENT MODAL */
+  #event-overlay {
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.8); z-index:8;
+    display:none; align-items:center; justify-content:center;
+  }
+  #event-card {
+    background:var(--panel); border:2px solid var(--danger);
+    border-radius:16px; padding:24px; max-width:420px;
+    text-align:center; animation:slideIn 0.3s ease;
+  }
+  #event-card h3 { font-size:20px; color:var(--danger); margin-bottom:10px; }
+  #event-card p { font-size:13px; color:var(--text-dim); margin-bottom:16px; line-height:1.5; }
+  .event-choices { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+
+  /* ACHIEVEMENTS MODAL */
+  #ach-overlay {
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.8); z-index:8;
+    display:none; align-items:center; justify-content:center;
+  }
+  #ach-card {
+    background:var(--panel); border:1px solid var(--gold);
+    border-radius:16px; padding:24px; max-width:460px; max-height:80vh;
+    overflow-y:auto; animation:slideIn 0.3s ease;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  #ach-card h3 { text-align:center; color:var(--gold); font-size:20px; margin-bottom:8px; }
+  .ach-row {
+    display:flex; align-items:center; gap:10px; padding:8px 10px;
+    border-radius:8px; background:var(--button); border:1px solid var(--border);
+  }
+  .ach-row.earned { border-color:var(--success); }
+  .ach-row .ach-icon { font-size:20px; }
+  .ach-row .ach-info { flex:1; }
+  .ach-row .ach-name { font-size:13px; font-weight:600; }
+  .ach-row .ach-desc { font-size:10px; color:var(--text-dim); }
+
+  /* CENTER */
+  #center-panel {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; position:relative;
+  }
+  #station-info {
+    position:absolute; bottom:16px;
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:14px; padding:12px 20px; text-align:center;
+  }
+  #station-info h3 { font-size:16px; margin-bottom:2px; }
+  #station-info p { font-size:11px; color:var(--text-dim); }
+
+  /* STAR CATALOG in left panel */
+  .star-entry {
+    display:flex; align-items:center; gap:8px;
+    padding:5px 8px; font-size:12px;
+    background:rgba(255,255,255,0.02); border-radius:6px;
+  }
+  .star-entry .star-icon { font-size:18px; }
+  .star-entry .star-name { flex:1; }
+  .star-entry .star-rarity { font-size:10px; color:var(--text-dim); }
+  .star-entry.undiscovered { opacity:0.3; }
 </style>
 </head>
 <body>
@@ -218,6 +278,43 @@
   <source src="Dop Dip Dup.mp3" type="audio/mpeg">
 </audio>
 <canvas id="canvas"></canvas>
+
+<!-- TUTORIAL -->
+<div id="tutorial-overlay">
+  <div id="tutorial-card">
+    <div class="tut-icon" id="tut-icon">🚀</div>
+    <h2 id="tut-title">Welcome to Star Labs!</h2>
+    <p id="tut-desc">You are the director of a deep-space research station. Your mission: explore the cosmos, discover stars, and expand humanity's knowledge.</p>
+    <div id="tutorial-nav">
+      <div class="tut-dot active"></div><div class="tut-dot"></div><div class="tut-dot"></div><div class="tut-dot"></div><div class="tut-dot"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;">
+      <button onclick="prevTutorial()" class="secondary">← Back</button>
+      <button id="tut-next" onclick="nextTutorial()">Next →</button>
+      <button onclick="skipTutorial()" class="secondary">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div id="event-overlay">
+  <div id="event-card">
+    <h3 id="event-title"></h3>
+    <p id="event-desc"></p>
+    <div class="event-choices" id="event-choices"></div>
+  </div>
+</div>
+
+<!-- ACHIEVEMENT MODAL -->
+<div id="ach-overlay" onclick="if(event.target===this)toggleAchievements()">
+  <div id="ach-card">
+    <h3>🏆 Achievements</h3>
+    <div id="ach-list"></div>
+    <button onclick="toggleAchievements()" class="secondary" style="margin-top:8px;">Close</button>
+  </div>
+</div>
+
+<!-- UI -->
 <div id="ui">
   <div id="topbar">
     <h1>✦ STAR LABS</h1>
@@ -225,679 +322,771 @@
     <div class="resource res-energy"><span class="icon">⚡</span><span id="res-energy">50</span><span class="rate" id="rate-energy">+1/s</span></div>
     <div class="resource res-credit"><span class="icon">💰</span><span id="res-credit">200</span></div>
     <div class="resource res-data"><span class="icon">📊</span><span id="res-data">0</span></div>
+    <button id="ach-btn" title="Achievements" onclick="toggleAchievements()">🏆 <span id="ach-count">0/16</span></button>
     <div id="day-counter">Day 1</div>
   </div>
   <div id="main">
     <div id="left-panel">
-      <div class="section-title">🚀 Expeditions</div>
+      <div class="section-title">🚀 EXPEDITIONS</div>
       <div id="expedition-list"></div>
+      <div class="section-title" style="margin-top:4px;">⭐ STAR CATALOG (<span id="catalog-count">0</span>/12)</div>
+      <div id="star-catalog"></div>
     </div>
     <div id="center-panel">
       <div id="station-info">
         <h3>Research Station Alpha</h3>
-        <p id="station-desc">Orbiting in deep space, ready to explore the cosmos.</p>
+        <p id="station-desc">Modules: 0 | Stars: 0 | Crew: 0 | Exp: 0</p>
       </div>
     </div>
     <div id="right-panel">
-      <div class="section-title">🔧 Station Modules</div>
-      <div id="module-list"></div>
-      <div class="section-title" style="margin-top:6px">🔬 Research</div>
-      <div id="research-list"></div>
+      <div class="tab-row">
+        <div class="tab-btn active" onclick="switchTab('modules')">🔧 Modules</div>
+        <div class="tab-btn" onclick="switchTab('research')">🔬 Research</div>
+        <div class="tab-btn" onclick="switchTab('crew')">👥 Crew</div>
+        <div class="tab-btn" onclick="switchTab('market')">💱 Trade</div>
+      </div>
+      <div class="tab-content active" id="tab-modules"></div>
+      <div class="tab-content" id="tab-research"></div>
+      <div class="tab-content" id="tab-crew"></div>
+      <div class="tab-content" id="tab-market"></div>
     </div>
   </div>
 </div>
 <div id="log-area"></div>
-<div id="toast" style="display:none"></div>
+<div id="toast"></div>
 
 <script>
-// ==================== GAME DATA ====================
-
+// ==================== DATA ====================
 const STAR_TYPES = [
-  { name: 'Red Dwarf', icon: '🔴', rarity: 'Common', dataValue: 8, creditValue: 15 },
-  { name: 'Yellow Star', icon: '🌟', rarity: 'Common', dataValue: 10, creditValue: 20 },
-  { name: 'Orange Giant', icon: '🟠', rarity: 'Uncommon', dataValue: 18, creditValue: 35 },
-  { name: 'Blue Giant', icon: '🔵', rarity: 'Uncommon', dataValue: 22, creditValue: 40 },
-  { name: 'White Dwarf', icon: '⚪', rarity: 'Rare', dataValue: 35, creditValue: 60 },
-  { name: 'Neutron Star', icon: '💫', rarity: 'Rare', dataValue: 45, creditValue: 75 },
-  { name: 'Pulsar', icon: '📡', rarity: 'Very Rare', dataValue: 60, creditValue: 100 },
-  { name: 'Binary System', icon: '✨', rarity: 'Very Rare', dataValue: 70, creditValue: 120 },
-  { name: 'Black Hole', icon: '🕳️', rarity: 'Legendary', dataValue: 100, creditValue: 200 },
-  { name: 'Nebula', icon: '🌌', rarity: 'Legendary', dataValue: 90, creditValue: 180 },
-  { name: 'Exoplanet System', icon: '🪐', rarity: 'Rare', dataValue: 50, creditValue: 90 },
-  { name: 'Supernova Remnant', icon: '💥', rarity: 'Legendary', dataValue: 110, creditValue: 220 },
+  { name:'Red Dwarf', icon:'🔴', rarity:'Common', data:8, credits:15 },
+  { name:'Yellow Star', icon:'🌟', rarity:'Common', data:10, credits:20 },
+  { name:'Orange Giant', icon:'🟠', rarity:'Uncommon', data:18, credits:35 },
+  { name:'Blue Giant', icon:'🔵', rarity:'Uncommon', data:22, credits:40 },
+  { name:'White Dwarf', icon:'⚪', rarity:'Rare', data:35, credits:60 },
+  { name:'Neutron Star', icon:'💫', rarity:'Rare', data:45, credits:75 },
+  { name:'Pulsar', icon:'📡', rarity:'Very Rare', data:60, credits:100 },
+  { name:'Binary System', icon:'✨', rarity:'Very Rare', data:70, credits:120 },
+  { name:'Black Hole', icon:'🕳️', rarity:'Legendary', data:100, credits:200 },
+  { name:'Nebula', icon:'🌌', rarity:'Legendary', data:90, credits:180 },
+  { name:'Exoplanet System', icon:'🪐', rarity:'Rare', data:50, credits:90 },
+  { name:'Supernova Remnant', icon:'💥', rarity:'Legendary', data:110, credits:220 },
 ];
 
 const EXPEDITIONS = [
-  { id: 'scan_local', name: 'Local System Scan', duration: 8, cost: 5, risk: 'Low', icon: '📡', minStars: 1, maxStars: 2 },
-  { id: 'nearby_probe', name: 'Nearby Star Probe', duration: 15, cost: 15, risk: 'Low', icon: '🛰️', minStars: 1, maxStars: 3 },
-  { id: 'deep_scan', name: 'Deep Space Scan', duration: 30, cost: 30, risk: 'Medium', icon: '🔭', minStars: 2, maxStars: 4 },
-  { id: 'sector_survey', name: 'Sector Survey', duration: 50, cost: 50, risk: 'Medium', icon: '🚀', minStars: 3, maxStars: 5 },
-  { id: 'dark_zone', name: 'Dark Zone Expedition', duration: 80, cost: 80, risk: 'High', icon: '🌑', minStars: 3, maxStars: 6 },
-  { id: 'deep_core', name: 'Deep Core Mission', duration: 120, cost: 130, risk: 'High', icon: '⚡', minStars: 4, maxStars: 7 },
+  { id:'scan_local', name:'Local System Scan', dur:7, cost:5, risk:'Low', icon:'📡', minS:1, maxS:2 },
+  { id:'nearby_probe', name:'Nearby Star Probe', dur:13, cost:12, risk:'Low', icon:'🛰️', minS:1, maxS:3 },
+  { id:'deep_scan', name:'Deep Space Scan', dur:25, cost:25, risk:'Medium', icon:'🔭', minS:2, maxS:4 },
+  { id:'sector_survey', name:'Sector Survey', dur:42, cost:45, risk:'Medium', icon:'🚀', minS:3, maxS:5 },
+  { id:'dark_zone', name:'Dark Zone Expedition', dur:65, cost:70, risk:'High', icon:'🌑', minS:3, maxS:6 },
+  { id:'deep_core', name:'Deep Core Mission', dur:100, cost:110, risk:'High', icon:'⚡', minS:4, maxS:7 },
+  { id:'nebula_dive', name:'Nebula Dive', dur:140, cost:170, risk:'Very High', icon:'🌀', minS:5, maxS:8 },
+  { id:'void_leap', name:'Void Leap', dur:200, cost:250, risk:'Extreme', icon:'🕳️', minS:6, maxS:10 },
 ];
 
 const MODULES = [
-  { id: 'solar', name: 'Solar Panels', icon: '☀️', desc: 'Passive energy generation', cost: 50, costScale: 1.6, maxLevel: 10, effect: (lvl) => `+${lvl}/s energy` },
-  { id: 'lab', name: 'Research Lab', icon: '🧪', desc: 'Faster research speed', cost: 80, costScale: 1.7, maxLevel: 8, effect: (lvl) => `Research ${lvl*12}% faster` },
-  { id: 'hangar', name: 'Expedition Hangar', icon: '🏗️', desc: 'More simultaneous expeditions', cost: 120, costScale: 1.8, maxLevel: 5, effect: (lvl) => `${1+lvl} slots` },
-  { id: 'scanner', name: 'Star Scanner', icon: '📡', desc: 'Better discovery chances', cost: 100, costScale: 1.7, maxLevel: 8, effect: (lvl) => `+${lvl*8}% rare finds` },
-  { id: 'fusion', name: 'Fusion Reactor', icon: '⚛️', desc: 'Massive energy output', cost: 300, costScale: 2.0, maxLevel: 5, effect: (lvl) => `+${lvl*5}/s energy` },
-  { id: 'shield', name: 'Deflector Shield', icon: '🛡️', desc: 'Reduce expedition risk', cost: 150, costScale: 1.7, maxLevel: 6, effect: (lvl) => `-${lvl*5}% risk` },
+  { id:'solar', name:'Solar Panels', icon:'☀️', desc:'Passive energy generation', cost:50, scale:1.55, max:10, effect:l=>`+${l}/s energy` },
+  { id:'lab', name:'Research Lab', icon:'🧪', desc:'Faster research speed', cost:80, scale:1.65, max:8, effect:l=>`Research ${l*12}% faster` },
+  { id:'hangar', name:'Expedition Hangar', icon:'🏗️', desc:'More simultaneous expeditions', cost:120, scale:1.75, max:5, effect:l=>`${1+l} slots` },
+  { id:'scanner', name:'Star Scanner', icon:'📡', desc:'Better discovery chances', cost:100, scale:1.7, max:8, effect:l=>`+${l*8}% rare finds` },
+  { id:'fusion', name:'Fusion Reactor', icon:'⚛️', desc:'Massive energy output', cost:300, scale:1.95, max:5, effect:l=>`+${l*5}/s energy` },
+  { id:'shield', name:'Deflector Shield', icon:'🛡️', desc:'Reduce expedition risk', cost:150, scale:1.7, max:6, effect:l=>`-${l*5}% risk` },
+  { id:'drones', name:'Repair Drones', icon:'🤖', desc:'Auto-repair failed expeditions', cost:200, scale:1.8, max:4, effect:l=>`${l*12}% salvage chance` },
+  { id:'quantum', name:'Quantum Core', icon:'💠', desc:'Boost all production by %', cost:500, scale:2.2, max:4, effect:l=>`+${l*8}% all yields` },
 ];
 
 const RESEARCH = [
-  { id: 'efficient_panels', name: 'Efficient Panels', cost: 30, req: null, effect: 'Solar panels +25% output', applied: false },
-  { id: 'quantum_scanner', name: 'Quantum Scanner', cost: 60, req: 'efficient_panels', effect: 'Scanner +15% effectiveness', applied: false },
-  { id: 'warp_drive', name: 'Mini Warp Drive', cost: 80, req: 'quantum_scanner', effect: 'Expeditions 20% faster', applied: false },
-  { id: 'ai_lab', name: 'AI Research Assistant', cost: 100, req: 'quantum_scanner', effect: 'Lab efficiency +30%', applied: false },
-  { id: 'dark_matter', name: 'Dark Matter Harvester', cost: 150, req: 'warp_drive', effect: '+3 energy/s, +10% credit from expeditions', applied: false },
-  { id: 'starlink', name: 'StarLink Network', cost: 180, req: 'ai_lab', effect: 'All expeditions +1 star discovery', applied: false },
-  { id: 'antimatter', name: 'Antimatter Core', cost: 250, req: 'dark_matter', effect: 'Fusion Reactor +100% output', applied: false },
-  { id: 'universal_trans', name: 'Universal Translator', cost: 300, req: 'starlink', effect: 'Double data from all discoveries', applied: false },
+  { id:'eff_panels', name:'Efficient Panels', cost:25, req:null, effect:'Solar panels +30% output' },
+  { id:'quant_scan', name:'Quantum Scanner', cost:50, req:'eff_panels', effect:'Scanner +15% effectiveness' },
+  { id:'warp_drive', name:'Mini Warp Drive', cost:70, req:'quant_scan', effect:'Expeditions 20% faster' },
+  { id:'ai_lab', name:'AI Assistant', cost:85, req:'quant_scan', effect:'Lab efficiency +30%' },
+  { id:'dark_matter', name:'Dark Matter Harvester', cost:130, req:'warp_drive', effect:'+3 energy/s, +10% credits' },
+  { id:'star_link', name:'StarLink Network', cost:160, req:'ai_lab', effect:'+1 star per expedition' },
+  { id:'anti_matter', name:'Antimatter Core', cost:220, req:'dark_matter', effect:'Fusion Reactor +100%' },
+  { id:'uni_trans', name:'Universal Translator', cost:260, req:'star_link', effect:'Double data from discoveries' },
+  { id:'wormhole', name:'Wormhole Theory', cost:300, req:'anti_matter', effect:'Expeditions 30% faster (stacks)' },
+  { id:'tachyon', name:'Tachyon Sensors', cost:350, req:'uni_trans', effect:'+25% legendary star chance' },
 ];
 
-const DISCOVERIES = [
-  'A rogue planet drifting through interstellar space',
-  'Ancient alien megastructure fragments',
-  'Quantum fluctuations in the spacetime fabric',
-  'Crystalline lifeforms on a frozen moon',
-  'A wormhole leading to an unknown galaxy',
-  'Traces of a long-dead civilization',
-  'Organic compounds in a nebula cloud',
-  'A binary black hole system merging',
-  'Dark matter filaments connecting galaxies',
-  'Signs of intelligent signal — the Wow! Signal 2.0',
+const CREW_TYPES = [
+  { id:'scientist', name:'Scientist', icon:'👩‍🔬', cost:80, upkeep:2, desc:'+20% research data, +15% lab speed', mod:'data', val:0.2 },
+  { id:'engineer', name:'Engineer', icon:'👨‍🔧', cost:100, upkeep:3, desc:'+25% energy, -15% module costs', mod:'energy', val:0.25 },
+  { id:'navigator', name:'Navigator', icon:'🧭', cost:120, upkeep:2, desc:'+15% expedition success, +10% speed', mod:'success', val:0.15 },
+  { id:'pilot', name:'Ace Pilot', icon:'👨‍✈️', cost:140, upkeep:3, desc:'+20% credits, +10% rare star chance', mod:'credits', val:0.2 },
+  { id:'xenologist', name:'Xenologist', icon:'👽', cost:180, upkeep:4, desc:'+30% discovery chance, +1 star/exp', mod:'discovery', val:0.3 },
+  { id:'physicist', name:'Physicist', icon:'🔬', cost:200, upkeep:4, desc:'+40% data, -20% research costs', mod:'data', val:0.4 },
 ];
 
-// ==================== GAME STATE ====================
+const EVENTS = [
+  { title:'☀️ Solar Flare!', desc:'A massive solar flare is heading toward the station!', choices:[
+    { text:'Divert power to shields (-30 energy)', cost:{energy:30}, effect:'Shields hold — no damage', good:true },
+    { text:'Recall all expeditions (-50% progress)', cost:{}, effect:'Probes damaged — lose 20 energy', good:false },
+  ]},
+  { title:'📡 Alien Signal', desc:'We detected a structured signal from Sector 7!', choices:[
+    { text:'Investigate (-20 energy)', cost:{energy:20}, effect:'Gain 40 research data!', good:true, reward:{data:40} },
+    { text:'Ignore — too risky', cost:{}, effect:'Nothing happens', good:false },
+  ]},
+  { title:'⚠️ Reactor Instability', desc:'The fusion reactor is fluctuating dangerously!', choices:[
+    { text:'Emergency repair (-50 credits)', cost:{credits:50}, effect:'Reactor stabilized', good:true },
+    { text:'Let it self-regulate', cost:{}, effect:'Lose 15 energy, 25% chance of outage', good:false, risk:0.25, penalty:{energy:30} },
+  ]},
+  { title:'💫 Meteor Shower', desc:'A meteor shower is passing near the station!', choices:[
+    { text:'Deploy collector drones (-15 energy)', cost:{energy:15}, effect:'Collect rare minerals! +60 credits', good:true, reward:{credits:60} },
+    { text:'Batten down the hatches', cost:{}, effect:'Safe but missed opportunity', good:false },
+  ]},
+  { title:'🛸 Unknown Object', desc:'An unidentified object is approaching!', choices:[
+    { text:'Hail and study (-25 energy)', cost:{energy:25}, effect:'First contact data! +50 data, +30 credits', good:true, reward:{data:50,credits:30} },
+    { text:'Activate cloaking (-40 energy)', cost:{energy:40}, effect:'Hidden but drain power', good:false },
+  ]},
+  { title:'🔧 Equipment Malfunction', desc:'Critical lab equipment is failing!', choices:[
+    { text:'Quick fix (-35 credits, -10 energy)', cost:{credits:35,energy:10}, effect:'Equipment restored', good:true },
+    { text:'Run diagnostics only', cost:{}, effect:'Lab disabled for 15s', good:false },
+  ]},
+  { title:'🌟 Rare Alignment', desc:'Three rare stars are aligning — unique observation window!', choices:[
+    { text:'Full observation mode (-40 energy)', cost:{energy:40}, effect:'Gain 80 data + discover 2 stars!', good:true, reward:{data:80,extraStars:2} },
+    { text:'Standard observation (-10 energy)', cost:{energy:10}, effect:'Gain 20 data', good:false, reward:{data:20} },
+  ]},
+  { title:'🌪️ Ion Storm', desc:'An ion storm is disrupting all communications!', choices:[
+    { text:'Ride it out', cost:{}, effect:'All expeditions delayed by 10s', good:false },
+    { text:'Boost signal (-45 energy)', cost:{energy:45}, effect:'Communications restored, +25 data', good:true, reward:{data:25} },
+  ]},
+];
+
+const ACHIEVEMENTS = [
+  { id:'first_exp', name:'First Steps', desc:'Launch your first expedition', icon:'🚀', check:()=>state.totalExpeditions>=1 },
+  { id:'ten_exp', name:'Veteran Explorer', desc:'Complete 10 expeditions', icon:'🏅', check:()=>state.successfulExpeditions>=10 },
+  { id:'fifty_exp', name:'Deep Space Captain', desc:'Complete 50 expeditions', icon:'🎖️', check:()=>state.successfulExpeditions>=50 },
+  { id:'first_star', name:'Stargazer', desc:'Discover your first star type', icon:'⭐', check:()=>state.discoveredStars.length>=1 },
+  { id:'five_stars', name:'Constellation Collector', desc:'Discover 5 star types', icon:'🌠', check:()=>state.discoveredStars.length>=5 },
+  { id:'all_stars', name:'Cosmic Encyclopedia', desc:'Discover all 12 star types', icon:'📚', check:()=>state.discoveredStars.length>=12 },
+  { id:'rich', name:'Stellar Economy', desc:'Accumulate 1000 credits', icon:'💰', check:()=>state.credits>=1000 },
+  { id:'minted', name:'Galactic Fortune', desc:'Accumulate 5000 credits', icon:'💎', check:()=>state.credits>=5000 },
+  { id:'data_hoard', name:'Data Hoarder', desc:'Accumulate 500 research data', icon:'📊', check:()=>state.data>=500 },
+  { id:'max_mod', name:'Fully Equipped', desc:'Max out any module', icon:'🔝', check:()=>Object.values(state.modules).some(v=>v>=MODULES.find(m=>state.modules[m.id]===v)?.max) },
+  { id:'crew3', name:'Dream Team', desc:'Hire 3 crew members', icon:'👥', check:()=>state.crew.length>=3 },
+  { id:'first_event', name:'Crisis Manager', desc:'Handle your first event', icon:'⚡', check:()=>state.eventsHandled>=1 },
+  { id:'researcher', name:'Researcher', desc:'Complete 3 research projects', icon:'🔬', check:()=>state.researchCompleted.length>=3 },
+  { id:'full_research', name:'Master Scientist', desc:'Complete all research', icon:'🧬', check:()=>state.researchCompleted.length>=RESEARCH.length },
+  { id:'big_exp', name:'Into the Void', desc:'Complete a Void Leap expedition', icon:'🕳️', check:()=>state.voidLeaps>=1 },
+  { id:'day30', name:'Month in Space', desc:'Reach Day 30', icon:'📅', check:()=>state.day>=30 },
+];
+
+// ==================== STATE ====================
 const state = {
-  energy: 50,
-  credits: 200,
-  data: 0,
-  day: 1,
-  tick: 0,
-  modules: {},
-  researchCompleted: [],
-  expeditions: [], // { expDef, progress, maxProgress, yield }
-  discoveredStars: [],
-  discoveries: [],
-  totalExpeditions: 0,
-  successfulExpeditions: 0,
-  failedExpeditions: 0,
+  energy:50, credits:200, data:0, day:1, tick:0,
+  modules:{}, researchCompleted:[], crew:[],
+  expeditions:[], discoveredStars:[], discoveries:[],
+  totalExpeditions:0, successfulExpeditions:0, failedExpeditions:0,
+  eventsHandled:0, voidLeaps:0,
+  achievements:[], newAchievement:false,
+  eventActive:false,
 };
 
-// Init modules
-MODULES.forEach(m => { state.modules[m.id] = 0; });
+MODULES.forEach(m=>{ state.modules[m.id]=0; });
 
 // ==================== CANVAS ====================
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let stars = [];
-let shootingStars = [];
-let particles = [];
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
+let stars=[],shootingStars=[],particles=[];
 
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', resize);
+function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resize(); window.addEventListener('resize',resize);
 
-// Generate stars
-for (let i = 0; i < 300; i++) {
-  stars.push({
-    x: Math.random() * 2000,
-    y: Math.random() * 2000,
-    r: Math.random() * 1.8 + 0.3,
-    twinkle: Math.random() * Math.PI * 2,
-    twinkleSpeed: Math.random() * 0.02 + 0.005,
-    hue: Math.random() < 0.1 ? 200 : Math.random() < 0.1 ? 40 : 0,
-  });
-}
+for(let i=0;i<350;i++) stars.push({
+  x:Math.random()*2000, y:Math.random()*2000,
+  r:Math.random()*2+0.2, twinkle:Math.random()*Math.PI*2,
+  twinkleSpeed:Math.random()*0.02+0.004,
+  hue:Math.random()<0.08?200:Math.random()<0.08?40:0,
+});
 
-function spawnShootingStar() {
-  shootingStars.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height * 0.5,
-    vx: (Math.random() - 0.5) * 4,
-    vy: Math.random() * 6 + 4,
-    life: 1,
-    len: Math.random() * 80 + 40,
-  });
-}
+function spawnShooting(){ shootingStars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.4,vx:(Math.random()-0.5)*4,vy:Math.random()*6+4,life:1,len:Math.random()*80+40}); }
 
-// Station properties
-let stationGlow = 0;
+function drawStation(cx,cy,scale){
+  ctx.save(); ctx.translate(cx,cy); ctx.scale(scale,scale);
+  const g=ctx.createLinearGradient(0,-30,0,30);
+  g.addColorStop(0,'#4a6491'); g.addColorStop(0.5,'#6e8cc4'); g.addColorStop(1,'#3a4f71');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.roundRect(-25,-12,50,24,6); ctx.fill();
+  ctx.strokeStyle='rgba(160,200,255,0.5)'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='rgba(130,180,255,0.3)'; ctx.beginPath(); ctx.arc(0,-12,12,Math.PI,0); ctx.fill();
+  ctx.strokeStyle='rgba(180,220,255,0.6)'; ctx.stroke();
 
-function drawStation(cx, cy, scale) {
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.scale(scale, scale);
+  if(state.modules.solar>0){
+    const n=Math.min(state.modules.solar,4);
+    for(let i=0;i<n;i++){ const px=-40-i*18; ctx.fillStyle='#2a3550'; ctx.fillRect(px,-6,14,12); ctx.fillStyle='#4a90d9'; ctx.fillRect(px+2,-4,3,8); ctx.fillRect(px+9,-4,3,8); }
+    for(let i=0;i<n;i++){ const px=26+i*18; ctx.fillStyle='#2a3550'; ctx.fillRect(px,-6,14,12); ctx.fillStyle='#4a90d9'; ctx.fillRect(px+2,-4,3,8); ctx.fillRect(px+9,-4,3,8); }
+  }
 
-  // Station body
-  const g = ctx.createLinearGradient(0, -30, 0, 30);
-  g.addColorStop(0, '#4a6491');
-  g.addColorStop(0.5, '#6e8cc4');
-  g.addColorStop(1, '#3a4f71');
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.roundRect(-25, -12, 50, 24, 6);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(160,200,255,0.5)';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
+  if(state.modules.fusion>0){
+    const a=0.25+state.modules.fusion*0.15;
+    ctx.strokeStyle=`rgba(100,200,255,${a})`; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.ellipse(0,0,35,14,0,0,Math.PI*2); ctx.stroke();
+    const gs=30+Math.sin(Date.now()/500)*5;
+    const glow=ctx.createRadialGradient(0,0,5,0,0,gs);
+    glow.addColorStop(0,`rgba(100,200,255,${0.12*state.modules.fusion})`); glow.addColorStop(1,'rgba(100,200,255,0)');
+    ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(0,0,gs,0,Math.PI*2); ctx.fill();
+  }
 
-  // Center dome
-  ctx.fillStyle = 'rgba(130,180,255,0.3)';
-  ctx.beginPath();
-  ctx.arc(0, -12, 12, Math.PI, 0);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(180,220,255,0.6)';
-  ctx.stroke();
+  if(state.modules.shield>0){
+    const a=0.04+state.modules.shield*0.06;
+    ctx.strokeStyle=`rgba(150,220,255,${a})`; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(0,0,40,0,Math.PI*2); ctx.stroke();
+  }
 
-  // Solar panels
-  if (state.modules.solar > 0) {
-    const panels = Math.min(state.modules.solar, 4);
-    for (let i = 0; i < panels; i++) {
-      const px = -40 - i * 18;
-      ctx.fillStyle = '#2a3550';
-      ctx.fillRect(px, -6, 14, 12);
-      ctx.fillStyle = '#4a90d9';
-      ctx.fillRect(px + 2, -4, 3, 8);
-      ctx.fillRect(px + 9, -4, 3, 8);
-    }
-    for (let i = 0; i < panels; i++) {
-      const px = 26 + i * 18;
-      ctx.fillStyle = '#2a3550';
-      ctx.fillRect(px, -6, 14, 12);
-      ctx.fillStyle = '#4a90d9';
-      ctx.fillRect(px + 2, -4, 3, 8);
-      ctx.fillRect(px + 9, -4, 3, 8);
+  if(state.modules.hangar>0){
+    for(let i=0;i<state.modules.hangar;i++){ const hx=-12+i*8; ctx.fillStyle='#1a1a30'; ctx.fillRect(hx,12,6,8); ctx.strokeStyle='rgba(255,200,100,0.5)'; ctx.strokeRect(hx,12,6,8); }
+  }
+
+  if(state.modules.drones>0){
+    for(let i=0;i<state.modules.drones;i++){
+      const a=Date.now()/600+i; const dx=Math.sin(a)*30,dy=Math.cos(a*1.3)*20-15;
+      ctx.fillStyle='#66ccff'; ctx.beginPath(); ctx.arc(dx,dy,3,0,Math.PI*2); ctx.fill();
     }
   }
 
-  // Fusion ring
-  if (state.modules.fusion > 0) {
-    const ringAlpha = 0.3 + state.modules.fusion * 0.15;
-    ctx.strokeStyle = `rgba(100,200,255,${ringAlpha})`;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 35, 14, 0, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Pulsing glow
-    const glowSize = 30 + Math.sin(Date.now() / 500) * 5;
-    const glow = ctx.createRadialGradient(0, 0, 5, 0, 0, glowSize);
-    glow.addColorStop(0, `rgba(100,200,255,${0.15 * state.modules.fusion})`);
-    glow.addColorStop(1, 'rgba(100,200,255,0)');
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(0, 0, glowSize, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // Shield
-  if (state.modules.shield > 0) {
-    const shieldAlpha = 0.05 + state.modules.shield * 0.06;
-    ctx.strokeStyle = `rgba(150,220,255,${shieldAlpha})`;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(0, 0, 40, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-
-  // Hangar bays
-  if (state.modules.hangar > 0) {
-    for (let i = 0; i < state.modules.hangar; i++) {
-      const hx = -12 + i * 8;
-      ctx.fillStyle = '#1a1a30';
-      ctx.fillRect(hx, 12, 6, 8);
-      ctx.strokeStyle = 'rgba(255,200,100,0.5)';
-      ctx.strokeRect(hx, 12, 6, 8);
-    }
+  if(state.modules.quantum>0){
+    const a=0.08+state.modules.quantum*0.05;
+    ctx.strokeStyle=`rgba(200,160,255,${a})`; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(0,0,50+state.modules.quantum*3,0,Math.PI*2); ctx.setLineDash([4,8]); ctx.stroke(); ctx.setLineDash([]);
   }
 
   ctx.restore();
 }
 
-function draw() {
-  ctx.fillStyle = '#0a0a1a';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  const time = Date.now() / 1000;
-
-  // Stars
-  stars.forEach(s => {
-    s.twinkle += s.twinkleSpeed;
-    const alpha = 0.5 + Math.sin(s.twinkle) * 0.5;
-    const hue = s.hue > 0 ? s.hue : 0;
-    if (hue > 0) {
-      ctx.fillStyle = `hsla(${hue}, 80%, 70%, ${alpha})`;
-    } else if (s.r > 1.4) {
-      ctx.fillStyle = `rgba(200,220,255,${alpha})`;
-    } else {
-      ctx.fillStyle = `rgba(180,200,240,${alpha * 0.8})`;
-    }
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fill();
+function draw(){
+  ctx.fillStyle='#0a0a1a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  const t=Date.now()/1000;
+  stars.forEach(s=>{
+    s.twinkle+=s.twinkleSpeed; const a=0.5+Math.sin(s.twinkle)*0.5;
+    if(s.hue>0) ctx.fillStyle=`hsla(${s.hue},80%,70%,${a})`;
+    else if(s.r>1.4) ctx.fillStyle=`rgba(200,220,255,${a})`;
+    else ctx.fillStyle=`rgba(180,200,240,${a*0.8})`;
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
   });
+  if(Math.random()<0.003) spawnShooting();
+  shootingStars=shootingStars.filter(s=>{ s.x+=s.vx; s.y+=s.vy; s.life-=0.015; ctx.strokeStyle=`rgba(255,255,255,${s.life})`; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(s.x-s.vx*s.len/5,s.y-s.vy*s.len/5); ctx.stroke(); return s.life>0; });
 
-  // Shooting stars
-  if (Math.random() < 0.003) spawnShootingStar();
-  shootingStars = shootingStars.filter(s => {
-    s.x += s.vx;
-    s.y += s.vy;
-    s.life -= 0.015;
-    const alpha = s.life;
-    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(s.x, s.y);
-    ctx.lineTo(s.x - s.vx * s.len / 5, s.y - s.vy * s.len / 5);
-    ctx.stroke();
-    return s.life > 0;
-  });
-
-  // Nebula clouds
   ctx.save();
-  const nebula1 = ctx.createRadialGradient(canvas.width * 0.75, canvas.height * 0.3, 0, canvas.width * 0.75, canvas.height * 0.3, 300);
-  nebula1.addColorStop(0, 'rgba(80, 40, 120, 0.06)');
-  nebula1.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = nebula1;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  const nebula2 = ctx.createRadialGradient(canvas.width * 0.2, canvas.height * 0.6, 0, canvas.width * 0.2, canvas.height * 0.6, 250);
-  nebula2.addColorStop(0, 'rgba(20, 60, 120, 0.05)');
-  nebula2.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = nebula2;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const n1=ctx.createRadialGradient(canvas.width*0.75,canvas.height*0.3,0,canvas.width*0.75,canvas.height*0.3,300);
+  n1.addColorStop(0,'rgba(80,40,120,0.05)'); n1.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=n1; ctx.fillRect(0,0,canvas.width,canvas.height);
+  const n2=ctx.createRadialGradient(canvas.width*0.2,canvas.height*0.6,0,canvas.width*0.2,canvas.height*0.6,250);
+  n2.addColorStop(0,'rgba(20,60,120,0.04)'); n2.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=n2; ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.restore();
 
-  // Station
-  const sx = canvas.width * 0.5;
-  const sy = canvas.height * 0.45;
-  const scale = 1.6 + Math.sin(time * 0.3) * 0.05;
-  drawStation(sx, sy, scale);
+  const sx=canvas.width*0.5,sy=canvas.height*0.45,scale=1.6+Math.sin(t*0.3)*0.05;
+  drawStation(sx,sy,scale);
 
-  // Expedition ships
-  state.expeditions.forEach((exp, i) => {
-    if (exp.progress >= exp.maxProgress) return;
-    const angle = (i / Math.max(state.expeditions.length, 1)) * Math.PI * 2 + time * 0.2;
-    const dist = 120 + i * 25;
-    const shipX = sx + Math.cos(angle) * dist;
-    const shipY = sy + Math.sin(angle) * dist * 0.5;
-    const prog = exp.progress / exp.maxProgress;
-
-    ctx.save();
-    ctx.translate(shipX, shipY);
-    ctx.rotate(angle + Math.PI / 2);
-
-    // Ship
-    ctx.fillStyle = '#8899cc';
-    ctx.beginPath();
-    ctx.moveTo(0, -7);
-    ctx.lineTo(-3, 4);
-    ctx.lineTo(3, 4);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(150,200,255,0.6)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Engine glow
-    const eg = ctx.createRadialGradient(0, 6, 0, 0, 6, 6);
-    eg.addColorStop(0, 'rgba(100,200,255,0.8)');
-    eg.addColorStop(1, 'rgba(100,200,255,0)');
-    ctx.fillStyle = eg;
-    ctx.beginPath();
-    ctx.arc(0, 6, 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Progress ring around ship
-    ctx.beginPath();
-    ctx.arc(0, 0, 10, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2);
-    ctx.strokeStyle = 'rgba(105, 240, 174, 0.7)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
+  state.expeditions.forEach((exp,i)=>{
+    if(exp.progress>=exp.maxProgress) return;
+    const angle=(i/Math.max(state.expeditions.length,1))*Math.PI*2+t*0.2;
+    const dist=110+i*22;
+    const shipX=sx+Math.cos(angle)*dist,shipY=sy+Math.sin(angle)*dist*0.5;
+    const prog=exp.progress/exp.maxProgress;
+    ctx.save(); ctx.translate(shipX,shipY); ctx.rotate(angle+Math.PI/2);
+    ctx.fillStyle='#8899cc'; ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(-3,3); ctx.lineTo(3,3); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='rgba(150,200,255,0.6)'; ctx.lineWidth=1; ctx.stroke();
+    const eg=ctx.createRadialGradient(0,5,0,0,5,5); eg.addColorStop(0,'rgba(100,200,255,0.8)'); eg.addColorStop(1,'rgba(100,200,255,0)');
+    ctx.fillStyle=eg; ctx.beginPath(); ctx.arc(0,5,5,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0,0,9,-Math.PI/2,-Math.PI/2+prog*Math.PI*2); ctx.strokeStyle='rgba(105,240,174,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
     ctx.restore();
   });
 
-  // Small orbit particle trail
-  particles.push({ x: sx, y: sy, life: 1, vx: (Math.random() - 0.5) * 0.5, vy: -Math.random() * 0.8 - 0.3 });
-  particles = particles.filter(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life -= 0.02;
-    ctx.fillStyle = `rgba(150,200,255,${p.life * 0.5})`;
-    ctx.fillRect(p.x, p.y, 1.5, 1.5);
-    return p.life > 0;
-  });
-  if (particles.length > 150) particles.splice(0, particles.length - 150);
+  particles.push({x:sx,y:sy,life:1,vx:(Math.random()-0.5)*0.5,vy:-Math.random()*0.8-0.3});
+  particles=particles.filter(p=>{ p.x+=p.vx; p.y+=p.vy; p.life-=0.02; ctx.fillStyle=`rgba(150,200,255,${p.life*0.5})`; ctx.fillRect(p.x,p.y,1,1); return p.life>0; });
+  if(particles.length>150) particles.splice(0,particles.length-150);
 
   requestAnimationFrame(draw);
 }
 draw();
 
-// ==================== UI RENDERING ====================
-function updateUI() {
-  document.getElementById('res-energy').textContent = Math.floor(state.energy);
-  document.getElementById('res-credit').textContent = Math.floor(state.credits);
-  document.getElementById('res-data').textContent = Math.floor(state.data);
-  document.getElementById('day-counter').textContent = `Day ${state.day}`;
+// ==================== TUTORIAL ====================
+const tutSteps = [
+  { icon:'🚀', title:'Welcome to Star Labs!', desc:'You are the director of a deep-space research station orbiting in the far reaches of the galaxy. Your mission: explore the cosmos, discover new stars, and expand humanity\'s knowledge of the universe.' },
+  { icon:'⚡', title:'Resources', desc:'<b>Energy ⚡</b> — generated by your station modules. Powers expeditions.<br><b>Credits 💰</b> — earned from discoveries. Buy modules and hire crew.<br><b>Research Data 📊</b> — from expeditions. Unlock new technologies.' },
+  { icon:'🚀', title:'Launch Expeditions', desc:'Click any expedition card on the <b>left panel</b> to send probes into space. They take time but return with star data, credits, and discoveries. Higher-risk expeditions find rarer stars!' },
+  { icon:'🔧', title:'Build & Upgrade', desc:'Use credits to buy <b>modules</b> (right panel — Modules tab). Each module improves your station: more energy, faster research, more expedition slots, and better scanners.' },
+  { icon:'🔬', title:'Research & Crew', desc:'Spend research data on <b>technologies</b> (Research tab) that unlock powerful bonuses. Hire <b>crew members</b> (Crew tab) who provide permanent stat boosts. Trade resources in the Market tab.' },
+  { icon:'⭐', title:'Discover the Cosmos', desc:'There are <b>12 star types</b> to discover, from common Red Dwarfs to legendary Black Holes. Track your collection in the <b>Star Catalog</b> (left panel). Complete <b>achievements</b> (🏆 button) for rewards!' },
+];
+let tutStep=0;
 
-  const energyRate = state.modules.solar + state.modules.fusion * 5
-    + (state.researchCompleted.includes('dark_matter') ? 3 : 0)
-    + (state.researchCompleted.includes('efficient_panels') ? Math.floor(state.modules.solar * 0.25) : 0);
-  document.getElementById('rate-energy').textContent = `+${energyRate}/s`;
-
-  // Station desc
-  const modCount = Object.values(state.modules).reduce((a, b) => a + b, 0);
-  const totalDisc = state.discoveredStars.length;
-  document.getElementById('station-desc').textContent =
-    `Modules: ${modCount} | Stars Discovered: ${totalDisc} | Expeditions: ${state.totalExpeditions}`;
-
-  renderExpeditions();
-  renderModules();
-  renderResearch();
+function renderTutorial(){
+  document.getElementById('tut-icon').textContent=tutSteps[tutStep].icon;
+  document.getElementById('tut-title').textContent=tutSteps[tutStep].title;
+  document.getElementById('tut-desc').innerHTML=tutSteps[tutStep].desc;
+  document.querySelectorAll('.tut-dot').forEach((d,i)=>d.classList.toggle('active',i===tutStep));
+  document.getElementById('tut-next').textContent=tutStep===tutSteps.length-1?'Let\'s Go! 🚀':'Next →';
 }
 
-function renderExpeditions() {
-  const container = document.getElementById('expedition-list');
-  const maxSlots = 1 + state.modules.hangar;
-  const activeCount = state.expeditions.filter(e => e.progress < e.maxProgress).length;
-
-  container.innerHTML = '';
-
-  EXPEDITIONS.forEach(expDef => {
-    const active = state.expeditions.find(e => e.expDef.id === expDef.id && e.progress < e.maxProgress);
-    const canLaunch = activeCount < maxSlots && state.energy >= expDef.cost && !active;
-
-    const card = document.createElement('div');
-    card.className = 'expedition-card';
-    if (!canLaunch && !active) card.className += ' disabled';
-    if (active) card.className += ' active';
-
-    card.innerHTML = `
-      <div class="exp-name">${expDef.icon} ${expDef.name}</div>
-      <div class="exp-details">
-        <span>⏱️ ${expDef.duration}s</span>
-        <span>⚡ ${expDef.cost}</span>
-        <span>⚠️ ${expDef.risk}</span>
-      </div>
-      ${active ? `<div class="exp-progress"><div class="exp-progress-bar" style="width:${(active.progress / active.maxProgress) * 100}%"></div></div>
-      <span style="font-size:11px;color:#69f0ae">${Math.floor((active.progress / active.maxProgress) * 100)}% — ${Math.ceil(active.maxProgress - active.progress)}s left</span>` : ''}
-    `;
-
-    card.addEventListener('click', () => {
-      if (active) return;
-      if (!canLaunch) return;
-      launchExpedition(expDef);
-    });
-
-    container.appendChild(card);
-  });
+function nextTutorial(){
+  if(tutStep<tutSteps.length-1){ tutStep++; renderTutorial(); }
+  else skipTutorial();
+}
+function prevTutorial(){
+  if(tutStep>0){ tutStep--; renderTutorial(); }
+}
+function skipTutorial(){
+  document.getElementById('tutorial-overlay').style.display='none';
+  addLog('Tutorial complete! Start exploring the cosmos. 🚀','good');
 }
 
-function renderModules() {
-  const container = document.getElementById('module-list');
-  container.innerHTML = '';
+// ==================== MUSIC ====================
+const bgm=document.getElementById('bgm'); bgm.volume=0.4;
+function toggleMusic(){
+  const btn=document.getElementById('music-btn');
+  if(bgm.paused){ bgm.play().catch(()=>{}); btn.textContent='🔊'; btn.classList.remove('muted'); }
+  else { bgm.pause(); btn.textContent='🔇'; btn.classList.add('muted'); }
+}
+let musicStarted=false;
+document.addEventListener('click',()=>{ if(!musicStarted){ bgm.play().catch(()=>{}); musicStarted=true; } },{once:false});
 
-  MODULES.forEach(mod => {
-    const level = state.modules[mod.id];
-    const cost = Math.floor(mod.cost * Math.pow(mod.costScale, level));
-    const maxed = level >= mod.maxLevel;
-    const canBuy = state.credits >= cost && !maxed;
+// ==================== TABS ====================
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick*="${name}"]`).classList.add('active');
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
 
-    const card = document.createElement('div');
-    card.className = 'module-card';
-    card.innerHTML = `
-      <div class="mod-icon">${mod.icon}</div>
-      <div class="mod-info">
-        <div class="mod-name">${mod.name}</div>
-        <div class="mod-desc">${mod.effect(level)}</div>
-        ${maxed ? '<span style="color:#69f0ae;font-size:11px">MAX</span>' :
-          `<button ${!canBuy ? 'disabled' : ''}>💰 ${cost} — Level ${level + 1}</button>`}
-      </div>
-      <div class="mod-level">Lv.${level}/${mod.maxLevel}</div>
-    `;
-
-    if (canBuy) {
-      card.querySelector('button').addEventListener('click', (e) => {
-        e.stopPropagation();
-        buyModule(mod);
-      });
+// ==================== ACHIEVEMENTS ====================
+function checkAchievements(){
+  let newOne=false;
+  ACHIEVEMENTS.forEach(a=>{
+    if(!state.achievements.includes(a.id) && a.check()){
+      state.achievements.push(a.id);
+      newOne=true;
+      showToast(`🏆 Achievement: ${a.name}!`);
+      addLog(`Achievement unlocked: ${a.icon} ${a.name}`, 'discovery');
+      // Reward
+      const idx=ACHIEVEMENTS.indexOf(a);
+      if(idx<5){ state.credits+=50; state.data+=20; }
+      else if(idx<10){ state.credits+=150; state.data+=60; }
+      else { state.credits+=400; state.data+=150; }
     }
-
-    container.appendChild(card);
   });
+  if(newOne){ state.newAchievement=true; }
 }
 
-function renderResearch() {
-  const container = document.getElementById('research-list');
-  container.innerHTML = '';
+function toggleAchievements(){
+  const ov=document.getElementById('ach-overlay');
+  if(ov.style.display==='flex'){ ov.style.display='none'; state.newAchievement=false; }
+  else { ov.style.display='flex'; renderAchievements(); state.newAchievement=false; }
+}
 
-  RESEARCH.forEach(res => {
-    const completed = state.researchCompleted.includes(res.id);
-    const reqMet = !res.req || state.researchCompleted.includes(res.req);
-    const canResearch = reqMet && !completed && state.data >= res.cost;
-    const locked = !reqMet && !completed;
+function renderAchievements(){
+  const list=document.getElementById('ach-list');
+  list.innerHTML='';
+  ACHIEVEMENTS.forEach(a=>{
+    const earned=state.achievements.includes(a.id);
+    const row=document.createElement('div');
+    row.className='ach-row'+(earned?' earned':'');
+    row.innerHTML=`<div class="ach-icon">${earned?a.icon:'🔒'}</div><div class="ach-info"><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div></div>${earned?'<span style="color:#69f0ae">✓</span>':''}`;
+    list.appendChild(row);
+  });
+  document.getElementById('ach-count').textContent=`${state.achievements.length}/${ACHIEVEMENTS.length}`;
+  const btn=document.getElementById('ach-btn');
+  if(state.newAchievement) btn.classList.add('has-new'); else btn.classList.remove('has-new');
+}
 
-    const card = document.createElement('div');
-    card.className = 'research-card';
-    if (completed) card.className += ' completed';
-    if (locked) card.className += ' locked';
+// ==================== EVENTS ====================
+let eventTimer=null;
+function scheduleEvent(){
+  const delay=30000+Math.random()*60000;
+  if(eventTimer) clearTimeout(eventTimer);
+  eventTimer=setTimeout(triggerEvent,delay);
+}
 
-    card.innerHTML = `
-      <div class="mod-icon">${completed ? '✅' : locked ? '🔒' : '🔬'}</div>
-      <div class="mod-info">
-        <div class="mod-name">${res.name}</div>
-        <div class="mod-desc">${res.effect}</div>
-        ${completed ? '<span style="color:#69f0ae;font-size:11px">Researched ✓</span>' :
-          locked ? '<span style="color:#ff6e6e;font-size:11px">Requires previous research</span>' :
-          `<button ${!canResearch ? 'disabled' : ''}>📊 ${res.cost} data</button>`}
-      </div>
-    `;
+function triggerEvent(){
+  if(state.eventActive) return;
+  const ev=EVENTS[Math.floor(Math.random()*EVENTS.length)];
+  document.getElementById('event-title').textContent=ev.title;
+  document.getElementById('event-desc').textContent=ev.desc;
+  const choices=document.getElementById('event-choices');
+  choices.innerHTML='';
+  ev.choices.forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.textContent=c.text;
+    btn.className=c.good?'':'secondary';
+    btn.onclick=()=>resolveEvent(ev,c);
+    choices.appendChild(btn);
+  });
+  document.getElementById('event-overlay').style.display='flex';
+  state.eventActive=true;
+}
 
-    if (canResearch) {
-      card.querySelector('button').addEventListener('click', (e) => {
-        e.stopPropagation();
-        researchTech(res);
-      });
+function resolveEvent(ev,choice){
+  document.getElementById('event-overlay').style.display='none';
+  state.eventActive=false;
+  state.eventsHandled++;
+
+  // Check costs
+  if(choice.cost){
+    if(choice.cost.energy && state.energy<choice.cost.energy){ addLog('Not enough energy for that choice!','danger'); scheduleEvent(); return; }
+    if(choice.cost.credits && state.credits<choice.cost.credits){ addLog('Not enough credits for that choice!','danger'); scheduleEvent(); return; }
+  }
+
+  if(choice.cost){
+    if(choice.cost.energy) state.energy-=choice.cost.energy;
+    if(choice.cost.credits) state.credits-=choice.cost.credits;
+  }
+
+  if(choice.risk && Math.random()<choice.risk){
+    addLog(`Event: ${ev.title} — Bad outcome! ${choice.penalty?'Lost '+Object.values(choice.penalty)[0]+' '+Object.keys(choice.penalty)[0]:''}`,'danger');
+    if(choice.penalty){
+      if(choice.penalty.energy) state.energy=Math.max(0,state.energy-choice.penalty.energy);
+      if(choice.penalty.credits) state.credits=Math.max(0,state.credits-choice.penalty.credits);
+      if(choice.penalty.data) state.data=Math.max(0,state.data-choice.penalty.data);
     }
+  } else if(choice.reward){
+    if(choice.reward.energy) state.energy+=choice.reward.energy;
+    if(choice.reward.credits) state.credits+=choice.reward.credits;
+    if(choice.reward.data) state.data+=choice.reward.data;
+    if(choice.reward.extraStars){
+      for(let i=0;i<choice.reward.extraStars;i++){
+        const star=STAR_TYPES[Math.floor(Math.random()*STAR_TYPES.length)];
+        if(!state.discoveredStars.find(s=>s.name===star.name)){ state.discoveredStars.push(star); showToast(`🌟 Discovered: ${star.name}!`); }
+      }
+    }
+    addLog(`Event: ${ev.title} — ${choice.effect}`, choice.good?'good':'');
+  } else {
+    addLog(`Event: ${ev.title} — ${choice.effect}`, choice.good?'good':'danger');
+  }
 
-    container.appendChild(card);
-  });
+  scheduleEvent();
+  updateUI();
 }
 
-// ==================== ACTIONS ====================
-function launchExpedition(expDef) {
-  if (state.energy < expDef.cost) return;
-  state.energy -= expDef.cost;
-  state.totalExpeditions++;
+// ==================== GAME ACTIONS ====================
+function launchExpedition(expDef){
+  const maxSlots=1+state.modules.hangar;
+  const activeCount=state.expeditions.filter(e=>e.progress<e.maxProgress).length;
+  if(activeCount>=maxSlots||state.energy<expDef.cost) return;
 
-  const shieldLvl = state.modules.shield;
-  const riskReduction = shieldLvl * 5;
-  const baseRisk = expDef.risk === 'Low' ? 0.85 : expDef.risk === 'Medium' ? 0.7 : 0.55;
-  const successChance = Math.min(0.95, baseRisk + riskReduction / 100);
+  state.energy-=expDef.cost; state.totalExpeditions++;
 
-  const duration = state.researchCompleted.includes('warp_drive')
-    ? Math.floor(expDef.duration * 0.8) : expDef.duration;
+  const shieldLvl=state.modules.shield;
+  const riskMap={Low:0.85,Medium:0.7,High:0.55,'Very High':0.4,Extreme:0.25};
+  const baseRisk=riskMap[expDef.risk]||0.7;
+  const navBonus=state.crew.filter(c=>c.type==='navigator').length*0.15;
+  const successChance=Math.min(0.95,baseRisk+shieldLvl*0.05+navBonus);
 
-  const extraStars = state.researchCompleted.includes('starlink') ? 1 : 0;
+  let duration=expDef.dur;
+  if(state.researchCompleted.includes('warp_drive')) duration=Math.floor(duration*0.8);
+  if(state.researchCompleted.includes('wormhole')) duration=Math.floor(duration*0.7);
+  const navSpeed=state.crew.filter(c=>c.type==='navigator').length*0.1;
+  duration=Math.floor(duration*(1-navSpeed));
 
-  state.expeditions.push({
-    expDef,
-    progress: 0,
-    maxProgress: duration,
-    successChance,
-    extraStars,
-    id: Date.now(),
-  });
+  const extraStars=state.researchCompleted.includes('star_link')?1:0+state.crew.filter(c=>c.type==='xenologist').length*1;
 
+  state.expeditions.push({expDef,progress:0,maxProgress:duration,successChance,extraStars,id:Date.now()});
   addLog(`Expedition launched: ${expDef.name}`, '');
   updateUI();
 }
 
-function completeExpedition(exp) {
-  const idx = state.expeditions.indexOf(exp);
-  if (idx >= 0) state.expeditions.splice(idx, 1);
+function completeExpedition(exp){
+  const idx=state.expeditions.indexOf(exp);
+  if(idx>=0) state.expeditions.splice(idx,1);
 
-  const roll = Math.random();
-  if (roll < exp.successChance) {
+  if(exp.expDef.id==='void_leap') state.voidLeaps++;
+
+  const droneSalvage=state.modules.drones*0.12;
+  const roll=Math.random();
+  let succeeded=roll<exp.successChance;
+
+  if(!succeeded && Math.random()<droneSalvage){
+    succeeded=true; addLog('🤖 Repair drones salvaged the expedition!','good');
+  }
+
+  if(succeeded){
     state.successfulExpeditions++;
-    const starCount = exp.expDef.minStars + Math.floor(Math.random() * (exp.expDef.maxStars - exp.expDef.minStars + 1)) + exp.extraStars;
-    let totalData = 0;
-    let totalCredits = 0;
-    const foundStars = [];
+    const starCount=exp.expDef.minS+Math.floor(Math.random()*(exp.expDef.maxS-exp.expDef.minS+1))+exp.extraStars;
+    let totalData=0,totalCredits=0;
+    const foundStars=[];
 
-    for (let i = 0; i < starCount; i++) {
-      // Bias towards rarer with scanner
-      const scannerBonus = state.modules.scanner * 8;
-      const roll2 = Math.random() * 100;
+    for(let i=0;i<starCount;i++){
+      const scannerBonus=state.modules.scanner*8;
+      const tachyonBonus=state.researchCompleted.includes('tachyon')?25:0;
+      const pilotBonus=state.crew.filter(c=>c.type==='pilot').length*10;
+      const roll2=Math.random()*100;
       let starIdx;
-      if (roll2 < 5 + scannerBonus) starIdx = Math.floor(Math.random() * 3) + 8; // Legendary/Very Rare
-      else if (roll2 < 20 + scannerBonus) starIdx = Math.floor(Math.random() * 3) + 5; // Rare
-      else if (roll2 < 50 + scannerBonus) starIdx = Math.floor(Math.random() * 2) + 3; // Uncommon
-      else starIdx = Math.floor(Math.random() * 3); // Common
+      if(roll2<5+scannerBonus+tachyonBonus) starIdx=Math.floor(Math.random()*3)+8;
+      else if(roll2<20+scannerBonus+pilotBonus) starIdx=Math.floor(Math.random()*3)+5;
+      else if(roll2<50+scannerBonus) starIdx=Math.floor(Math.random()*2)+3;
+      else starIdx=Math.floor(Math.random()*3);
 
-      const star = STAR_TYPES[starIdx];
+      const star=STAR_TYPES[starIdx];
       foundStars.push(star);
-      totalData += star.dataValue;
-      totalCredits += star.creditValue;
-
-      if (!state.discoveredStars.find(s => s.name === star.name)) {
+      totalData+=star.data; totalCredits+=star.credits;
+      if(!state.discoveredStars.find(s=>s.name===star.name)){
         state.discoveredStars.push(star);
         showToast(`🌟 New Discovery: ${star.name}!`);
-        addLog(`Discovered: ${star.icon} ${star.name} (${star.rarity})`, 'discovery');
+        addLog(`Discovered: ${star.icon} ${star.name} (${star.rarity})`,'discovery');
       }
     }
 
-    // Research bonus
-    if (state.researchCompleted.includes('universal_trans')) totalData *= 2;
-    if (state.researchCompleted.includes('dark_matter')) totalCredits = Math.floor(totalCredits * 1.1);
+    if(state.researchCompleted.includes('uni_trans')) totalData*=2;
+    const scientistBonus=state.crew.filter(c=>c.type==='scientist').length*0.2;
+    const physicistBonus=state.crew.filter(c=>c.type==='physicist').length*0.4;
+    totalData=Math.floor(totalData*(1+scientistBonus+physicistBonus));
+    const pilotCreditBonus=state.crew.filter(c=>c.type==='pilot').length*0.2;
+    if(state.researchCompleted.includes('dark_matter')) totalCredits=Math.floor(totalCredits*1.1);
+    totalCredits=Math.floor(totalCredits*(1+pilotCreditBonus));
+    const quantumMul=1+state.modules.quantum*0.08;
+    totalData=Math.floor(totalData*quantumMul);
+    totalCredits=Math.floor(totalCredits*quantumMul);
 
-    state.data += totalData;
-    state.credits += totalCredits;
+    state.data+=totalData; state.credits+=totalCredits;
+    addLog(`✅ ${exp.expDef.name} complete! +${totalData} data, +${totalCredits} credits`,'good');
 
-    addLog(`✅ ${exp.expDef.name} complete! +${totalData} data, +${totalCredits} credits`, 'good');
-
-    // Random discovery
-    if (Math.random() < 0.25) {
-      const disc = DISCOVERIES[Math.floor(Math.random() * DISCOVERIES.length)];
-      if (!state.discoveries.includes(disc)) {
+    // Discovery chance
+    const discChance=0.2+state.crew.filter(c=>c.type==='xenologist').length*0.3;
+    if(Math.random()<discChance){
+      const disc=['Ancient alien artifact','Quantum crystal formation','Dark matter pocket','Alien life signature','Wormhole coordinates','Unknown energy reading','Crystalline cave system','Extinct civilization ruins'][Math.floor(Math.random()*8)];
+      if(!state.discoveries.includes(disc)){
         state.discoveries.push(disc);
-        state.data += 15;
+        state.data+=20;
         showToast(`📖 Discovery: ${disc}`);
-        addLog(`Anomaly found: ${disc}`, 'discovery');
+        addLog(`Anomaly found: ${disc}`,'discovery');
       }
     }
   } else {
     state.failedExpeditions++;
-    addLog(`❌ ${exp.expDef.name} failed — probe lost in deep space`, '');
+    addLog(`❌ ${exp.expDef.name} failed — probe lost in deep space`,'danger');
   }
 
+  checkAchievements();
   updateUI();
 }
 
-function buyModule(mod) {
-  const level = state.modules[mod.id];
-  const cost = Math.floor(mod.cost * Math.pow(mod.costScale, level));
-  if (state.credits < cost || level >= mod.maxLevel) return;
-
-  state.credits -= cost;
-  state.modules[mod.id]++;
-  addLog(`Upgraded ${mod.name} to Level ${state.modules[mod.id]}`, 'good');
+function buyModule(mod){
+  const level=state.modules[mod.id];
+  let cost=Math.floor(mod.cost*Math.pow(mod.scale,level));
+  if(state.crew.some(c=>c.type==='engineer')) cost=Math.floor(cost*0.85);
+  if(state.credits<cost||level>=mod.max) return;
+  state.credits-=cost; state.modules[mod.id]++;
+  addLog(`Upgraded ${mod.name} to Level ${state.modules[mod.id]}`,'good');
+  checkAchievements();
   updateUI();
 }
 
-function researchTech(res) {
-  if (state.data < res.cost || state.researchCompleted.includes(res.id)) return;
-  if (res.req && !state.researchCompleted.includes(res.req)) return;
-
-  state.data -= res.cost;
-  state.researchCompleted.push(res.id);
+function researchTech(res){
+  if(state.data<res.cost||state.researchCompleted.includes(res.id)) return;
+  if(res.req&&!state.researchCompleted.includes(res.req)) return;
+  let cost=res.cost;
+  if(state.crew.some(c=>c.type==='physicist')) cost=Math.floor(cost*0.8);
+  if(state.data<cost) return;
+  state.data-=cost; state.researchCompleted.push(res.id);
   showToast(`🔬 Research Complete: ${res.name}!`);
-  addLog(`Research: ${res.name} — ${res.effect}`, 'discovery');
+  addLog(`Research: ${res.name} — ${res.effect}`,'discovery');
+  checkAchievements();
   updateUI();
 }
 
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.style.display = 'block';
-  toast.style.animation = 'none';
-  toast.offsetHeight;
-  toast.style.animation = 'toastPop 2.5s forwards';
-  setTimeout(() => { toast.style.display = 'none'; }, 2500);
+function hireCrew(crewDef){
+  const hired=state.crew.filter(c=>c.type===crewDef.id).length;
+  if(hired>=2) return;
+  if(state.credits<crewDef.cost) return;
+  state.credits-=crewDef.cost;
+  state.crew.push({type:crewDef.id,name:crewDef.name,icon:crewDef.icon,upkeep:crewDef.upkeep});
+  addLog(`Hired ${crewDef.icon} ${crewDef.name}!`,'good');
+  checkAchievements();
+  updateUI();
 }
 
-function addLog(msg, cls) {
-  const log = document.getElementById('log-area');
-  const entry = document.createElement('div');
-  entry.className = `log-entry ${cls}`;
-  entry.textContent = msg;
+function fireCrew(type){
+  const idx=state.crew.findIndex(c=>c.type===type);
+  if(idx<0) return;
+  state.crew.splice(idx,1);
+  addLog('Crew member released.','');
+  updateUI();
+}
+
+function trade(from,to,amount){
+  if(from==='energy'&&state.energy>=amount){ state.energy-=amount; state.credits+=Math.floor(amount*0.4); }
+  else if(from==='credits'&&state.credits>=amount){ state.credits-=amount; state.energy+=Math.floor(amount*1.5); }
+  else if(from==='data'&&state.data>=amount){ state.data-=amount; state.credits+=Math.floor(amount*1.2); }
+  else return;
+  addLog(`Traded ${amount} ${from} → ${from==='energy'?'credits':from==='data'?'credits':'energy'}`,'');
+  updateUI();
+}
+
+// ==================== UI RENDER ====================
+function updateUI(){
+  document.getElementById('res-energy').textContent=Math.floor(state.energy);
+  document.getElementById('res-credit').textContent=Math.floor(state.credits);
+  document.getElementById('res-data').textContent=Math.floor(state.data);
+  document.getElementById('day-counter').textContent=`Day ${state.day}`;
+
+  let eGen=state.modules.solar+state.modules.fusion*5;
+  if(state.researchCompleted.includes('dark_matter')) eGen+=3;
+  if(state.researchCompleted.includes('eff_panels')) eGen+=Math.floor(state.modules.solar*0.3);
+  if(state.researchCompleted.includes('anti_matter')) eGen+=state.modules.fusion*5;
+  const engBonus=state.crew.filter(c=>c.type==='engineer').length*0.25;
+  eGen=Math.floor(eGen*(1+engBonus))-state.crew.reduce((s,c)=>s+c.upkeep,0);
+  document.getElementById('rate-energy').textContent=`+${Math.max(0,eGen)}/s`;
+
+  const modCount=Object.values(state.modules).reduce((a,b)=>a+b,0);
+  document.getElementById('station-desc').textContent=`Modules: ${modCount} | Stars: ${state.discoveredStars.length}/12 | Crew: ${state.crew.length} | Exp: ${state.successfulExpeditions}`;
+
+  renderExpeditions();
+  renderStarCatalog();
+  renderModulesTab();
+  renderResearchTab();
+  renderCrewTab();
+  renderMarketTab();
+  renderAchievements();
+  document.getElementById('catalog-count').textContent=state.discoveredStars.length;
+}
+
+function renderExpeditions(){
+  const container=document.getElementById('expedition-list');
+  const maxSlots=1+state.modules.hangar;
+  const activeCount=state.expeditions.filter(e=>e.progress<e.maxProgress).length;
+  container.innerHTML='';
+
+  EXPEDITIONS.forEach(expDef=>{
+    const active=state.expeditions.find(e=>e.expDef.id===expDef.id&&e.progress<e.maxProgress);
+    const canLaunch=activeCount<maxSlots&&state.energy>=expDef.cost&&!active;
+    const card=document.createElement('div');
+    card.className='expedition-card';
+    if(!canLaunch&&!active) card.className+=' disabled';
+    if(active) card.className+=' active';
+
+    card.innerHTML=`
+      <div class="exp-name">${expDef.icon} ${expDef.name}</div>
+      <div class="exp-details"><span>⏱️${expDef.dur}s</span><span>⚡${expDef.cost}</span><span>⚠️${expDef.risk}</span></div>
+      ${active?`<div class="exp-progress"><div class="exp-progress-bar" style="width:${(active.progress/active.maxProgress)*100}%"></div></div><span style="font-size:10px;color:#69f0ae">${Math.floor((active.progress/active.maxProgress)*100)}% — ${Math.ceil(active.maxProgress-active.progress)}s left</span>`:''}
+    `;
+    card.addEventListener('click',()=>{ if(active) return; if(!canLaunch) return; launchExpedition(expDef); });
+    container.appendChild(card);
+  });
+}
+
+function renderStarCatalog(){
+  const container=document.getElementById('star-catalog');
+  container.innerHTML='';
+  STAR_TYPES.forEach(s=>{
+    const discovered=state.discoveredStars.some(d=>d.name===s.name);
+    const div=document.createElement('div');
+    div.className='star-entry'+(discovered?'':' undiscovered');
+    div.innerHTML=`<span class="star-icon">${discovered?s.icon:'❓'}</span><span class="star-name">${discovered?s.name:'???'}</span><span class="star-rarity">${discovered?s.rarity:''}</span>`;
+    container.appendChild(div);
+  });
+}
+
+function renderModulesTab(){
+  const container=document.getElementById('tab-modules');
+  container.innerHTML='';
+  MODULES.forEach(mod=>{
+    const level=state.modules[mod.id];
+    let cost=Math.floor(mod.cost*Math.pow(mod.scale,level));
+    if(state.crew.some(c=>c.type==='engineer')) cost=Math.floor(cost*0.85);
+    const maxed=level>=mod.max,canBuy=state.credits>=cost&&!maxed;
+    const div=document.createElement('div');
+    div.className='card';
+    div.innerHTML=`<div class="card-icon">${mod.icon}</div><div class="card-info"><div class="card-name">${mod.name} <span class="card-level">Lv.${level}/${mod.max}</span></div><div class="card-desc">${mod.effect(level)}</div>${maxed?'<span style="color:#69f0ae;font-size:10px">MAXED</span>':`<button class="small" ${!canBuy?'disabled':''}>💰 ${cost}</button>`}</div>`;
+    if(canBuy&&!maxed) div.querySelector('button').addEventListener('click',e=>{ e.stopPropagation(); buyModule(mod); });
+    container.appendChild(div);
+  });
+}
+
+function renderResearchTab(){
+  const container=document.getElementById('tab-research');
+  container.innerHTML='';
+  const labSpeed=1+(state.modules.lab*0.12)+(state.crew.filter(c=>c.type==='scientist').length*0.15)+((state.researchCompleted.includes('ai_lab')?0.3:0));
+  RESEARCH.forEach(res=>{
+    const completed=state.researchCompleted.includes(res.id);
+    const reqMet=!res.req||state.researchCompleted.includes(res.req);
+    let cost=res.cost;
+    if(state.crew.some(c=>c.type==='physicist')) cost=Math.floor(cost*0.8);
+    const canResearch=reqMet&&!completed&&state.data>=cost;
+    const div=document.createElement('div');
+    div.className='card';
+    if(completed) div.className+=' completed'; else if(!reqMet) div.className+=' locked';
+    div.innerHTML=`<div class="card-icon">${completed?'✅':!reqMet?'🔒':'🔬'}</div><div class="card-info"><div class="card-name">${res.name}</div><div class="card-desc">${res.effect}</div>${completed?'<span style="color:#69f0ae;font-size:10px">Researched ✓</span>':!reqMet?'<span style="color:#ff6e6e;font-size:10px">Requires prerequisite</span>':`<button class="small" ${!canResearch?'disabled':''}>📊 ${cost} data</button>`}</div>`;
+    if(canResearch) div.querySelector('button').addEventListener('click',e=>{ e.stopPropagation(); researchTech(res); });
+    container.appendChild(div);
+  });
+}
+
+function renderCrewTab(){
+  const container=document.getElementById('tab-crew');
+  container.innerHTML='';
+  CREW_TYPES.forEach(ct=>{
+    const hiredCount=state.crew.filter(c=>c.type===ct.id).length;
+    const div=document.createElement('div');
+    div.className='card'+(hiredCount>0?' hired':'');
+    div.innerHTML=`<div class="card-icon">${ct.icon}</div><div class="card-info"><div class="card-name">${ct.name} ${hiredCount>0?`<span style="color:#69f0ae">x${hiredCount}</span>`:''}</div><div class="card-desc">${ct.desc}</div><div style="display:flex;gap:6px;align-items:center;margin-top:3px;"><span class="card-cost">💰 ${ct.cost} hire</span><span style="font-size:10px;color:var(--energy)">⚡${ct.upkeep}/s upkeep</span></div></div>`;
+    if(hiredCount<2&&state.credits>=ct.cost){
+      const btn=document.createElement('button');
+      btn.className='small'; btn.textContent='Hire';
+      btn.addEventListener('click',e=>{ e.stopPropagation(); hireCrew(ct); });
+      div.appendChild(btn);
+    }
+    if(hiredCount>0){
+      const btn=document.createElement('button');
+      btn.className='small secondary'; btn.textContent='Fire';
+      btn.addEventListener('click',e=>{ e.stopPropagation(); fireCrew(ct.id); });
+      div.appendChild(btn);
+    }
+    container.appendChild(div);
+  });
+}
+
+function renderMarketTab(){
+  const container=document.getElementById('tab-market');
+  container.innerHTML=`
+    <div class="card" style="flex-direction:column;align-items:stretch;gap:8px;">
+      <div class="card-name">💱 Resource Exchange</div>
+      <div style="display:flex;gap:8px;align-items:center;"><span>⚡ 50 Energy</span><span>→</span><span>💰 20 Credits</span><button class="small" onclick="trade('energy','credits',50)" ${state.energy<50?'disabled':''}>Trade</button></div>
+      <div style="display:flex;gap:8px;align-items:center;"><span>💰 40 Credits</span><span>→</span><span>⚡ 60 Energy</span><button class="small" onclick="trade('credits','energy',40)" ${state.credits<40?'disabled':''}>Trade</button></div>
+      <div style="display:flex;gap:8px;align-items:center;"><span>📊 30 Data</span><span>→</span><span>💰 36 Credits</span><button class="small" onclick="trade('data','credits',30)" ${state.data<30?'disabled':''}>Trade</button></div>
+    </div>
+  `;
+}
+
+function showToast(msg){
+  const toast=document.getElementById('toast');
+  toast.textContent=msg; toast.style.display='block';
+  toast.style.animation='none'; toast.offsetHeight;
+  toast.style.animation='toastPop 3s forwards';
+  setTimeout(()=>toast.style.display='none',3000);
+}
+
+function addLog(msg,cls){
+  const log=document.getElementById('log-area');
+  const entry=document.createElement('div');
+  entry.className=`log-entry ${cls}`; entry.textContent=msg;
   log.appendChild(entry);
-  setTimeout(() => entry.remove(), 4000);
-  if (log.children.length > 8) log.firstChild.remove();
+  setTimeout(()=>entry.remove(),4000);
+  if(log.children.length>8) log.firstChild&&log.firstChild.remove();
 }
 
 // ==================== GAME LOOP ====================
-setInterval(() => {
+setInterval(()=>{
   state.tick++;
 
-  // Energy generation per tick (1 tick = 1 second)
-  let energyGen = state.modules.solar + state.modules.fusion * 5;
-  if (state.researchCompleted.includes('dark_matter')) energyGen += 3;
-  if (state.researchCompleted.includes('efficient_panels')) energyGen += Math.floor(state.modules.solar * 0.25);
-  if (state.researchCompleted.includes('antimatter')) energyGen += state.modules.fusion * 5;
-  state.energy += energyGen;
+  let eGen=state.modules.solar+state.modules.fusion*5;
+  if(state.researchCompleted.includes('dark_matter')) eGen+=3;
+  if(state.researchCompleted.includes('eff_panels')) eGen+=Math.floor(state.modules.solar*0.3);
+  if(state.researchCompleted.includes('anti_matter')) eGen+=state.modules.fusion*5;
+  const engBonus=state.crew.filter(c=>c.type==='engineer').length*0.25;
+  eGen=Math.floor(eGen*(1+engBonus))-state.crew.reduce((s,c)=>s+c.upkeep,0);
+  state.energy=Math.max(0,state.energy+eGen);
 
-  // Advance expeditions
-  state.expeditions.forEach(exp => {
+  state.expeditions.forEach(exp=>{
     exp.progress++;
-    if (exp.progress >= exp.maxProgress) {
-      setTimeout(() => completeExpedition(exp), 100);
-    }
+    if(exp.progress>=exp.maxProgress) setTimeout(()=>completeExpedition(exp),100);
   });
 
-  // Day counter (every ~30 seconds = 1 day)
-  if (state.tick % 30 === 0) state.day++;
+  if(state.tick%25===0) state.day++;
+  if(state.tick%10===0) checkAchievements();
 
   updateUI();
-}, 1000);
-
-// ==================== MUSIC ====================
-const bgm = document.getElementById('bgm');
-bgm.volume = 0.4;
-
-function toggleMusic() {
-  const btn = document.getElementById('music-btn');
-  if (bgm.paused) {
-    bgm.play().catch(() => {});
-    btn.textContent = '🔊';
-    btn.classList.remove('muted');
-  } else {
-    bgm.pause();
-    btn.textContent = '🔇';
-    btn.classList.add('muted');
-  }
-}
-
-// Try autoplay on first click anywhere
-let musicStarted = false;
-document.addEventListener('click', () => {
-  if (!musicStarted) {
-    bgm.play().catch(() => {});
-    musicStarted = true;
-  }
-}, { once: false });
+},1000);
 
 // ==================== INIT ====================
 updateUI();
-addLog('Welcome to Star Labs Research Station! 🚀', 'good');
-addLog('Build modules, send expeditions, and discover the cosmos.', '');
+scheduleEvent();
+addLog('Welcome to Star Labs Research Station! 🚀','good');
+addLog('Complete the tutorial or skip to start playing.','');
 </script>
 </body>
 </html>
