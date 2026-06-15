@@ -754,6 +754,7 @@ function resolveEvent(ev,choice){
 }
 
 // ==================== GAME ACTIONS ====================
+let expInstanceCounter=0;
 function launchExpedition(expDef){
   const maxSlots=1+state.modules.hangar;
   const activeCount=state.expeditions.filter(e=>e.progress<e.maxProgress).length;
@@ -775,8 +776,8 @@ function launchExpedition(expDef){
 
   const extraStars=state.researchCompleted.includes('star_link')?1:0+state.crew.filter(c=>c.type==='xenologist').length*1;
 
-  state.expeditions.push({expDef,progress:0,maxProgress:duration,successChance,extraStars,id:Date.now()});
-  addLog(`Expedition launched: ${expDef.name}`, '');
+  state.expeditions.push({expDef,progress:0,maxProgress:duration,successChance,extraStars,id:`${expDef.id}_${++expInstanceCounter}`});
+  addLog(`Expedition launched: ${expDef.name} (#${expInstanceCounter})`, '');
   updateUI();
 }
 
@@ -942,19 +943,23 @@ function renderExpeditions(){
   container.innerHTML='';
 
   EXPEDITIONS.forEach(expDef=>{
-    const active=state.expeditions.find(e=>e.expDef.id===expDef.id&&e.progress<e.maxProgress);
-    const canLaunch=activeCount<maxSlots&&state.energy>=expDef.cost&&!active;
+    const canLaunch=activeCount<maxSlots&&state.energy>=expDef.cost;
     const card=document.createElement('div');
     card.className='expedition-card';
-    if(!canLaunch&&!active) card.className+=' disabled';
-    if(active) card.className+=' active';
+    if(!canLaunch) card.className+=' disabled';
 
     card.innerHTML=`
       <div class="exp-name">${expDef.icon} ${expDef.name}</div>
-      <div class="exp-details"><span>⏱️${expDef.dur}s</span><span>⚡${expDef.cost}</span><span>⚠️${expDef.risk}</span></div>
-      ${active?`<div class="exp-progress"><div class="exp-progress-bar" style="width:${(active.progress/active.maxProgress)*100}%"></div></div><span style="font-size:10px;color:#69f0ae">${Math.floor((active.progress/active.maxProgress)*100)}% — ${Math.ceil(active.maxProgress-active.progress)}s left</span>`:''}
-    `;
-    card.addEventListener('click',()=>{ if(active) return; if(!canLaunch) return; launchExpedition(expDef); });
+      <div class="exp-details"><span>⏱️${expDef.dur}s</span><span>⚡${expDef.cost}</span><span>⚠️${expDef.risk}</span></div>`;
+
+    // Show active instances of this type
+    const activeInstances=state.expeditions.filter(e=>e.expDef.id===expDef.id&&e.progress<e.maxProgress);
+    activeInstances.forEach(exp=>{
+      card.innerHTML+=`<div class="exp-progress"><div class="exp-progress-bar" style="width:${(exp.progress/exp.maxProgress)*100}%"></div></div><span style="font-size:10px;color:#69f0ae">${Math.floor((exp.progress/exp.maxProgress)*100)}% — ${Math.ceil(exp.maxProgress-exp.progress)}s left</span>`;
+    });
+
+    card.innerHTML+=`</div>`;
+    card.addEventListener('click',()=>{ if(!canLaunch) return; launchExpedition(expDef); });
     container.appendChild(card);
   });
 }
