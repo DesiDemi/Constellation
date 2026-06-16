@@ -3,174 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Star Labs: AI Research Division</title>
+<title>Star Labs: Research Divisions</title>
 <style>
   :root {
-    --bg: #0a0a1a; --panel: rgba(10, 14, 30, 0.94);
-    --border: rgba(100, 220, 180, 0.2); --accent: #64d8b0;
-    --gold: #ffd866; --compute: #4fc3f7; --funding: #ffd740;
-    --traindata: #b39ddb; --danger: #ff6e6e; --success: #69f0ae;
-    --text: #c8d6e5; --text-dim: #7a8ba6;
-    --button: rgba(40, 100, 80, 0.5); --button-hover: rgba(60, 150, 120, 0.7);
+    --bg: #1a1d23; --panel: rgba(26, 29, 35, 0.96);
+    --border: rgba(255,255,255,0.08); --accent: #5b9bd5;
+    --gold: #f0c040; --compute: #4fc3f7; --funding: #81c784;
+    --traindata: #ce93d8; --danger: #ef5350; --success: #66bb6a;
+    --text: #d5d5d5; --text-dim: #888; --warm-white: #f5f0e8;
+    --wood: #8d6e63; --carpet: #3e4a5a; --desk: #5d4037;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    height: 100vh; overflow: hidden; user-select: none;
-  }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; height:100vh; overflow:hidden; user-select:none; }
   canvas { position:fixed; top:0; left:0; z-index:0; }
+
   #ui { position:relative; z-index:1; height:100vh; display:flex; flex-direction:column; }
 
   #topbar {
-    display:flex; align-items:center; gap:12px;
-    padding:10px 16px; background:var(--panel);
+    display:flex; align-items:center; gap:10px;
+    padding:8px 14px; background:var(--panel);
     border-bottom:1px solid var(--border); flex-shrink:0;
   }
-  #topbar h1 {
-    font-size:20px; font-weight:700;
-    background:linear-gradient(135deg, #64d8b0, #b39ddb);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    letter-spacing:1px;
+  #topbar h1 { font-size:18px; font-weight:700; color:var(--accent); letter-spacing:1px; }
+  #topbar .divider { width:1px; height:20px; background:var(--border); margin:0 4px; }
+  .team-badge {
+    background:var(--accent); color:white; padding:3px 10px;
+    border-radius:12px; font-size:11px; font-weight:700;
+    white-space:nowrap;
   }
   #music-btn {
     background:transparent; border:1px solid var(--border);
-    color:white; font-size:16px; padding:4px 8px; border-radius:6px;
+    color:white; font-size:14px; padding:3px 7px; border-radius:6px;
     cursor:pointer; transition:all 0.2s;
   }
-  #music-btn:hover { border-color:var(--accent); background:var(--button); }
-  #music-btn.muted { opacity:0.4; }
+  #music-btn:hover { border-color:var(--accent); }
   .resource {
-    display:flex; align-items:center; gap:5px;
-    background:rgba(255,255,255,0.04); padding:5px 12px;
-    border-radius:16px; font-size:13px; font-weight:600;
+    display:flex; align-items:center; gap:4px;
+    background:rgba(255,255,255,0.03); padding:4px 10px;
+    border-radius:14px; font-size:12px; font-weight:600;
   }
-  .resource .icon { font-size:16px; }
-  .res-compute { color:var(--compute); }
-  .res-funding { color:var(--funding); }
-  .res-traindata { color:var(--traindata); }
-  .rate { font-size:10px; opacity:0.7; margin-left:3px; }
-  #day-counter { margin-left:auto; font-size:12px; color:var(--text-dim); }
+  .resource .icon { font-size:14px; }
+  #day-counter { margin-left:auto; font-size:11px; color:var(--text-dim); }
   #ach-btn {
-    margin-left:4px; background:transparent; border:1px solid var(--border);
-    color:var(--gold); font-size:16px; padding:4px 8px; border-radius:6px;
+    background:transparent; border:1px solid var(--border);
+    color:var(--gold); font-size:14px; padding:3px 7px; border-radius:6px;
     cursor:pointer; transition:all 0.2s;
   }
-  #ach-btn:hover { border-color:var(--gold); background:rgba(255,216,100,0.1); }
-  #ach-btn.has-new { animation:pulseGold 1s infinite; }
-  @keyframes pulseGold {
-    0%,100% { box-shadow:0 0 0 rgba(255,216,100,0); }
-    50% { box-shadow:0 0 12px rgba(255,216,100,0.5); }
-  }
+  #ach-btn:hover { border-color:var(--gold); }
 
   #main { display:flex; flex:1; min-height:0; }
 
   #left-panel {
-    width:310px; min-width:310px; padding:12px;
+    width:290px; min-width:290px; padding:10px;
     background:var(--panel); border-right:1px solid var(--border);
-    display:flex; flex-direction:column; gap:10px; overflow-y:auto;
+    display:flex; flex-direction:column; gap:8px; overflow-y:auto;
   }
-  .section-title { font-size:11px; text-transform:uppercase; letter-spacing:2px; color:var(--text-dim); font-weight:600; }
-  .expedition-card {
-    background:var(--button); border:1px solid var(--border);
-    border-radius:10px; padding:10px; cursor:pointer;
-    transition:all 0.2s; display:flex; flex-direction:column; gap:4px;
+  .section-title { font-size:10px; text-transform:uppercase; letter-spacing:2px; color:var(--text-dim); font-weight:600; margin-top:2px; }
+  .project-card {
+    background:rgba(255,255,255,0.02); border:1px solid var(--border);
+    border-radius:8px; padding:8px 10px; cursor:pointer;
+    transition:all 0.2s; display:flex; align-items:center; gap:8px;
   }
-  .expedition-card:hover:not(.disabled) { background:var(--button-hover); border-color:var(--accent); transform:translateX(2px); }
-  .expedition-card.disabled { opacity:0.4; cursor:not-allowed; }
-  .expedition-card.active { border-color:var(--success); background:rgba(105,240,174,0.08); }
-  .exp-name { font-weight:700; font-size:14px; }
-  .exp-details { font-size:11px; color:var(--text-dim); display:flex; gap:10px; flex-wrap:wrap; }
-  .exp-progress { height:3px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
-  .exp-progress-bar { height:100%; background:var(--success); transition:width 1s linear; border-radius:2px; }
+  .project-card:hover:not(.disabled) { background:rgba(91,155,213,0.08); border-color:var(--accent); }
+  .project-card.disabled { opacity:0.35; cursor:not-allowed; }
+  .project-card .p-icon { font-size:22px; }
+  .project-card .p-info { flex:1; }
+  .project-card .p-name { font-weight:700; font-size:13px; }
+  .project-card .p-meta { font-size:10px; color:var(--text-dim); display:flex; gap:10px; }
+  .project-card .p-bar { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; margin-top:3px; }
+  .project-card .p-bar-fill { height:100%; background:var(--success); border-radius:2px; transition:width 1s linear; }
 
   #right-panel {
-    width:340px; min-width:340px; padding:10px;
+    width:320px; min-width:320px; padding:10px;
     background:var(--panel); border-left:1px solid var(--border);
     display:flex; flex-direction:column; gap:8px; overflow-y:auto;
   }
-  .tab-row { display:flex; gap:4px; }
+  .tab-row { display:flex; gap:3px; }
   .tab-btn {
-    flex:1; background:var(--button); border:1px solid var(--border);
-    color:var(--text-dim); padding:6px; border-radius:6px;
-    font-size:11px; font-weight:600; cursor:pointer; text-align:center; transition:all 0.2s;
+    flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    color:var(--text-dim); padding:5px 4px; border-radius:6px;
+    font-size:10px; font-weight:600; cursor:pointer; text-align:center; transition:all 0.2s;
   }
   .tab-btn:hover { color:white; border-color:var(--accent); }
-  .tab-btn.active { color:white; border-color:var(--accent); background:var(--button-hover); }
-  .tab-content { display:none; flex-direction:column; gap:8px; }
+  .tab-btn.active { color:white; border-color:var(--accent); background:rgba(91,155,213,0.15); }
+  .tab-content { display:none; flex-direction:column; gap:6px; }
   .tab-content.active { display:flex; }
 
   .card {
-    background:var(--button); border:1px solid var(--border);
-    border-radius:8px; padding:8px 10px; display:flex; align-items:center;
-    gap:8px; cursor:pointer; transition:all 0.2s;
+    background:rgba(255,255,255,0.02); border:1px solid var(--border);
+    border-radius:7px; padding:7px 9px; display:flex; align-items:center;
+    gap:7px; cursor:pointer; transition:all 0.15s;
   }
-  .card:hover:not(.locked):not(.hired) { background:var(--button-hover); border-color:var(--accent); }
-  .card.locked { opacity:0.35; cursor:not-allowed; }
-  .card.hired { border-color:var(--success); background:rgba(105,240,174,0.06); }
-  .card.completed { border-color:var(--success); opacity:0.5; }
-  .card-icon { font-size:24px; min-width:32px; text-align:center; }
+  .card:hover:not(.locked) { background:rgba(255,255,255,0.04); border-color:var(--accent); }
+  .card.locked { opacity:0.3; cursor:not-allowed; }
+  .card.hired { border-color:var(--success); }
+  .card-icon { font-size:20px; min-width:26px; text-align:center; }
   .card-info { flex:1; }
-  .card-name { font-weight:700; font-size:13px; }
-  .card-desc { font-size:10px; color:var(--text-dim); }
-  .card-cost { font-size:10px; color:var(--gold); font-weight:600; }
-  .card-level { font-size:10px; color:var(--accent); font-weight:600; }
+  .card-name { font-weight:700; font-size:12px; }
+  .card-desc { font-size:9px; color:var(--text-dim); }
 
   button {
-    background:var(--accent); color:var(--bg); border:none;
-    padding:6px 14px; border-radius:6px; font-weight:700;
-    font-size:11px; cursor:pointer; transition:all 0.2s;
+    background:var(--accent); color:white; border:none;
+    padding:5px 12px; border-radius:5px; font-weight:700;
+    font-size:10px; cursor:pointer; transition:all 0.15s;
   }
-  button:hover { filter:brightness(1.2); transform:scale(1.02); }
-  button:disabled { opacity:0.35; cursor:not-allowed; transform:none; filter:none; }
-  button.small { padding:4px 10px; font-size:10px; }
+  button:hover { filter:brightness(1.15); transform:scale(1.03); }
+  button:disabled { opacity:0.3; cursor:not-allowed; transform:none; filter:none; }
+  button.small { padding:3px 8px; font-size:9px; }
   button.secondary { background:transparent; border:1px solid var(--accent); color:var(--accent); }
+  button.danger { background:var(--danger); }
+
+  #center-panel { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; }
+  #office-label {
+    position:absolute; bottom:12px;
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:10px 16px; text-align:center;
+    pointer-events:none;
+  }
+  #office-label h3 { font-size:14px; color:var(--accent); margin-bottom:2px; }
+  #office-label p { font-size:10px; color:var(--text-dim); }
+
+  #interact-hint {
+    position:fixed; bottom:50px; left:50%; transform:translateX(-50%);
+    font-size:10px; color:var(--text-dim); pointer-events:none;
+    z-index:2; opacity:0; transition:opacity 0.5s;
+  }
 
   #log-area {
-    position:fixed; bottom:50px; left:330px; right:360px;
-    max-height:100px; overflow-y:auto; pointer-events:none; z-index:2;
+    position:fixed; bottom:40px; left:310px; right:340px;
+    max-height:80px; overflow-y:auto; pointer-events:none; z-index:2;
   }
   .log-entry {
-    font-size:11px; padding:2px 0; color:var(--text-dim);
-    animation:fadeUp 4s forwards; text-align:center;
+    font-size:10px; padding:1px 0; color:var(--text-dim);
+    animation:fadeUp 3.5s forwards; text-align:center;
   }
   @keyframes fadeUp {
-    0% { opacity:1; transform:translateY(0); } 80% { opacity:0.5; } 100% { opacity:0; transform:translateY(-16px); }
+    0% { opacity:1; transform:translateY(0); } 75% { opacity:0.4; } 100% { opacity:0; transform:translateY(-12px); }
   }
   .log-entry.good { color:var(--success); }
   .log-entry.discovery { color:var(--gold); }
   .log-entry.danger { color:var(--danger); }
 
   #toast {
-    position:fixed; top:80px; left:50%; transform:translateX(-50%);
+    position:fixed; top:60px; left:50%; transform:translateX(-50%);
     background:var(--panel); border:1px solid var(--gold);
-    color:var(--gold); padding:10px 24px; border-radius:20px;
+    color:var(--gold); padding:8px 20px; border-radius:16px;
     font-weight:700; z-index:5; pointer-events:none;
-    animation:toastPop 3s forwards; display:none;
+    animation:toastPop 2.5s forwards; display:none;
   }
   @keyframes toastPop {
-    0% { opacity:0; transform:translateX(-50%) translateY(10px); }
+    0% { opacity:0; transform:translateX(-50%) translateY(8px); }
     15% { opacity:1; transform:translateX(-50%) translateY(0); }
-    80% { opacity:1; } 100% { opacity:0; transform:translateX(-50%) translateY(-10px); }
+    80% { opacity:1; } 100% { opacity:0; transform:translateX(-50%) translateY(-8px); }
   }
-
-  #tutorial-overlay {
-    position:fixed; top:0; left:0; right:0; bottom:0;
-    background:rgba(0,0,0,0.85); z-index:10;
-    display:flex; align-items:center; justify-content:center;
-  }
-  #tutorial-card {
-    background:var(--panel); border:1px solid var(--accent);
-    border-radius:16px; padding:30px; max-width:480px;
-    text-align:center; animation:slideIn 0.4s ease;
-  }
-  @keyframes slideIn { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
-  #tutorial-card h2 { font-size:24px; margin-bottom:8px; background:linear-gradient(135deg, #64d8b0, #b39ddb); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  #tutorial-card p { font-size:14px; color:var(--text-dim); margin-bottom:6px; line-height:1.5; }
-  #tutorial-card .tut-icon { font-size:48px; margin-bottom:12px; }
-  #tutorial-nav { display:flex; gap:8px; justify-content:center; margin-top:16px; }
-  .tut-dot { width:8px; height:8px; border-radius:50%; background:var(--text-dim); transition:all 0.3s; }
-  .tut-dot.active { background:var(--accent); width:24px; border-radius:4px; }
 
   #event-overlay {
     position:fixed; top:0; left:0; right:0; bottom:0;
@@ -179,12 +164,27 @@
   }
   #event-card {
     background:var(--panel); border:2px solid var(--danger);
-    border-radius:16px; padding:24px; max-width:420px;
+    border-radius:14px; padding:20px; max-width:400px;
     text-align:center; animation:slideIn 0.3s ease;
   }
-  #event-card h3 { font-size:20px; color:var(--danger); margin-bottom:10px; }
-  #event-card p { font-size:13px; color:var(--text-dim); margin-bottom:16px; line-height:1.5; }
-  .event-choices { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  @keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  #event-card h3 { font-size:18px; color:var(--danger); margin-bottom:8px; }
+  #event-card p { font-size:12px; color:var(--text-dim); margin-bottom:14px; line-height:1.4; }
+  .event-choices { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+
+  #team-popup {
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.85); z-index:9;
+    display:none; align-items:center; justify-content:center;
+  }
+  #team-popup .card {
+    background:var(--panel); border:2px solid var(--accent);
+    border-radius:16px; padding:28px; max-width:440px;
+    text-align:center; animation:slideIn 0.4s ease;
+    flex-direction:column; align-items:center; gap:14px;
+  }
+  #team-popup h2 { font-size:22px; color:var(--accent); }
+  #team-popup .big-icon { font-size:64px; }
 
   #ach-overlay {
     position:fixed; top:0; left:0; right:0; bottom:0;
@@ -193,56 +193,36 @@
   }
   #ach-card {
     background:var(--panel); border:1px solid var(--gold);
-    border-radius:16px; padding:24px; max-width:460px; max-height:80vh;
+    border-radius:14px; padding:20px; max-width:420px; max-height:75vh;
     overflow-y:auto; animation:slideIn 0.3s ease;
-    display:flex; flex-direction:column; gap:8px;
   }
-  #ach-card h3 { text-align:center; color:var(--gold); font-size:20px; margin-bottom:8px; }
+  #ach-card h3 { text-align:center; color:var(--gold); font-size:18px; margin-bottom:8px; }
   .ach-row {
-    display:flex; align-items:center; gap:10px; padding:8px 10px;
-    border-radius:8px; background:var(--button); border:1px solid var(--border);
+    display:flex; align-items:center; gap:8px; padding:6px 8px;
+    border-radius:6px; background:rgba(255,255,255,0.02); border:1px solid var(--border);
+    margin-bottom:4px;
   }
   .ach-row.earned { border-color:var(--success); }
-  .ach-row .ach-icon { font-size:20px; }
-  .ach-row .ach-info { flex:1; }
-  .ach-row .ach-name { font-size:13px; font-weight:600; }
-  .ach-row .ach-desc { font-size:10px; color:var(--text-dim); }
 
-  #center-panel { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; }
-  #station-info {
-    position:absolute; bottom:16px;
-    background:var(--panel); border:1px solid var(--border);
-    border-radius:14px; padding:12px 20px; text-align:center;
+  /* Division entries */
+  .division-card {
+    background:rgba(91,155,213,0.05); border:1px solid var(--border);
+    border-radius:8px; padding:8px; margin-bottom:4px;
   }
-  #station-info h3 { font-size:16px; margin-bottom:2px; }
-  #station-info p { font-size:11px; color:var(--text-dim); }
-
-  .star-entry {
-    display:flex; align-items:center; gap:8px;
-    padding:5px 8px; font-size:12px;
-    background:rgba(255,255,255,0.02); border-radius:6px;
-  }
-  .star-entry .star-icon { font-size:18px; }
-  .star-entry .star-name { flex:1; }
-  .star-entry .star-rarity { font-size:10px; color:var(--text-dim); }
-  .star-entry.undiscovered { opacity:0.3; }
+  .division-card .div-name { font-weight:700; font-size:12px; color:var(--accent); }
+  .division-card .div-meta { font-size:9px; color:var(--text-dim); margin-top:2px; }
 </style>
 </head>
 <body>
 <audio id="bgm" loop preload="auto"><source src="Dop Dip Dup.mp3" type="audio/mpeg"></audio>
 <canvas id="canvas"></canvas>
 
-<div id="tutorial-overlay">
-  <div id="tutorial-card">
-    <div class="tut-icon" id="tut-icon">🧠</div>
-    <h2 id="tut-title">Welcome to Star Labs AI!</h2>
-    <p id="tut-desc">You lead Star Labs' AI Research Division. Your mission: push the boundaries of artificial intelligence through ambitious projects and cutting-edge research.</p>
-    <div id="tutorial-nav"><div class="tut-dot active"></div><div class="tut-dot"></div><div class="tut-dot"></div><div class="tut-dot"></div><div class="tut-dot"></div></div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;">
-      <button onclick="prevTutorial()" class="secondary">← Back</button>
-      <button id="tut-next" onclick="nextTutorial()">Next →</button>
-      <button onclick="skipTutorial()" class="secondary">Skip</button>
-    </div>
+<div id="team-popup" onclick="if(event.target===this)dismissTeamPopup()">
+  <div class="card">
+    <div class="big-icon" id="popup-icon">🎉</div>
+    <h2 id="popup-title">Team Complete!</h2>
+    <p id="popup-desc" style="color:var(--text-dim);line-height:1.5;"></p>
+    <button onclick="dismissTeamPopup()">Start New Team 🚀</button>
   </div>
 </div>
 
@@ -251,566 +231,583 @@
 </div>
 
 <div id="ach-overlay" onclick="if(event.target===this)toggleAchievements()">
-  <div id="ach-card"><h3>🏆 Achievements</h3><div id="ach-list"></div><button onclick="toggleAchievements()" class="secondary" style="margin-top:8px;">Close</button></div>
+  <div id="ach-card"><h3>🏆 Achievements</h3><div id="ach-list"></div><button onclick="toggleAchievements()" class="secondary" style="margin-top:6px;">Close</button></div>
 </div>
 
 <div id="ui">
   <div id="topbar">
-    <h1>🧠 STAR LABS AI</h1>
+    <h1>🏢 STAR LABS</h1>
+    <span class="team-badge" id="team-badge">Team Alpha</span>
+    <span class="divider"></span>
     <button id="music-btn" title="Toggle Music" onclick="toggleMusic()">🔊</button>
-    <div class="resource res-compute"><span class="icon">⚡</span><span id="res-compute">50</span><span class="rate" id="rate-compute">+1/s</span></div>
-    <div class="resource res-funding"><span class="icon">💰</span><span id="res-funding">200</span></div>
-    <div class="resource res-traindata"><span class="icon">📊</span><span id="res-traindata">0</span></div>
+    <div class="resource" style="color:#4fc3f7;"><span class="icon">⚡</span><span id="res-compute">50</span><span class="rate" id="rate-compute">+1/s</span></div>
+    <div class="resource" style="color:#81c784;"><span class="icon">💰</span><span id="res-funding">200</span></div>
+    <div class="resource" style="color:#ce93d8;"><span class="icon">📊</span><span id="res-traindata">0</span></div>
+    <span class="divider"></span>
     <button id="ach-btn" title="Achievements" onclick="toggleAchievements()">🏆 <span id="ach-count">0/20</span></button>
     <div id="day-counter">Day 1</div>
-    <div class="resource" style="color:#ff6e6e;gap:4px;"><span class="icon">🔒</span><span id="res-integrity">100</span>/<span id="res-maxintegrity">100</span></div>
+    <div class="resource" style="color:#ef5350;gap:3px;"><span class="icon">🔒</span><span id="res-integrity">100</span>/<span id="res-maxintegrity">100</span></div>
   </div>
   <div id="main">
     <div id="left-panel">
-      <div class="section-title">🚀 AI PROJECTS</div>
-      <div id="expedition-list"></div>
+      <div class="section-title">📋 AI PROJECTS</div>
+      <div id="project-list"></div>
       <div class="section-title" style="margin-top:4px;">🧠 MODEL ZOO (<span id="catalog-count">0</span>/12)</div>
       <div id="star-catalog"></div>
     </div>
     <div id="center-panel">
-      <div id="station-info"><h3>Star Labs AI Lab</h3><p id="station-desc">Infrastructure: 0 | Models: 0 | Team: 0 | Projects: 0</p></div>
+      <div id="office-label"><h3 id="office-name">Your Office</h3><p id="office-desc">Team Alpha | 0/6 members</p></div>
     </div>
     <div id="right-panel">
       <div class="tab-row">
-        <div class="tab-btn active" onclick="switchTab('modules')">🏗️ Infra</div>
-        <div class="tab-btn" onclick="switchTab('research')">🔬 Papers</div>
-        <div class="tab-btn" onclick="switchTab('crew')">👥 Team</div>
-        <div class="tab-btn" onclick="switchTab('defense')">🛡️ Security</div>
+        <div class="tab-btn active" onclick="switchTab('infra')">🏗️ Infra</div>
+        <div class="tab-btn" onclick="switchTab('team')">👥 Team</div>
+        <div class="tab-btn" onclick="switchTab('papers')">📄 Papers</div>
+        <div class="tab-btn" onclick="switchTab('security')">🛡️ Security</div>
+        <div class="tab-btn" onclick="switchTab('divisions')">🏢 Divisions</div>
       </div>
-      <div class="tab-content active" id="tab-modules"></div>
-      <div class="tab-content" id="tab-research"></div>
-      <div class="tab-content" id="tab-crew"></div>
-      <div class="tab-content" id="tab-defense"></div>
-      <div id="combat-overlay" style="display:none;flex-direction:column;gap:8px;background:rgba(255,60,60,0.08);border:2px solid var(--danger);border-radius:12px;padding:12px;margin-top:8px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span id="alien-icon" style="font-size:32px;">🦠</span>
+      <div class="tab-content active" id="tab-infra"></div>
+      <div class="tab-content" id="tab-team"></div>
+      <div class="tab-content" id="tab-papers"></div>
+      <div class="tab-content" id="tab-security"></div>
+      <div class="tab-content" id="tab-divisions"></div>
+      <div id="combat-overlay" style="display:none;flex-direction:column;gap:6px;background:rgba(239,83,80,0.05);border:2px solid var(--danger);border-radius:10px;padding:10px;margin-top:6px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span id="alien-icon" style="font-size:24px;">🐛</span>
           <div style="flex:1;">
-            <div style="font-weight:700;color:var(--danger);" id="alien-name">Script Kiddie</div>
-            <div style="width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;margin-top:4px;"><div id="alien-hp-bar" style="height:100%;background:var(--danger);border-radius:4px;width:100%;transition:width 0.3s;"></div></div>
-            <div style="font-size:10px;color:var(--text-dim);margin-top:2px;"><span id="alien-hp-text">30/30</span> Health</div>
+            <div style="font-weight:700;color:var(--danger);font-size:12px;" id="alien-name">Bug</div>
+            <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:3px;"><div id="alien-hp-bar" style="height:100%;background:var(--danger);border-radius:3px;width:100%;"></div></div>
           </div>
         </div>
-        <div style="display:flex;gap:8px;"><button onclick="attackAlien()" id="attack-btn" style="flex:1;background:var(--danger);font-size:13px;">🛡️ Patch! (<span id="attack-dmg">10</span> dmg)</button></div>
-        <div style="font-size:10px;color:var(--text-dim);text-align:center;" id="alien-threat">⚠️ Exploiting in 3s for 4 damage</div>
+        <button onclick="attackAlien()" id="attack-btn" class="danger" style="font-size:11px;">🛡️ Patch! (<span id="attack-dmg">10</span>)</button>
+        <div style="font-size:9px;color:var(--text-dim);text-align:center;" id="alien-threat"></div>
       </div>
     </div>
   </div>
 </div>
 <div id="log-area"></div>
 <div id="toast"></div>
+<div id="interact-hint">Click desks and monitors for bonus compute! 🖱️</div>
 
 <script>
-// ==================== DATA (AI-Themed) ====================
+// ==================== DATA ====================
+const TEAM_NAMES = ['Alpha','Beta','Gamma','Delta','Epsilon','Zeta','Eta','Theta','Iota','Kappa'];
+
 const STAR_TYPES = [
   { name:'Linear Regression', icon:'📈', rarity:'Common', data:8, credits:15 },
   { name:'Decision Tree', icon:'🌳', rarity:'Common', data:10, credits:20 },
   { name:'Random Forest', icon:'🌲', rarity:'Uncommon', data:18, credits:35 },
   { name:'Support Vector Machine', icon:'🎯', rarity:'Uncommon', data:22, credits:40 },
   { name:'Convolutional NN', icon:'👁️', rarity:'Rare', data:35, credits:60 },
-  { name:'Recurrent NN (LSTM)', icon:'🔄', rarity:'Rare', data:45, credits:75 },
+  { name:'LSTM Network', icon:'🔄', rarity:'Rare', data:45, credits:75 },
   { name:'Transformer', icon:'⚡', rarity:'Very Rare', data:60, credits:100 },
-  { name:'Generative Adversarial', icon:'🎨', rarity:'Very Rare', data:70, credits:120 },
+  { name:'GAN', icon:'🎨', rarity:'Very Rare', data:70, credits:120 },
   { name:'Diffusion Model', icon:'🌌', rarity:'Legendary', data:100, credits:200 },
   { name:'Mixture of Experts', icon:'🧩', rarity:'Legendary', data:90, credits:180 },
-  { name:'RL Agent (PPO)', icon:'🎮', rarity:'Rare', data:50, credits:90 },
+  { name:'RL Agent', icon:'🎮', rarity:'Rare', data:50, credits:90 },
   { name:'Foundation Model', icon:'🧠', rarity:'Legendary', data:110, credits:220 },
 ];
 
-const EXPEDITIONS = [
-  { id:'small_exp', name:'Small Experiment', dur:7, cost:5, risk:'Low', icon:'🧪', minS:1, maxS:2 },
-  { id:'fine_tune', name:'Model Fine-Tuning', dur:13, cost:12, risk:'Low', icon:'🔧', minS:1, maxS:3 },
-  { id:'arch_search', name:'Architecture Search', dur:25, cost:25, risk:'Medium', icon:'🔍', minS:2, maxS:4 },
-  { id:'large_train', name:'Large Training Run', dur:42, cost:45, risk:'Medium', icon:'🏋️', minS:3, maxS:5 },
-  { id:'multi_agent', name:'Multi-Agent System', dur:65, cost:70, risk:'High', icon:'🤖', minS:3, maxS:6 },
-  { id:'foundation', name:'Foundation Model', dur:100, cost:110, risk:'High', icon:'🏛️', minS:4, maxS:7 },
-  { id:'agi_research', name:'AGI Research', dur:140, cost:170, risk:'Very High', icon:'🧬', minS:5, maxS:8 },
-  { id:'super_intel', name:'Superintelligence Proto', dur:200, cost:250, risk:'Extreme', icon:'💡', minS:6, maxS:10 },
+const PROJECTS = [
+  { id:'small_exp', name:'Small Experiment', dur:7, cost:5, risk:'Low', icon:'🧪' },
+  { id:'fine_tune', name:'Model Fine-Tuning', dur:13, cost:12, risk:'Low', icon:'🔧' },
+  { id:'arch_search', name:'Architecture Search', dur:25, cost:25, risk:'Medium', icon:'🔍' },
+  { id:'large_train', name:'Large Training Run', dur:42, cost:45, risk:'Medium', icon:'🏋️' },
+  { id:'multi_agent', name:'Multi-Agent System', dur:65, cost:70, risk:'High', icon:'🤖' },
+  { id:'foundation', name:'Foundation Model', dur:100, cost:110, risk:'High', icon:'🏛️' },
+  { id:'agi_research', name:'AGI Research', dur:140, cost:170, risk:'Very High', icon:'🧬' },
+  { id:'super_intel', name:'Superintelligence Proto', dur:200, cost:250, risk:'Extreme', icon:'💡' },
 ];
 
 const MODULES = [
-  { id:'gpu', name:'GPU Cluster', icon:'🖥️', desc:'Compute generation', cost:50, scale:1.55, max:10, effect:l=>`+${l} compute/s` },
-  { id:'lab', name:'AI Lab', icon:'🧪', desc:'Faster research speed', cost:80, scale:1.65, max:8, effect:l=>`Research ${l*12}% faster` },
-  { id:'team', name:'Engineering Team', icon:'👥', desc:'More simultaneous projects', cost:120, scale:1.75, max:5, effect:l=>`${1+l} project slots` },
-  { id:'crawler', name:'Data Crawler', icon:'🕷️', desc:'Better data discovery', cost:100, scale:1.7, max:8, effect:l=>`+${l*8}% rare models` },
-  { id:'tpu', name:'TPU Pod', icon:'⚡', desc:'Massive compute output', cost:300, scale:1.95, max:5, effect:l=>`+${l*5} compute/s` },
-  { id:'firewall', name:'Security Layer', icon:'🛡️', desc:'Reduce project risk', cost:150, scale:1.7, max:6, effect:l=>`-${l*5}% risk` },
-  { id:'debugger', name:'Auto-Debugger', icon:'🐛', desc:'Salvage failed projects', cost:200, scale:1.8, max:4, effect:l=>`${l*12}% salvage chance` },
-  { id:'quantum', name:'Quantum Lab', icon:'💠', desc:'Boost all yields', cost:500, scale:2.2, max:4, effect:l=>`+${l*8}% all yields` },
+  { id:'gpu', name:'GPU Cluster', icon:'🖥️', cost:50, scale:1.55, max:10, desc:l=>`+${l} compute/s` },
+  { id:'lab', name:'AI Lab', icon:'🧪', cost:80, scale:1.65, max:8, desc:l=>`Research ${l*12}% faster` },
+  { id:'crawler', name:'Data Crawler', icon:'🕷️', cost:100, scale:1.7, max:8, desc:l=>`+${l*8}% rare models` },
+  { id:'tpu', name:'TPU Pod', icon:'⚡', cost:300, scale:1.95, max:5, desc:l=>`+${l*5} compute/s` },
+  { id:'firewall', name:'Security Layer', icon:'🛡️', cost:150, scale:1.7, max:6, desc:l=>`-${l*5}% risk` },
+  { id:'debugger', name:'Auto-Debugger', icon:'🐛', cost:200, scale:1.8, max:4, desc:l=>`${l*12}% salvage` },
+  { id:'quantum', name:'Quantum Lab', icon:'💠', cost:500, scale:2.2, max:4, desc:l=>`+${l*8}% yields` },
 ];
 
 const RESEARCH = [
-  { id:'eff_gpu', name:'Efficient Architectures', cost:25, req:null, effect:'GPU clusters +30% output' },
-  { id:'adv_mining', name:'Advanced Data Mining', cost:50, req:'eff_gpu', effect:'Data Crawler +15% effectiveness' },
-  { id:'dist_train', name:'Distributed Training', cost:70, req:'adv_mining', effect:'Projects 20% faster' },
-  { id:'automl', name:'AutoML Pipeline', cost:85, req:'adv_mining', effect:'Lab efficiency +30%' },
-  { id:'unsupervised', name:'Unsupervised Learning', cost:130, req:'dist_train', effect:'+3 compute/s, +10% funding' },
-  { id:'federated', name:'Federated Learning', cost:160, req:'automl', effect:'+1 model per project' },
-  { id:'neuromorphic', name:'Neuromorphic Computing', cost:220, req:'unsupervised', effect:'TPU Pod +100%' },
-  { id:'multimodal', name:'Multimodal AI', cost:260, req:'federated', effect:'Double data from discoveries' },
-  { id:'transfer', name:'Transfer Learning', cost:300, req:'neuromorphic', effect:'Projects 30% faster (stacks)' },
-  { id:'predictive', name:'Predictive Analytics', cost:350, req:'multimodal', effect:'+25% legendary model chance' },
+  { id:'eff_gpu', name:'Efficient Architectures', cost:25, req:null, desc:'GPU +30% output' },
+  { id:'adv_mining', name:'Advanced Data Mining', cost:50, req:'eff_gpu', desc:'Crawler +15% eff' },
+  { id:'dist_train', name:'Distributed Training', cost:70, req:'adv_mining', desc:'Projects 20% faster' },
+  { id:'automl', name:'AutoML Pipeline', cost:85, req:'adv_mining', desc:'Lab +30%' },
+  { id:'unsupervised', name:'Unsupervised Learning', cost:130, req:'dist_train', desc:'+3 comp/s, +10% funding' },
+  { id:'federated', name:'Federated Learning', cost:160, req:'automl', desc:'+1 model/project' },
+  { id:'neuromorphic', name:'Neuromorphic Computing', cost:220, req:'unsupervised', desc:'TPU +100%' },
+  { id:'multimodal', name:'Multimodal AI', cost:260, req:'federated', desc:'Double data from discoveries' },
+  { id:'transfer', name:'Transfer Learning', cost:300, req:'neuromorphic', desc:'Projects 30% faster' },
+  { id:'predictive', name:'Predictive Analytics', cost:350, req:'multimodal', desc:'+25% legendary chance' },
 ];
 
-const CREW_TYPES = [
-  { id:'ml_researcher', name:'ML Researcher', icon:'👩‍💻', cost:80, upkeep:2, desc:'+20% training data, +15% lab speed', mod:'data', val:0.2 },
-  { id:'devops', name:'DevOps Engineer', icon:'⚙️', cost:100, upkeep:3, desc:'+25% compute, -15% infra costs', mod:'compute', val:0.25 },
-  { id:'pm', name:'Project Manager', icon:'📋', cost:120, upkeep:2, desc:'+15% project success, +10% speed', mod:'success', val:0.15 },
-  { id:'senior_dev', name:'Senior Developer', icon:'👨‍💻', cost:140, upkeep:3, desc:'+20% funding, +10% rare model chance', mod:'funding', val:0.2 },
-  { id:'data_scientist', name:'Data Scientist', icon:'📈', cost:180, upkeep:4, desc:'+30% discovery chance, +1 model/project', mod:'discovery', val:0.3 },
-  { id:'research_lead', name:'Research Lead', icon:'🎓', cost:200, upkeep:4, desc:'+40% data, -20% research costs', mod:'data', val:0.4 },
+const CREW = [
+  { id:'ml_researcher', name:'ML Researcher', icon:'👩‍💻', cost:80, desc:'+20% data, +15% lab speed' },
+  { id:'devops', name:'DevOps Engineer', icon:'⚙️', cost:100, desc:'+25% compute, -15% costs' },
+  { id:'pm', name:'Project Manager', icon:'📋', cost:120, desc:'+15% success, +10% speed' },
+  { id:'senior_dev', name:'Senior Developer', icon:'👨‍💻', cost:140, desc:'+20% funding' },
+  { id:'data_scientist', name:'Data Scientist', icon:'📈', cost:180, desc:'+30% discoveries' },
+  { id:'research_lead', name:'Research Lead', icon:'🎓', cost:200, desc:'+40% data, -20% paper cost' },
 ];
 
 const EVENTS = [
-  { title:'🔌 Power Outage!', desc:'The data center is experiencing a major power outage!', choices:[
-    { text:'Divert backup power (-30 compute)', cost:{compute:30}, effect:'Systems stable', good:true },
-    { text:'Let systems hibernate (-50% project progress)', cost:{}, effect:'Projects delayed', good:false },
+  { title:'🔌 Power Outage!', desc:'Data center lost power!', choices:[
+    { text:'Divert backup (-30 comp)', cost:{compute:30}, good:true },
+    { text:'Let systems hibernate', cost:{}, good:false },
   ]},
-  { title:'📡 Anomalous Data Pattern', desc:'Sensors detect unusual patterns in the training data!', choices:[
-    { text:'Investigate (-20 compute)', cost:{compute:20}, effect:'Gain 40 training data!', good:true, reward:{data:40} },
-    { text:'Ignore anomaly', cost:{}, effect:'Nothing happens', good:false },
+  { title:'📡 Anomalous Data', desc:'Unusual patterns in training data!', choices:[
+    { text:'Investigate (-20 comp)', cost:{compute:20}, good:true, reward:{data:40} },
+    { text:'Ignore', cost:{}, good:false },
   ]},
-  { title:'🌡️ GPU Overheating', desc:'GPU cluster temperatures are spiking dangerously!', choices:[
-    { text:'Emergency cooling (-50 funding)', cost:{funding:50}, effect:'GPUs stabilized', good:true },
-    { text:'Throttle performance', cost:{}, effect:'Lose 15 compute, 25% chance of failure', good:false, risk:0.25, penalty:{compute:30} },
+  { title:'🌡️ GPU Overheating', desc:'Temperatures spiking!', choices:[
+    { text:'Emergency cooling (-50 fund)', cost:{funding:50}, good:true },
+    { text:'Throttle (-30 comp)', cost:{}, good:false, penalty:{compute:30} },
   ]},
-  { title:'💾 Data Breach Attempt', desc:'Unauthorized access detected in the database!', choices:[
-    { text:'Activate countermeasures (-15 compute)', cost:{compute:15}, effect:'Breach blocked! +60 funding reward', good:true, reward:{funding:60} },
-    { text:'Lock down systems', cost:{}, effect:'Safe but missed bounty', good:false },
+  { title:'💾 Data Breach', desc:'Unauthorized access detected!', choices:[
+    { text:'Countermeasures (-15 comp)', cost:{compute:15}, good:true, reward:{funding:60} },
+    { text:'Lock systems', cost:{}, good:false },
   ]},
-  { title:'🦠 Unknown Code Execution', desc:'Unidentified process running on the cluster!', choices:[
-    { text:'Analyze sandboxed (-25 compute)', cost:{compute:25}, effect:'Novel algorithm found! +50 data, +30 funding', good:true, reward:{data:50,funding:30} },
-    { text:'Kill process (-40 compute)', cost:{compute:40}, effect:'Stopped but drained compute', good:false },
+  { title:'✨ Breakthrough Window', desc:'Rare insight moment!', choices:[
+    { text:'Full sprint (-40 comp)', cost:{compute:40}, good:true, reward:{data:80,extraModels:2} },
+    { text:'Standard (-10 comp)', cost:{compute:10}, good:false, reward:{data:20} },
   ]},
-  { title:'💻 Server Crash', desc:'A critical server has crashed!', choices:[
-    { text:'Rapid redeploy (-35 funding, -10 compute)', cost:{funding:35,compute:10}, effect:'Server restored', good:true },
-    { text:'Run diagnostics', cost:{}, effect:'Lab disabled for 15s', good:false },
-  ]},
-  { title:'✨ Research Breakthrough Window', desc:'A rare opportunity — key insight moment!', choices:[
-    { text:'Full research sprint (-40 compute)', cost:{compute:40}, effect:'Gain 80 data + discover 2 models!', good:true, reward:{data:80,extraModels:2} },
-    { text:'Standard research (-10 compute)', cost:{compute:10}, effect:'Gain 20 data', good:false, reward:{data:20} },
-  ]},
-  { title:'🌐 DDoS Attack', desc:'Massive DDoS flooding the network!', choices:[
-    { text:'Ride it out', cost:{}, effect:'All projects delayed by 10s', good:false },
-    { text:'Activate CDN (-45 compute)', cost:{compute:45}, effect:'Attack mitigated, +25 data', good:true, reward:{data:25} },
+  { title:'🌐 DDoS Attack', desc:'Massive DDoS!', choices:[
+    { text:'Ride it out', cost:{}, good:false },
+    { text:'Activate CDN (-45 comp)', cost:{compute:45}, good:true, reward:{data:25} },
   ]},
 ];
 
 const ACHIEVEMENTS = [
-  { id:'first_project', name:'First Commit', desc:'Launch your first AI project', icon:'🚀', check:()=>state.totalExpeditions>=1 },
-  { id:'ten_projects', name:'Veteran Researcher', desc:'Complete 10 projects', icon:'🏅', check:()=>state.successfulExpeditions>=10 },
-  { id:'fifty_projects', name:'Lab Director', desc:'Complete 50 projects', icon:'🎖️', check:()=>state.successfulExpeditions>=50 },
-  { id:'first_model', name:'Hello World', desc:'Develop your first AI model', icon:'🧠', check:()=>state.discoveredStars.length>=1 },
-  { id:'five_models', name:'Model Collector', desc:'Develop 5 model architectures', icon:'📚', check:()=>state.discoveredStars.length>=5 },
-  { id:'all_models', name:'AI Encyclopedia', desc:'Develop all 12 model types', icon:'🏛️', check:()=>state.discoveredStars.length>=12 },
-  { id:'rich', name:'Well Funded', desc:'Accumulate 1000 funding', icon:'💰', check:()=>state.credits>=1000 },
-  { id:'minted', name:'Unicorn Status', desc:'Accumulate 5000 funding', icon:'💎', check:()=>state.credits>=5000 },
-  { id:'data_hoard', name:'Data Hoarder', desc:'Accumulate 500 training data', icon:'📊', check:()=>state.data>=500 },
-  { id:'max_mod', name:'Fully Equipped Lab', desc:'Max out any infrastructure', icon:'🔝', check:()=>Object.values(state.modules).some(v=>v>=MODULES.find(m=>state.modules[m.id]===v)?.max) },
-  { id:'crew3', name:'Dream Team', desc:'Hire 3 team members', icon:'👥', check:()=>state.crew.length>=3 },
-  { id:'first_event', name:'Crisis Manager', desc:'Handle your first incident', icon:'⚡', check:()=>state.eventsHandled>=1 },
-  { id:'researcher', name:'Published', desc:'Complete 3 research papers', icon:'📄', check:()=>state.researchCompleted.length>=3 },
-  { id:'full_research', name:'Nobel Potential', desc:'Complete all research', icon:'🏆', check:()=>state.researchCompleted.length>=RESEARCH.length },
-  { id:'big_project', name:'Moonshot', desc:'Complete a Superintelligence project', icon:'💡', check:()=>state.voidLeaps>=1 },
-  { id:'day30', name:'Senior Researcher', desc:'Reach Day 30', icon:'📅', check:()=>state.day>=30 },
-  { id:'first_kill', name:'Bug Squasher', desc:'Defeat your first hacker', icon:'🐛', check:()=>state.aliensDefeated>=1 },
-  { id:'ten_kills', name:'Security Expert', desc:'Defeat 10 threats', icon:'🛡️', check:()=>state.aliensDefeated>=10 },
-  { id:'boss_kill', name:'Zero-Day Hero', desc:'Defeat a Zero-Day Exploit', icon:'💀', check:()=>state.mothershipsDefeated>=1 },
-  { id:'survivor', name:'Resilient', desc:'Survive with less than 20% integrity', icon:'❤️‍🩹', check:()=>state.stationHP<=20&&state.stationHP>0 },
+  { id:'first_project', name:'First Commit', desc:'Launch first project', icon:'🚀', check:()=>S.totalProjects>=1 },
+  { id:'ten_projects', name:'Veteran', desc:'Complete 10 projects', icon:'🏅', check:()=>S.successful>=10 },
+  { id:'fifty_projects', name:'Director', desc:'Complete 50 projects', icon:'🎖️', check:()=>S.successful>=50 },
+  { id:'first_model', name:'Hello World', desc:'Develop first model', icon:'🧠', check:()=>S.stars.length>=1 },
+  { id:'five_models', name:'Collector', desc:'5 model types', icon:'📚', check:()=>S.stars.length>=5 },
+  { id:'all_models', name:'Encyclopedia', desc:'All 12 models', icon:'🏛️', check:()=>S.stars.length>=12 },
+  { id:'rich', name:'Well Funded', desc:'1000 funding', icon:'💰', check:()=>S.credits>=1000 },
+  { id:'first_kill', name:'Bug Squasher', desc:'Defeat first threat', icon:'🐛', check:()=>S.aliensDefeated>=1 },
+  { id:'first_team', name:'Team Builder', desc:'Form your first team', icon:'👥', check:()=>S.teams.length>=1 },
+  { id:'three_teams', name:'Division Head', desc:'Build 3 teams', icon:'🏢', check:()=>S.teams.length>=3 },
+  { id:'five_teams', name:'Lab Director', desc:'Build 5 teams', icon:'🏛️', check:()=>S.teams.length>=5 },
+  { id:'day30', name:'Tenured', desc:'Reach Day 30', icon:'📅', check:()=>S.day>=30 },
+  { id:'ten_kills', name:'Security Expert', desc:'Defeat 10 threats', icon:'🛡️', check:()=>S.aliensDefeated>=10 },
+  { id:'boss_kill', name:'Zero-Day Hero', desc:'Defeat Zero-Day', icon:'💀', check:()=>S.mothershipsDefeated>=1 },
+  { id:'first_event', name:'Crisis Manager', desc:'Handle incident', icon:'⚡', check:()=>S.eventsHandled>=1 },
+  { id:'researcher', name:'Published', desc:'3 papers', icon:'📄', check:()=>S.research.length>=3 },
+  { id:'full_research', name:'Nobel Potential', desc:'All papers', icon:'🏆', check:()=>S.research.length>=RESEARCH.length },
+  { id:'survivor', name:'Resilient', desc:'Survive <20% integrity', icon:'❤️‍🩹', check:()=>S.stationHP<=20&&S.stationHP>0 },
+  { id:'big_project', name:'Moonshot', desc:'Complete superintelligence', icon:'💡', check:()=>S.voidLeaps>=1 },
+  { id:'max_mod', name:'Fully Equipped', desc:'Max any infra', icon:'🔝', check:()=>Object.values(S.modules).some(v=>v>=10) },
 ];
 
-const ALIEN_TYPES = [
+const ALIENS = [
   { id:'script_kiddie', name:'Script Kiddie', icon:'🐛', hp:30, damage:4, atkSpeed:3, reward:{credits:60,data:10}, speed:0.6 },
   { id:'hacker', name:'Hacker', icon:'👾', hp:60, damage:8, atkSpeed:2.5, reward:{credits:120,data:25}, speed:0.8 },
   { id:'apt_group', name:'APT Group', icon:'🕵️', hp:100, damage:15, atkSpeed:2, reward:{credits:250,data:50}, speed:0.5 },
-  { id:'zero_day', name:'💀 Zero-Day Exploit', icon:'☠️', hp:250, damage:25, atkSpeed:3, reward:{credits:600,data:150}, speed:0.3 },
+  { id:'zero_day', name:'Zero-Day Exploit', icon:'☠️', hp:250, damage:25, atkSpeed:3, reward:{credits:600,data:150}, speed:0.3 },
 ];
 
-const DEFENSE_MODULES = [
-  { id:'laser', name:'Firewall', icon:'🔥', desc:'Auto-blocks threats', cost:100, scale:1.6, max:6, effect:l=>`${l*5} dmg/sec` },
-  { id:'cannon', name:'Intrusion Detection', icon:'🔍', desc:'Manual defense boost', cost:150, scale:1.7, max:5, effect:l=>`+${l*8} manual dmg` },
-  { id:'repair', name:'System Restore', icon:'🔄', desc:'Auto-repair integrity', cost:200, scale:1.7, max:5, effect:l=>`+${l*3} integrity/5s` },
+const DEFENSE = [
+  { id:'laser', name:'Firewall', icon:'🔥', cost:100, scale:1.6, max:6, desc:l=>`${l*5} dmg/sec` },
+  { id:'cannon', name:'Intrusion Detection', icon:'🔍', cost:150, scale:1.7, max:5, desc:l=>`+${l*8} manual dmg` },
+  { id:'repair', name:'System Restore', icon:'🔄', cost:200, scale:1.7, max:5, desc:l=>`+${l*3} integrity/5s` },
 ];
 
 // ==================== STATE ====================
-const state = {
-  energy:50, credits:200, data:0, day:1, tick:0,
-  modules:{}, researchCompleted:[], crew:[],
-  expeditions:[], discoveredStars:[], discoveries:[],
-  totalExpeditions:0, successfulExpeditions:0, failedExpeditions:0,
+const S = {
+  energy:100, credits:500, data:0, day:1, tick:0,
+  modules:{}, research:[], crew:[], // crew = current team members
+  projects:[], stars:[], discoveries:[],
+  totalProjects:0, successful:0, failed:0,
   eventsHandled:0, voidLeaps:0,
-  achievements:[], newAchievement:false,
-  eventActive:false,
-  stationHP:100, maxHP:100,
+  achievements:[], stationHP:100, maxHP:100,
   aliensDefeated:0, mothershipsDefeated:0,
   currentAlien:null,
-  combatLog:[],
+  teams:[], // array of {name, members:[], projectsCompleted:0}
+  teamIndex:0, // which team name we're on
 };
+MODULES.forEach(m=>{S.modules[m.id]=0;});
+DEFENSE.forEach(m=>{S.modules[m.id]=0;});
 
-MODULES.forEach(m=>{ state.modules[m.id]=0; });
-DEFENSE_MODULES.forEach(m=>{ state.modules[m.id]=0; });
+function currentTeamName(){ return TEAM_NAMES[S.teamIndex]||'Team '+(S.teamIndex+1); }
+function teamMemberCount(){ return S.crew.length; }
 
-// ==================== CANVAS ====================
+// ==================== CANVAS (OFFICE) ====================
 const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
-let stars=[],shootingStars=[],particles=[];
+let deskLights=[],officePeople=[];
 function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
 resize(); window.addEventListener('resize',resize);
-for(let i=0;i<350;i++) stars.push({
-  x:Math.random()*2000, y:Math.random()*2000,
-  r:Math.random()*2+0.2, twinkle:Math.random()*Math.PI*2,
-  twinkleSpeed:Math.random()*0.02+0.004,
-  hue:Math.random()<0.08?160:Math.random()<0.08?40:0,
-});
-function spawnShooting(){ shootingStars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.4,vx:(Math.random()-0.5)*4,vy:Math.random()*6+4,life:1,len:Math.random()*80+40}); }
 
-function drawStation(cx,cy,scale){
+// Office desks (interactive click targets)
+const desks=[];
+for(let row=0;row<5;row++){
+  for(let col=0;col<6;col++){
+    desks.push({x:150+col*160+Math.random()*40,y:80+row*120+Math.random()*30,w:70,h:45,monitorOn:false,id:row*6+col});
+  }
+}
+for(let i=0;i<40;i++) deskLights.push({x:Math.random()*2000-100,y:Math.random()*1200-50,r:Math.random()*1.2+0.3,phase:Math.random()*Math.PI*2});
+for(let i=0;i<8;i++) officePeople.push({desk:Math.floor(Math.random()*desks.length),phase:Math.random()*Math.PI*2});
+
+function drawOffice(cx,cy,scale){
   ctx.save(); ctx.translate(cx,cy); ctx.scale(scale,scale);
-  // Lab building
-  const g=ctx.createLinearGradient(0,-30,0,30);
-  g.addColorStop(0,'#3a6b5e'); g.addColorStop(0.5,'#4d8c7a'); g.addColorStop(1,'#2d5248');
-  ctx.fillStyle=g; ctx.beginPath(); ctx.roundRect(-28,-14,56,28,6); ctx.fill();
-  ctx.strokeStyle='rgba(100,220,180,0.5)'; ctx.lineWidth=1.5; ctx.stroke();
-  // Server racks
-  for(let i=0;i<3;i++){ ctx.fillStyle='#1a3028'; ctx.fillRect(-18+i*12,-8,6,10); ctx.fillStyle='#44ff88'; ctx.fillRect(-17+i*12,-7,1,1); ctx.fillRect(-17+i*12,-3,1,1); ctx.fillRect(-17+i*12,1,1,1); }
-  // Logo dome
-  ctx.fillStyle='rgba(100,220,180,0.3)'; ctx.beginPath(); ctx.arc(0,-14,14,Math.PI,0); ctx.fill();
-  ctx.strokeStyle='rgba(150,240,210,0.6)'; ctx.stroke();
-  // GPU clusters
-  if(state.modules.gpu>0){ const n=Math.min(state.modules.gpu,4);
-    for(let i=0;i<n;i++){ const px=-44-i*18; ctx.fillStyle='#1a3025'; ctx.fillRect(px,-6,14,12); ctx.fillStyle='#44cc88'; ctx.fillRect(px+2,-4,3,8); ctx.fillRect(px+9,-4,3,8); }
-    for(let i=0;i<n;i++){ const px=30+i*18; ctx.fillStyle='#1a3025'; ctx.fillRect(px,-6,14,12); ctx.fillStyle='#44cc88'; ctx.fillRect(px+2,-4,3,8); ctx.fillRect(px+9,-4,3,8); }
+
+  // Floor / carpet
+  ctx.fillStyle='#3a4555'; ctx.fillRect(-150,-100,300,200);
+  for(let x=-150;x<150;x+=20){
+    for(let y=-100;y<100;y+=20){
+      ctx.fillStyle=(Math.floor((x+150)/20)+Math.floor((y+100)/20))%2===0?'#3d4859':'#374353';
+      ctx.fillRect(x,y,20,20);
+    }
   }
-  if(state.modules.tpu>0){ const a=0.25+state.modules.tpu*0.15; ctx.strokeStyle=`rgba(100,255,200,${a})`; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(0,0,35,14,0,0,Math.PI*2); ctx.stroke();
-    const gs=30+Math.sin(Date.now()/500)*5; const glow=ctx.createRadialGradient(0,0,5,0,0,gs);
-    glow.addColorStop(0,`rgba(100,255,200,${0.12*state.modules.tpu})`); glow.addColorStop(1,'rgba(100,255,200,0)'); ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(0,0,gs,0,Math.PI*2); ctx.fill();
-  }
-  if(state.modules.firewall>0){ const a=0.04+state.modules.firewall*0.06; ctx.strokeStyle=`rgba(150,255,220,${a})`; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(0,0,40,0,Math.PI*2); ctx.stroke(); }
-  if(state.modules.team>0){ for(let i=0;i<state.modules.team;i++){ const hx=-12+i*8; ctx.fillStyle='#1a1a30'; ctx.fillRect(hx,14,6,8); ctx.strokeStyle='rgba(100,255,180,0.5)'; ctx.strokeRect(hx,14,6,8); } }
-  if(state.modules.debugger>0){ for(let i=0;i<state.modules.debugger;i++){ const a=Date.now()/600+i; const dx=Math.sin(a)*30,dy=Math.cos(a*1.3)*20-15; ctx.fillStyle='#66ffcc'; ctx.beginPath(); ctx.arc(dx,dy,3,0,Math.PI*2); ctx.fill(); } }
-  if(state.modules.quantum>0){ const a=0.08+state.modules.quantum*0.05; ctx.strokeStyle=`rgba(200,255,200,${a})`; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(0,0,50+state.modules.quantum*3,0,Math.PI*2); ctx.setLineDash([4,8]); ctx.stroke(); ctx.setLineDash([]); }
-  // Firewall turrets
-  if(state.modules.laser>0){ for(let i=0;i<Math.min(state.modules.laser,3);i++){ const lx=-55-i*20; ctx.fillStyle='#232'; ctx.fillRect(lx,-4,9,8); ctx.strokeStyle='rgba(100,255,180,0.5)'; ctx.lineWidth=1; ctx.strokeRect(lx,-4,9,8); ctx.fillStyle='#66ffaa'; ctx.fillRect(lx+2,-2,2,4); } }
-  if(state.modules.cannon>0){ for(let i=0;i<Math.min(state.modules.cannon,2);i++){ const cx=50+i*22; ctx.fillStyle='#330'; ctx.beginPath(); ctx.arc(cx,5,7,0,Math.PI*2); ctx.fill(); ctx.strokeStyle='rgba(255,200,100,0.6)'; ctx.stroke(); ctx.fillStyle='#ffaa00'; ctx.beginPath(); ctx.arc(cx,5,4,0,Math.PI*2); ctx.fill(); } }
+
+  // Walls
+  ctx.fillStyle='#4a5568'; ctx.fillRect(-150,-100,300,8); // top wall
+  ctx.fillStyle='#505b6e'; ctx.fillRect(-150,-100,8,200); // left wall
+  ctx.fillRect(142,-100,8,200); // right wall
+
+  // Desks
+  desks.forEach((d,i)=>{
+    const sx=cx+(d.x-150)*scale, sy=cy+(d.y-100)*scale;
+    // Draw at world space
+  });
   ctx.restore();
 }
 
 function draw(){
-  ctx.fillStyle='#0a0a1a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#1a1d23'; ctx.fillRect(0,0,canvas.width,canvas.height);
   const t=Date.now()/1000;
-  stars.forEach(s=>{ s.twinkle+=s.twinkleSpeed; const a=0.5+Math.sin(s.twinkle)*0.5;
-    if(s.hue>0) ctx.fillStyle=`hsla(${s.hue},80%,70%,${a})`; else if(s.r>1.4) ctx.fillStyle=`rgba(200,255,220,${a})`; else ctx.fillStyle=`rgba(180,240,200,${a*0.8})`;
-    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
-  });
-  if(Math.random()<0.003) spawnShooting();
-  shootingStars=shootingStars.filter(s=>{ s.x+=s.vx; s.y+=s.vy; s.life-=0.015; ctx.strokeStyle=`rgba(200,255,220,${s.life})`; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(s.x-s.vx*s.len/5,s.y-s.vy*s.len/5); ctx.stroke(); return s.life>0; });
 
-  ctx.save();
-  const n1=ctx.createRadialGradient(canvas.width*0.75,canvas.height*0.3,0,canvas.width*0.75,canvas.height*0.3,300);
-  n1.addColorStop(0,'rgba(30,80,60,0.05)'); n1.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=n1; ctx.fillRect(0,0,canvas.width,canvas.height);
-  const n2=ctx.createRadialGradient(canvas.width*0.2,canvas.height*0.6,0,canvas.width*0.2,canvas.height*0.6,250);
-  n2.addColorStop(0,'rgba(20,60,80,0.04)'); n2.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=n2; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Office ceiling lights
+  deskLights.forEach(l=>{ const a=0.15+Math.sin(t*0.7+l.phase)*0.08; ctx.fillStyle=`rgba(255,240,220,${a})`; ctx.beginPath(); ctx.arc(l.x,l.y,l.r,0,Math.PI*2); ctx.fill(); });
+
+  const sx=canvas.width*0.5, sy=canvas.height*0.45, s=2.2;
+  // Draw floor
+  ctx.save(); ctx.translate(sx,sy); ctx.scale(s,s);
+  ctx.fillStyle='#3e4a5a'; ctx.fillRect(-180,-120,360,240);
+  for(let x=-180;x<180;x+=24){ for(let y=-120;y<120;y+=24){ ctx.fillStyle=(Math.floor((x+180)/24)+Math.floor((y+120)/24))%2===0?'#414d5e':'#3b4758'; ctx.fillRect(x,y,24,24); } }
+  ctx.fillStyle='#4a5568'; ctx.fillRect(-180,-120,360,8);
+  ctx.fillStyle='#505b6e'; ctx.fillRect(-180,-116,8,236);
+  ctx.fillRect(172,-116,8,236);
+
+  // Draw desks with monitors
+  desks.forEach(d=>{
+    const dx=d.x-150,dy=d.y-100;
+    // Desk surface
+    ctx.fillStyle='#5d4037'; ctx.fillRect(dx-32,dy-18,64,36);
+    ctx.fillStyle='#6d4c41'; ctx.fillRect(dx-30,dy-16,60,32);
+    // Monitor
+    ctx.fillStyle='#333'; ctx.fillRect(dx-14,dy-28,28,14);
+    ctx.fillStyle=d.monitorOn?'#4fc3f7':'#1a1a1a'; ctx.fillRect(dx-12,dy-26,24,10);
+    if(d.monitorOn){ ctx.fillStyle='rgba(79,195,247,0.3)'; ctx.fillRect(dx-12,dy-26,24,4); }
+    // Chair
+    ctx.fillStyle='#424242'; ctx.beginPath(); ctx.ellipse(dx,dy+26,16,8,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#333'; ctx.fillRect(dx-2,dy+10,4,16);
+    // Keyboard
+    ctx.fillStyle='#222'; ctx.fillRect(dx-10,dy-2,20,5);
+  });
+
+  // People at desks
+  officePeople.forEach(p=>{
+    const d=desks[p.desk%desks.length];
+    if(!d) return;
+    const b=Math.sin(t*1.5+p.phase)*2;
+    ctx.fillStyle='#e8c9a0'; ctx.beginPath(); ctx.arc(d.x-150+b,d.y-120,5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#555'; ctx.fillRect(d.x-153+b,d.y-115,6,10);
+  });
+
+  // Your desk (highlighted — center)
+  ctx.strokeStyle='rgba(91,155,213,0.6)'; ctx.lineWidth=2; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.roundRect(-40,-22,80,58,8); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(91,155,213,0.08)'; ctx.fillRect(-40,-22,80,58);
+
+  // Ships = active projects orbiting your desk
+  S.projects.forEach((p,i)=>{
+    if(p.progress>=p.max) return;
+    const ang=(i/Math.max(S.projects.length,1))*Math.PI*2+t*0.3;
+    const dist=70+i*16;
+    const px=Math.cos(ang)*dist, py=Math.sin(ang)*dist*0.5;
+    ctx.save(); ctx.translate(px,py); ctx.rotate(ang+Math.PI/2);
+    ctx.fillStyle='#81c784'; ctx.beginPath(); ctx.moveTo(0,-5); ctx.lineTo(-2,3); ctx.lineTo(2,3); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.arc(0,0,7,-Math.PI/2,-Math.PI/2+(p.progress/p.max)*Math.PI*2); ctx.strokeStyle='rgba(129,199,132,0.6)'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.restore();
+  });
+
+  // Threat (hacker)
+  if(S.currentAlien){
+    const a=S.currentAlien; a.x-=a.speed; if(a.x<sx/s+80) a.x=sx/s+80;
+    ctx.save(); ctx.translate(a.x,a.y); const bob=Math.sin(t*4)*2;
+    ctx.fillStyle='#ef5350'; ctx.beginPath(); ctx.ellipse(0,bob,18,10,0,0,Math.PI*2); ctx.fill();
+    const hpPct=a.hp/a.maxHp; ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(-16,bob-20,32,4); ctx.fillStyle='#ef5350'; ctx.fillRect(-16,bob-20,32*hpPct,4);
+    ctx.fillStyle='white'; ctx.font='9px sans-serif'; ctx.textAlign='center'; ctx.fillText(a.name,0,bob-24);
+    ctx.restore();
+    // Laser
+    if(S.modules.laser>0){ ctx.strokeStyle='rgba(100,200,255,0.6)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(a.x*s-22*s,a.y*s-sy); ctx.stroke(); }
+  }
+
   ctx.restore();
-
-  const sx=canvas.width*0.5,sy=canvas.height*0.45,scale=1.6+Math.sin(t*0.3)*0.05;
-  drawStation(sx,sy,scale);
-
-  state.expeditions.forEach((exp,i)=>{
-    if(exp.progress>=exp.maxProgress) return;
-    const angle=(i/Math.max(state.expeditions.length,1))*Math.PI*2+t*0.2;
-    const dist=110+i*22;
-    const shipX=sx+Math.cos(angle)*dist,shipY=sy+Math.sin(angle)*dist*0.5;
-    const prog=exp.progress/exp.maxProgress;
-    ctx.save(); ctx.translate(shipX,shipY); ctx.rotate(angle+Math.PI/2);
-    ctx.fillStyle='#66bb99'; ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(-3,3); ctx.lineTo(3,3); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle='rgba(150,255,200,0.6)'; ctx.lineWidth=1; ctx.stroke();
-    const eg=ctx.createRadialGradient(0,5,0,0,5,5); eg.addColorStop(0,'rgba(100,255,200,0.8)'); eg.addColorStop(1,'rgba(100,255,200,0)');
-    ctx.fillStyle=eg; ctx.beginPath(); ctx.arc(0,5,5,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(0,0,9,-Math.PI/2,-Math.PI/2+prog*Math.PI*2); ctx.strokeStyle='rgba(105,240,174,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
-    ctx.restore();
-  });
-
-  particles.push({x:sx,y:sy,life:1,vx:(Math.random()-0.5)*0.5,vy:-Math.random()*0.8-0.3});
-  particles=particles.filter(p=>{ p.x+=p.vx; p.y+=p.vy; p.life-=0.02; ctx.fillStyle=`rgba(100,255,200,${p.life*0.5})`; ctx.fillRect(p.x,p.y,1,1); return p.life>0; });
-  if(particles.length>150) particles.splice(0,particles.length-150);
-
-  // Draw threat (hacker/bug)
-  if(state.currentAlien){
-    const alien=state.currentAlien; alien.x-=alien.speed; if(alien.x<sx+60) alien.x=sx+60;
-    ctx.save(); ctx.translate(alien.x,alien.y); const bob=Math.sin(t*4)*3;
-    ctx.fillStyle='#ff4444'; ctx.beginPath(); ctx.ellipse(0,bob,22,12,0,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='rgba(255,100,100,0.8)'; ctx.lineWidth=2; ctx.stroke();
-    ctx.fillStyle='rgba(255,200,200,0.6)'; ctx.beginPath(); ctx.arc(0,bob-5,9,Math.PI,0); ctx.fill();
-    const eg2=ctx.createRadialGradient(-3,bob+14,0,-3,bob+14,10); eg2.addColorStop(0,'rgba(255,80,80,0.9)'); eg2.addColorStop(1,'rgba(255,0,0,0)'); ctx.fillStyle=eg2; ctx.beginPath(); ctx.arc(-3,bob+14,10,0,Math.PI*2); ctx.fill();
-    ctx.setLineDash([4,8]); ctx.strokeStyle='rgba(255,0,0,0.3)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,bob); ctx.lineTo(sx-alien.x,sy-alien.y-bob); ctx.stroke(); ctx.setLineDash([]);
-    const hpPct=alien.hp/alien.maxHp; ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(-20,bob-22,40,5); ctx.fillStyle=hpPct>0.5?'#ff4444':hpPct>0.25?'#ff8800':'#ff0000'; ctx.fillRect(-20,bob-22,40*hpPct,5);
-    ctx.fillStyle='white'; ctx.font='10px sans-serif'; ctx.textAlign='center'; ctx.fillText(alien.name,0,bob-28);
-    ctx.restore();
-  }
-  if(state.currentAlien&&state.modules.laser>0){
-    const alien=state.currentAlien;
-    ctx.strokeStyle='rgba(100,255,200,0.8)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(sx,sy-10); ctx.lineTo(alien.x-22,alien.y+Math.sin(t*4)*3); ctx.stroke();
-    ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(sx,sy-10); ctx.lineTo(alien.x-22,alien.y+Math.sin(t*4)*3); ctx.stroke();
-  }
 
   requestAnimationFrame(draw);
 }
 draw();
 
-// ==================== TUTORIAL ====================
-const tutSteps = [
-  { icon:'🧠', title:'Welcome to Star Labs AI!', desc:'You lead the AI Research Division. Your mission: push the boundaries of artificial intelligence through ambitious projects, cutting-edge research, and world-class engineering.' },
-  { icon:'⚡', title:'Resources', desc:'<b>Compute ⚡</b> — GPU/TPU hours. Powers AI projects.<br><b>Funding 💰</b> — earned from successful models. Buy infrastructure.<br><b>Training Data 📊</b> — from projects. Publish research papers.' },
-  { icon:'🚀', title:'Launch AI Projects', desc:'Click any project card on the <b>left panel</b> to start training runs. They take time but yield new AI models, funding, and training data. Higher-risk projects discover rarer models!' },
-  { icon:'🏗️', title:'Build Infrastructure', desc:'Use funding to buy <b>infrastructure</b> (Infra tab): GPU clusters, TPU pods, data crawlers, and more. Each upgrade improves your lab.' },
-  { icon:'🔬', title:'Research & Team', desc:'Spend training data on <b>papers</b> (Papers tab) that unlock powerful breakthroughs. Hire <b>team members</b> (Team tab) for permanent stat boosts.' },
-  { icon:'🧠', title:'Build the Model Zoo', desc:'There are <b>12 AI model types</b> to develop, from Linear Regression to Foundation Models. Track them in the <b>Model Zoo</b>. Complete <b>achievements</b> (🏆)!' },
-];
-let tutStep=0;
-function renderTutorial(){
-  document.getElementById('tut-icon').textContent=tutSteps[tutStep].icon;
-  document.getElementById('tut-title').textContent=tutSteps[tutStep].title;
-  document.getElementById('tut-desc').innerHTML=tutSteps[tutStep].desc;
-  document.querySelectorAll('.tut-dot').forEach((d,i)=>d.classList.toggle('active',i===tutStep));
-  document.getElementById('tut-next').textContent=tutStep===tutSteps.length-1?'Let\'s Go! 🚀':'Next →';
-}
-function nextTutorial(){ if(tutStep<tutSteps.length-1){ tutStep++; renderTutorial(); } else skipTutorial(); }
-function prevTutorial(){ if(tutStep>0){ tutStep--; renderTutorial(); } }
-function skipTutorial(){ document.getElementById('tutorial-overlay').style.display='none'; addLog('Tutorial complete! Start building AI! 🧠','good'); }
-
-// ==================== MUSIC ====================
-const bgm=document.getElementById('bgm'); bgm.volume=0.4;
-function toggleMusic(){ const btn=document.getElementById('music-btn'); if(bgm.paused){ bgm.play().catch(()=>{}); btn.textContent='🔊'; btn.classList.remove('muted'); } else { bgm.pause(); btn.textContent='🔇'; btn.classList.add('muted'); } }
-let musicStarted=false;
-document.addEventListener('click',()=>{ if(!musicStarted){ bgm.play().catch(()=>{}); musicStarted=true; } },{once:false});
+// Interactive: click desks to toggle monitors (bonus compute)
+canvas.addEventListener('click',(e)=>{
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  const sx=canvas.width*0.5, sy=canvas.height*0.45, s=2.2;
+  desks.forEach(d=>{
+    const dx=(d.x-150)*s+sx, dy=(d.y-100)*s+sy;
+    if(mx>dx-32&&mx<dx+32&&my>dy-30&&my<dy+30){
+      d.monitorOn=!d.monitorOn;
+      if(d.monitorOn){ S.energy+=2; addLog('🖥️ Monitor turned on! +2 compute','good'); }
+    }
+  });
+  // Check if clicked on enemy
+  if(S.currentAlien){
+    const a=S.currentAlien, ax=a.x*s, ay=a.y*s;
+    if(Math.hypot(mx-ax,my-ay)<30){ attackAlien(); }
+  }
+});
 
 // ==================== TABS ====================
 function switchTab(name){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-  document.querySelector(`.tab-btn[onclick*="${name}"]`).classList.add('active');
+  const tabBtn=document.querySelector(`.tab-btn[onclick*="${name}"]`); if(tabBtn)tabBtn.classList.add('active');
   document.getElementById(`tab-${name}`).classList.add('active');
+  if(name==='divisions') renderDivisionsTab();
 }
 
-// ==================== ACHIEVEMENTS ====================
-function checkAchievements(){
-  let newOne=false;
-  ACHIEVEMENTS.forEach(a=>{ if(!state.achievements.includes(a.id)&&a.check()){ state.achievements.push(a.id); newOne=true; showToast(`🏆 Achievement: ${a.name}!`); addLog(`Achievement: ${a.icon} ${a.name}`,'discovery'); const idx=ACHIEVEMENTS.indexOf(a); if(idx<6) { state.credits+=50; state.data+=20; } else if(idx<12) { state.credits+=150; state.data+=60; } else { state.credits+=400; state.data+=150; } } });
-  if(newOne) state.newAchievement=true;
+// ==================== TEAM SYSTEM ====================
+function checkTeamComplete(){
+  if(teamMemberCount()>=6){
+    const name=currentTeamName();
+    S.teams.push({name,members:[...S.crew],projectsCompleted:S.successful});
+    S.crew=[]; S.teamIndex++;
+    // Popup
+    document.getElementById('popup-icon').textContent='🎉';
+    document.getElementById('popup-title').textContent=`${name} is Complete!`;
+    document.getElementById('popup-desc').textContent=`Your team of 6 has become an autonomous division. They'll continue working independently. You've been promoted to lead ${currentTeamName()}!`;
+    document.getElementById('team-popup').style.display='flex';
+    document.getElementById('team-badge').textContent=currentTeamName();
+    document.getElementById('office-desc').textContent=`${currentTeamName()} | 0/6 members`;
+    addLog(`🎉 ${name} is now an autonomous division! Starting ${currentTeamName()}...`,'good');
+    showToast(`🎉 ${name} autonomous! New: ${currentTeamName()}`);
+    checkAchievements();
+  }
 }
-function toggleAchievements(){ const ov=document.getElementById('ach-overlay'); if(ov.style.display==='flex'){ ov.style.display='none'; state.newAchievement=false; } else { ov.style.display='flex'; renderAchievements(); state.newAchievement=false; } }
-function renderAchievements(){
-  const list=document.getElementById('ach-list'); list.innerHTML='';
-  ACHIEVEMENTS.forEach(a=>{ const earned=state.achievements.includes(a.id); const row=document.createElement('div'); row.className='ach-row'+(earned?' earned':''); row.innerHTML=`<div class="ach-icon">${earned?a.icon:'🔒'}</div><div class="ach-info"><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div></div>${earned?'<span style="color:#69f0ae">✓</span>':''}`; list.appendChild(row); });
-  document.getElementById('ach-count').textContent=`${state.achievements.length}/${ACHIEVEMENTS.length}`;
-  const btn=document.getElementById('ach-btn'); if(state.newAchievement) btn.classList.add('has-new'); else btn.classList.remove('has-new');
-}
-
-// ==================== EVENTS ====================
-let eventTimer=null;
-function scheduleEvent(){ const delay=30000+Math.random()*60000; if(eventTimer) clearTimeout(eventTimer); eventTimer=setTimeout(triggerEvent,delay); }
-function triggerEvent(){
-  if(state.eventActive) return;
-  const ev=EVENTS[Math.floor(Math.random()*EVENTS.length)];
-  document.getElementById('event-title').textContent=ev.title; document.getElementById('event-desc').textContent=ev.desc;
-  const choices=document.getElementById('event-choices'); choices.innerHTML='';
-  ev.choices.forEach((c,i)=>{ const btn=document.createElement('button'); btn.textContent=c.text; btn.className=c.good?'':'secondary'; btn.onclick=()=>resolveEvent(ev,c); choices.appendChild(btn); });
-  document.getElementById('event-overlay').style.display='flex'; state.eventActive=true;
-}
-function resolveEvent(ev,choice){
-  document.getElementById('event-overlay').style.display='none'; state.eventActive=false; state.eventsHandled++;
-  if(choice.cost){ if(choice.cost.compute&&state.energy<choice.cost.compute){ addLog('Not enough compute!','danger'); scheduleEvent(); return; } if(choice.cost.funding&&state.credits<choice.cost.funding){ addLog('Not enough funding!','danger'); scheduleEvent(); return; } }
-  if(choice.cost){ if(choice.cost.compute) state.energy-=choice.cost.compute; if(choice.cost.funding) state.credits-=choice.cost.funding; if(choice.cost.energy) state.energy-=choice.cost.energy; if(choice.cost.credits) state.credits-=choice.cost.credits; }
-  if(choice.risk&&Math.random()<choice.risk){ addLog(`Incident bad outcome!`,'danger'); if(choice.penalty){ if(choice.penalty.compute) state.energy=Math.max(0,state.energy-choice.penalty.compute); if(choice.penalty.funding) state.credits=Math.max(0,state.credits-choice.penalty.funding); if(choice.penalty.energy) state.energy=Math.max(0,state.energy-choice.penalty.energy); if(choice.penalty.credits) state.credits=Math.max(0,state.credits-choice.penalty.credits); if(choice.penalty.data) state.data=Math.max(0,state.data-choice.penalty.data); } }
-  else if(choice.reward){ if(choice.reward.data) state.data+=choice.reward.data; if(choice.reward.funding) state.credits+=choice.reward.funding; if(choice.reward.credits) state.credits+=choice.reward.credits; if(choice.reward.extraModels){ for(let i=0;i<choice.reward.extraModels;i++){ const star=STAR_TYPES[Math.floor(Math.random()*STAR_TYPES.length)]; if(!state.discoveredStars.find(s=>s.name===star.name)){ state.discoveredStars.push(star); showToast(`🧠 Developed: ${star.name}!`); } } }
-    if(choice.reward.extraStars){ for(let i=0;i<choice.reward.extraStars;i++){ const star=STAR_TYPES[Math.floor(Math.random()*STAR_TYPES.length)]; if(!state.discoveredStars.find(s=>s.name===star.name)){ state.discoveredStars.push(star); showToast(`🧠 Developed: ${star.name}!`); } } }
-    addLog(`Incident resolved: ${choice.effect}`,choice.good?'good':''); }
-  else { addLog(`Incident: ${choice.effect}`,choice.good?'good':'danger'); }
-  scheduleEvent(); updateUI();
-}
+function dismissTeamPopup(){ document.getElementById('team-popup').style.display='none'; updateUI(); }
 
 // ==================== GAME ACTIONS ====================
-let expInstanceCounter=0;
-function launchExpedition(expDef){
-  const maxSlots=1+state.modules.team; const activeCount=state.expeditions.filter(e=>e.progress<e.maxProgress).length;
-  if(activeCount>=maxSlots||state.energy<expDef.cost) return;
-  state.energy-=expDef.cost; state.totalExpeditions++;
-  const shieldLvl=state.modules.firewall; const riskMap={Low:0.85,Medium:0.7,High:0.55,'Very High':0.4,Extreme:0.25}; const baseRisk=riskMap[expDef.risk]||0.7;
-  const navBonus=state.crew.filter(c=>c.type==='pm').length*0.15; const successChance=Math.min(0.95,baseRisk+shieldLvl*0.05+navBonus);
-  let duration=expDef.dur; if(state.researchCompleted.includes('dist_train')) duration=Math.floor(duration*0.8); if(state.researchCompleted.includes('transfer')) duration=Math.floor(duration*0.7);
-  const navSpeed=state.crew.filter(c=>c.type==='pm').length*0.1; duration=Math.floor(duration*(1-navSpeed));
-  const extraStars=(state.researchCompleted.includes('federated')?1:0)+state.crew.filter(c=>c.type==='data_scientist').length*1;
-  state.expeditions.push({expDef,progress:0,maxProgress:duration,successChance,extraStars,id:`${expDef.id}_${++expInstanceCounter}`});
-  addLog(`Project launched: ${expDef.name} (#${expInstanceCounter})`, ''); updateUI();
+let expCounter=0;
+function launchProject(proj){
+  if(S.projects.filter(p=>p.progress<p.max).length>=6||S.energy<proj.cost) return;
+  S.energy-=proj.cost; S.totalProjects++;
+  let dur=proj.dur; if(S.research.includes('dist_train')) dur=Math.floor(dur*0.8); if(S.research.includes('transfer')) dur=Math.floor(dur*0.7);
+  const pm=teamMemberCount()>3?0.1:0;
+  dur=Math.floor(dur*(1-pm));
+  const extraStars=S.research.includes('federated')?1:0;
+  S.projects.push({proj,progress:0,max:dur,extraStars,id:`${proj.id}_${++expCounter}`});
+  addLog(`Project launched: ${proj.name}`,''); updateUI();
 }
 
-function completeExpedition(exp){
-  const idx=state.expeditions.indexOf(exp); if(idx>=0) state.expeditions.splice(idx,1);
-  if(exp.expDef.id==='super_intel') state.voidLeaps++;
-  const droneSalvage=state.modules.debugger*0.12; const roll=Math.random(); let succeeded=roll<exp.successChance;
-  if(!succeeded&&Math.random()<droneSalvage){ succeeded=true; addLog('🐛 Auto-Debugger saved the project!','good'); }
+function completeProject(p){
+  const idx=S.projects.indexOf(p); if(idx>=0) S.projects.splice(idx,1);
+  if(p.proj.id==='super_intel') S.voidLeaps++;
+  const baseRisk={Low:0.85,Medium:0.7,High:0.55,'Very High':0.4,Extreme:0.25}[p.proj.risk]||0.7;
+  const successChance=baseRisk+S.modules.firewall*0.05+(S.modules.debugger*0.12);
+  const succeeded=Math.random()<Math.min(0.95,successChance);
   if(succeeded){
-    state.successfulExpeditions++; const starCount=exp.expDef.minS+Math.floor(Math.random()*(exp.expDef.maxS-exp.expDef.minS+1))+exp.extraStars;
-    let totalData=0,totalCredits=0; const foundStars=[];
-    for(let i=0;i<starCount;i++){
-      const scannerBonus=state.modules.crawler*8; const tachyonBonus=state.researchCompleted.includes('predictive')?25:0; const pilotBonus=state.crew.filter(c=>c.type==='senior_dev').length*10;
-      const roll2=Math.random()*100; let starIdx;
-      if(roll2<5+scannerBonus+tachyonBonus) starIdx=Math.floor(Math.random()*3)+8;
-      else if(roll2<20+scannerBonus+pilotBonus) starIdx=Math.floor(Math.random()*3)+5;
-      else if(roll2<50+scannerBonus) starIdx=Math.floor(Math.random()*2)+3;
-      else starIdx=Math.floor(Math.random()*3);
-      const star=STAR_TYPES[starIdx]; foundStars.push(star); totalData+=star.data; totalCredits+=star.credits;
-      if(!state.discoveredStars.find(s=>s.name===star.name)){ state.discoveredStars.push(star); showToast(`🧠 New Model: ${star.name}!`); addLog(`Developed: ${star.icon} ${star.name} (${star.rarity})`,'discovery'); }
+    S.successful++; const count=Math.floor(1+Math.random()*3)+p.extraStars;
+    let td=0,tc=0; count>0&&count;
+    for(let i=0;i<count;i++){
+      const roll=Math.random()*100; let idx;
+      if(roll<5+S.modules.crawler*8) idx=Math.floor(Math.random()*3)+8;
+      else if(roll<20+S.modules.crawler*5) idx=Math.floor(Math.random()*3)+5;
+      else if(roll<50+S.modules.crawler*3) idx=Math.floor(Math.random()*2)+3;
+      else idx=Math.floor(Math.random()*3);
+      const star=STAR_TYPES[idx]; td+=star.data; tc+=star.credits;
+      if(!S.stars.find(s=>s.name===star.name)){ S.stars.push(star); showToast(`🧠 ${star.name}!`); addLog(`Developed: ${star.icon} ${star.name} (${star.rarity})`,'discovery'); }
     }
-    if(state.researchCompleted.includes('multimodal')) totalData*=2;
-    const scientistBonus=state.crew.filter(c=>c.type==='ml_researcher').length*0.2; const physicistBonus=state.crew.filter(c=>c.type==='research_lead').length*0.4;
-    totalData=Math.floor(totalData*(1+scientistBonus+physicistBonus));
-    const pilotCreditBonus=state.crew.filter(c=>c.type==='senior_dev').length*0.2;
-    if(state.researchCompleted.includes('unsupervised')) totalCredits=Math.floor(totalCredits*1.1);
-    totalCredits=Math.floor(totalCredits*(1+pilotCreditBonus));
-    const quantumMul=1+state.modules.quantum*0.08; totalData=Math.floor(totalData*quantumMul); totalCredits=Math.floor(totalCredits*quantumMul);
-    state.data+=totalData; state.credits+=totalCredits;
-    addLog(`✅ ${exp.expDef.name} complete! +${totalData} data, +${totalCredits} funding`,'good');
-    if(Math.random()<(0.2+state.crew.filter(c=>c.type==='data_scientist').length*0.3)){
-      const disc=['Novel activation function','Efficient attention mechanism','Self-supervised paradigm','Reinforcement learning breakthrough','Adversarial robustness technique','Neural architecture innovation','Compression algorithm','Tokenization breakthrough'][Math.floor(Math.random()*8)];
-      if(!state.discoveries.includes(disc)){ state.discoveries.push(disc); state.data+=20; showToast(`💡 Discovery: ${disc}`); addLog(`Breakthrough: ${disc}`,'discovery'); }
-    }
-  } else { state.failedExpeditions++; addLog(`❌ ${exp.expDef.name} failed — experiment crashed`,'danger'); }
+    if(S.research.includes('multimodal')) td*=2;
+    const qm=1+S.modules.quantum*0.08; td=Math.floor(td*qm); tc=Math.floor(tc*qm);
+    S.data+=td; S.credits+=tc;
+    addLog(`✅ ${p.proj.name}: +${td} data, +${tc} funding`,'good');
+  } else { S.failed++; addLog(`❌ ${p.proj.name} failed`,'danger'); }
   checkAchievements(); updateUI();
 }
 
 function buyModule(mod){
-  const level=state.modules[mod.id]; let cost=Math.floor(mod.cost*Math.pow(mod.scale,level));
-  if(state.crew.some(c=>c.type==='devops')) cost=Math.floor(cost*0.85);
-  if(state.credits<cost||level>=mod.max) return; state.credits-=cost; state.modules[mod.id]++;
-  addLog(`Upgraded ${mod.name} to Level ${state.modules[mod.id]}`,'good'); checkAchievements(); updateUI();
+  const lvl=S.modules[mod.id]; let cost=Math.floor(mod.cost*Math.pow(mod.scale,lvl));
+  if(S.credits<cost||lvl>=mod.max) return; S.credits-=cost; S.modules[mod.id]++;
+  addLog(`Upgraded ${mod.name} → Lv.${S.modules[mod.id]}`,'good'); checkAchievements(); updateUI();
 }
 
 function researchTech(res){
-  if(state.data<res.cost||state.researchCompleted.includes(res.id)) return; if(res.req&&!state.researchCompleted.includes(res.req)) return;
-  let cost=res.cost; if(state.crew.some(c=>c.type==='research_lead')) cost=Math.floor(cost*0.8);
-  if(state.data<cost) return; state.data-=cost; state.researchCompleted.push(res.id);
-  showToast(`📄 Paper Published: ${res.name}!`); addLog(`Published: ${res.name} — ${res.effect}`,'discovery'); checkAchievements(); updateUI();
+  if(S.data<res.cost||S.research.includes(res.id)) return; if(res.req&&!S.research.includes(res.req)) return;
+  let cost=res.cost;
+  S.data-=cost; S.research.push(res.id);
+  showToast(`📄 Published: ${res.name}!`); addLog(`Published: ${res.name} — ${res.desc}`,'discovery'); checkAchievements(); updateUI();
 }
 
-function hireCrew(crewDef){
-  const hired=state.crew.filter(c=>c.type===crewDef.id).length; if(hired>=2) return; if(state.credits<crewDef.cost) return;
-  state.credits-=crewDef.cost; state.crew.push({type:crewDef.id,name:crewDef.name,icon:crewDef.icon,upkeep:crewDef.upkeep});
-  addLog(`Hired ${crewDef.icon} ${crewDef.name}!`,'good'); checkAchievements(); updateUI();
-}
-
-function fireCrew(type){ const idx=state.crew.findIndex(c=>c.type===type); if(idx<0) return; state.crew.splice(idx,1); addLog('Team member released.',''); updateUI(); }
+function hireCrew(c){ if(teamMemberCount()>=6||S.credits<c.cost) return; S.credits-=c.cost; S.crew.push(c); addLog(`Hired ${c.icon} ${c.name}! (${teamMemberCount()}/6)`,'good'); checkTeamComplete(); checkAchievements(); updateUI(); }
+function fireCrew(type){ const i=S.crew.findIndex(c=>c.id===type); if(i<0) return; S.crew.splice(i,1); addLog('Member released.',''); updateUI(); }
 
 // ==================== COMBAT ====================
 let combatTimer=null;
 function spawnAlien(){
-  if(state.currentAlien) return;
-  let maxType=0; if(state.day>5) maxType=1; if(state.day>15) maxType=2; if(state.day>30) maxType=3;
-  const at=ALIEN_TYPES[Math.floor(Math.random()*(maxType+1))];
-  state.currentAlien={type:at,hp:at.hp,maxHp:at.hp,name:at.name,icon:at.icon,damage:at.damage,reward:at.reward,atkSpeed:at.atkSpeed,speed:at.speed,x:canvas.width*0.85,y:canvas.height*0.35+Math.random()*canvas.height*0.3,attackTimer:0};
-  showToast(`⚠️ THREAT DETECTED! ${at.icon} ${at.name}!`); addLog(`🚨 ${at.icon} ${at.name} attacking systems!`,'danger'); updateCombatUI();
+  if(S.currentAlien) return; let mx=0; if(S.day>5) mx=1; if(S.day>15) mx=2; if(S.day>30) mx=3;
+  const at=ALIENS[Math.floor(Math.random()*(mx+1))];
+  S.currentAlien={type:at,hp:at.hp,maxHp:at.hp,name:at.name,icon:at.icon,damage:at.damage,reward:at.reward,atkSpeed:at.atkSpeed,speed:at.speed,x:canvas.width*0.7/2.2,y:-30+Math.random()*20,attackTimer:0};
+  showToast(`⚠️ ${at.icon} ${at.name} detected!`); addLog(`🚨 ${at.icon} ${at.name} attacking!`,'danger'); updateCombatUI();
 }
 function attackAlien(){
-  if(!state.currentAlien) return; const baseDmg=10; const cannonDmg=state.modules.cannon*8; const dmg=baseDmg+cannonDmg;
-  const btn=document.getElementById('attack-btn'); btn.style.transform='scale(0.9)'; setTimeout(()=>btn.style.transform='',150);
-  state.currentAlien.hp-=dmg; addLog(`🛡️ Patched ${state.currentAlien.name} for ${dmg} damage!`,'');
-  if(state.currentAlien.hp<=0) defeatAlien(); updateCombatUI();
+  if(!S.currentAlien) return; const dmg=10+S.modules.cannon*8;
+  S.currentAlien.hp-=dmg; addLog(`🛡️ Patched for ${dmg} dmg!`,'');
+  if(S.currentAlien.hp<=0) defeatAlien(); updateCombatUI();
 }
 function defeatAlien(){
-  const alien=state.currentAlien; state.aliensDefeated++; if(alien.type.id==='zero_day') state.mothershipsDefeated++;
-  const reward=alien.reward; state.credits+=reward.credits||0; state.data+=reward.data||0;
-  showToast(`✅ ${alien.name} neutralized! +${reward.credits}💰 +${reward.data}📊`);
-  addLog(`✅ ${alien.name} patched! +${reward.credits} funding, +${reward.data} data`,'good');
-  if(Math.random()<0.3){ const star=STAR_TYPES[Math.floor(Math.random()*STAR_TYPES.length)]; if(!state.discoveredStars.find(s=>s.name===star.name)){ state.discoveredStars.push(star); showToast(`🧠 Salvaged model: ${star.name}!`); } }
-  state.currentAlien=null; document.getElementById('combat-overlay').style.display='none'; scheduleAlienAttack(); checkAchievements(); updateUI();
+  const a=S.currentAlien; S.aliensDefeated++; if(a.type.id==='zero_day') S.mothershipsDefeated++;
+  S.credits+=a.reward.credits||0; S.data+=a.reward.data||0;
+  showToast(`✅ ${a.name} neutralized!`); addLog(`✅ ${a.name} patched! +${a.reward.credits}💰`,'good');
+  if(Math.random()<0.25){ const s=STAR_TYPES[Math.floor(Math.random()*12)]; if(!S.stars.find(x=>x.name===s.name)){ S.stars.push(s); showToast(`🧠 Salvaged: ${s.name}!`); } }
+  S.currentAlien=null; document.getElementById('combat-overlay').style.display='none'; scheduleAlien(); checkAchievements(); updateUI();
 }
 function updateCombatUI(){
-  if(!state.currentAlien) return; const alien=state.currentAlien;
-  document.getElementById('combat-overlay').style.display='flex'; document.getElementById('alien-icon').textContent=alien.icon; document.getElementById('alien-name').textContent=alien.name;
-  const hpPct=(alien.hp/alien.maxHp)*100; document.getElementById('alien-hp-bar').style.width=hpPct+'%'; document.getElementById('alien-hp-text').textContent=`${Math.max(0,alien.hp)}/${alien.maxHp}`;
-  const baseDmg=10+state.modules.cannon*8; document.getElementById('attack-dmg').textContent=baseDmg;
-  const threatTime=Math.max(0,Math.ceil(alien.atkSpeed-alien.attackTimer)); document.getElementById('alien-threat').textContent=`⚠️ Exploiting in ${threatTime}s for ${alien.damage} damage`;
+  if(!S.currentAlien) return; const a=S.currentAlien;
+  document.getElementById('combat-overlay').style.display='flex'; document.getElementById('alien-icon').textContent=a.icon; document.getElementById('alien-name').textContent=a.name;
+  document.getElementById('alien-hp-bar').style.width=(a.hp/a.maxHp*100)+'%';
+  document.getElementById('attack-dmg').textContent=10+S.modules.cannon*8;
+  document.getElementById('alien-threat').textContent=`⚠️ Exploiting in ${Math.ceil(Math.max(0,a.atkSpeed-a.attackTimer))}s for ${a.damage}dmg`;
 }
-function scheduleAlienAttack(){ if(combatTimer) clearTimeout(combatTimer); const delay=40000+Math.random()*80000; combatTimer=setTimeout(spawnAlien,delay); }
+function scheduleAlien(){ if(combatTimer) clearTimeout(combatTimer); combatTimer=setTimeout(spawnAlien,40000+Math.random()*60000); }
 
-// ==================== UI RENDER ====================
+// ==================== UI ====================
 function updateUI(){
-  document.getElementById('res-compute').textContent=Math.floor(state.energy);
-  document.getElementById('res-funding').textContent=Math.floor(state.credits);
-  document.getElementById('res-traindata').textContent=Math.floor(state.data);
-  document.getElementById('day-counter').textContent=`Day ${state.day}`;
-  document.getElementById('res-integrity').textContent=Math.floor(state.stationHP);
-  document.getElementById('res-maxintegrity').textContent=state.maxHP;
-
-  let eGen=state.modules.gpu+state.modules.tpu*5;
-  if(state.researchCompleted.includes('unsupervised')) eGen+=3; if(state.researchCompleted.includes('eff_gpu')) eGen+=Math.floor(state.modules.gpu*0.3);
-  if(state.researchCompleted.includes('neuromorphic')) eGen+=state.modules.tpu*5;
-  const engBonus=state.crew.filter(c=>c.type==='devops').length*0.25; eGen=Math.floor(eGen*(1+engBonus))-state.crew.reduce((s,c)=>s+c.upkeep,0);
+  document.getElementById('res-compute').textContent=Math.floor(S.energy);
+  document.getElementById('res-funding').textContent=Math.floor(S.credits);
+  document.getElementById('res-traindata').textContent=Math.floor(S.data);
+  document.getElementById('day-counter').textContent=`Day ${S.day}`;
+  document.getElementById('res-integrity').textContent=Math.floor(S.stationHP);
+  document.getElementById('res-maxintegrity').textContent=S.maxHP;
+  document.getElementById('team-badge').textContent=currentTeamName();
+  document.getElementById('office-name').textContent=`${currentTeamName()} Office`;
+  document.getElementById('office-desc').textContent=`${currentTeamName()} | ${teamMemberCount()}/6 members`;
+  renderProjects(); renderStarCatalog(); renderInfraTab(); renderTeamTab(); renderPapersTab(); renderSecurityTab(); renderAchievements();
+  document.getElementById('catalog-count').textContent=S.stars.length;
+  let eGen=S.modules.gpu+S.modules.tpu*5; if(S.research.includes('unsupervised')) eGen+=3+Math.floor(S.modules.gpu*0.3); if(S.research.includes('neuromorphic')) eGen+=S.modules.tpu*5;
   document.getElementById('rate-compute').textContent=`+${Math.max(0,eGen)}/s`;
-
-  const modCount=Object.values(state.modules).reduce((a,b)=>a+b,0);
-  document.getElementById('station-desc').textContent=`Infrastructure: ${modCount} | Models: ${state.discoveredStars.length}/12 | Team: ${state.crew.length} | Projects: ${state.successfulExpeditions}`;
-  renderExpeditions(); renderStarCatalog(); renderModulesTab(); renderResearchTab(); renderCrewTab(); renderDefenseTab(); renderAchievements();
-  document.getElementById('catalog-count').textContent=state.discoveredStars.length;
 }
 
-function renderExpeditions(){
-  const container=document.getElementById('expedition-list'); const maxSlots=1+state.modules.team; const activeCount=state.expeditions.filter(e=>e.progress<e.maxProgress).length; container.innerHTML='';
-  EXPEDITIONS.forEach(expDef=>{
-    const canLaunch=activeCount<maxSlots&&state.energy>=expDef.cost;
-    const card=document.createElement('div'); card.className='expedition-card'; if(!canLaunch) card.className+=' disabled';
-    let inner=`<div class="exp-name">${expDef.icon} ${expDef.name}</div><div class="exp-details"><span>⏱️${expDef.dur}s</span><span>⚡${expDef.cost}</span><span>⚠️${expDef.risk}</span></div>`;
-    const activeInstances=state.expeditions.filter(e=>e.expDef.id===expDef.id&&e.progress<e.maxProgress);
-    activeInstances.forEach(exp=>{ inner+=`<div class="exp-progress"><div class="exp-progress-bar" style="width:${(exp.progress/exp.maxProgress)*100}%"></div></div><span style="font-size:10px;color:#69f0ae">${Math.floor((exp.progress/exp.maxProgress)*100)}% — ${Math.ceil(exp.maxProgress-exp.progress)}s left</span>`; });
-    card.innerHTML=inner;
-    card.addEventListener('click',()=>{ if(!canLaunch) return; launchExpedition(expDef); }); container.appendChild(card);
+function renderProjects(){
+  const c=document.getElementById('project-list'), active=S.projects.filter(p=>p.progress<p.max).length;
+  c.innerHTML='';
+  PROJECTS.forEach(proj=>{
+    const can=active<6&&S.energy>=proj.cost;
+    const div=document.createElement('div'); div.className='project-card'+(!can?' disabled':'');
+    const activeInst=S.projects.filter(p=>p.proj.id===proj.id&&p.progress<p.max);
+    let inner=`<div class="p-icon">${proj.icon}</div><div class="p-info"><div class="p-name">${proj.name}</div><div class="p-meta"><span>⏱${proj.dur}s</span><span>⚡${proj.cost}</span><span>⚠${proj.risk}</span></div>`;
+    activeInst.forEach(p=>{ inner+=`<div class="p-bar"><div class="p-bar-fill" style="width:${(p.progress/p.max)*100}%"></div></div><span style="font-size:9px;color:#66bb6a">${Math.floor((p.progress/p.max)*100)}%</span>`; });
+    inner+='</div>';
+    div.innerHTML=inner;
+    div.addEventListener('click',()=>{ if(can)launchProject(proj); }); c.appendChild(div);
   });
 }
 
-function renderStarCatalog(){ const container=document.getElementById('star-catalog'); container.innerHTML=''; STAR_TYPES.forEach(s=>{ const discovered=state.discoveredStars.some(d=>d.name===s.name); const div=document.createElement('div'); div.className='star-entry'+(discovered?'':' undiscovered'); div.innerHTML=`<span class="star-icon">${discovered?s.icon:'❓'}</span><span class="star-name">${discovered?s.name:'???'}</span><span class="star-rarity">${discovered?s.rarity:''}</span>`; container.appendChild(div); }); }
+function renderStarCatalog(){
+  const c=document.getElementById('star-catalog'); c.innerHTML='';
+  STAR_TYPES.forEach(s=>{ const d=S.stars.some(x=>x.name===s.name); c.innerHTML+=`<div style="display:flex;align-items:center;gap:6px;padding:3px 6px;font-size:11px;opacity:${d?1:0.3}"><span>${d?s.icon:'❓'}</span><span>${d?s.name:'???'}</span><span style="font-size:9px;color:#888;margin-left:auto">${d?s.rarity:''}</span></div>`; });
+}
 
-function renderModulesTab(){ const container=document.getElementById('tab-modules'); container.innerHTML=''; MODULES.forEach(mod=>{ const level=state.modules[mod.id]; let cost=Math.floor(mod.cost*Math.pow(mod.scale,level)); if(state.crew.some(c=>c.type==='devops')) cost=Math.floor(cost*0.85); const maxed=level>=mod.max,canBuy=state.credits>=cost&&!maxed; const div=document.createElement('div'); div.className='card'; div.innerHTML=`<div class="card-icon">${mod.icon}</div><div class="card-info"><div class="card-name">${mod.name} <span class="card-level">Lv.${level}/${mod.max}</span></div><div class="card-desc">${mod.effect(level)}</div>${maxed?'<span style="color:#69f0ae;font-size:10px">MAXED</span>':`<button class="small" ${!canBuy?'disabled':''}>💰 ${cost}</button>`}</div>`; if(canBuy&&!maxed) div.querySelector('button').addEventListener('click',e=>{ e.stopPropagation(); buyModule(mod); }); container.appendChild(div); }); }
+function renderInfraTab(){
+  const c=document.getElementById('tab-infra'); c.innerHTML='';
+  MODULES.forEach(m=>{ const l=S.modules[m.id]; let cost=Math.floor(m.cost*Math.pow(m.scale,l)); const max=l>=m.max; c.innerHTML+=`<div class="card"><div class="card-icon">${m.icon}</div><div class="card-info"><div class="card-name">${m.name} <span style="color:#5b9bd5;font-size:9px">Lv${l}/${m.max}</span></div><div class="card-desc">${m.desc(l)}</div></div>${max?'<span style="color:#66bb6a;font-size:9px">MAX</span>':`<button class="small" ${S.credits<cost?'disabled':''} onclick="buyModule(MODULES[${MODULES.indexOf(m)}])">💰${cost}</button>`}</div>`; });
+}
 
-function renderResearchTab(){ const container=document.getElementById('tab-research'); container.innerHTML=''; RESEARCH.forEach(res=>{ const completed=state.researchCompleted.includes(res.id); const reqMet=!res.req||state.researchCompleted.includes(res.req); let cost=res.cost; if(state.crew.some(c=>c.type==='research_lead')) cost=Math.floor(cost*0.8); const canResearch=reqMet&&!completed&&state.data>=cost; const div=document.createElement('div'); div.className='card'; if(completed) div.className+=' completed'; else if(!reqMet) div.className+=' locked'; div.innerHTML=`<div class="card-icon">${completed?'✅':!reqMet?'🔒':'📄'}</div><div class="card-info"><div class="card-name">${res.name}</div><div class="card-desc">${res.effect}</div>${completed?'<span style="color:#69f0ae;font-size:10px">Published ✓</span>':!reqMet?'<span style="color:#ff6e6e;font-size:10px">Requires prerequisite</span>':`<button class="small" ${!canResearch?'disabled':''}>📊 ${cost} data</button>`}</div>`; if(canResearch) div.querySelector('button').addEventListener('click',e=>{ e.stopPropagation(); researchTech(res); }); container.appendChild(div); }); }
+function renderTeamTab(){
+  const c=document.getElementById('tab-team'); c.innerHTML=`<div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">${currentTeamName()} — ${teamMemberCount()}/6 members</div>`;
+  CREW.forEach(cr=>{ const hired=S.crew.filter(c=>c.id===cr.id).length; const can=teamMemberCount()<6&&S.credits>=cr.cost&&hired<1; c.innerHTML+=`<div class="card${hired?' hired':''}"><div class="card-icon">${cr.icon}</div><div class="card-info"><div class="card-name">${cr.name}${hired?' <span style="color:#66bb6a">✓</span>':''}</div><div class="card-desc">${cr.desc}</div></div><div style="display:flex;gap:3px;">${can?`<button class="small" onclick="hireCrew(CREW[${CREW.indexOf(cr)}])">💰${cr.cost}</button>`:''}${hired?`<button class="small secondary" onclick="fireCrew('${cr.id}')">✕</button>`:''}</div></div>`; });
+}
 
-function renderCrewTab(){ const container=document.getElementById('tab-crew'); container.innerHTML=''; CREW_TYPES.forEach(ct=>{ const hiredCount=state.crew.filter(c=>c.type===ct.id).length; const div=document.createElement('div'); div.className='card'+(hiredCount>0?' hired':''); div.innerHTML=`<div class="card-icon">${ct.icon}</div><div class="card-info"><div class="card-name">${ct.name} ${hiredCount>0?`<span style="color:#69f0ae">x${hiredCount}</span>`:''}</div><div class="card-desc">${ct.desc}</div><div style="display:flex;gap:6px;align-items:center;margin-top:3px;"><span class="card-cost">💰 ${ct.cost} hire</span><span style="font-size:10px;color:var(--compute)">⚡${ct.upkeep}/s upkeep</span></div></div>`; if(hiredCount<2&&state.credits>=ct.cost){ const btn=document.createElement('button'); btn.className='small'; btn.textContent='Hire'; btn.addEventListener('click',e=>{ e.stopPropagation(); hireCrew(ct); }); div.appendChild(btn); } if(hiredCount>0){ const btn=document.createElement('button'); btn.className='small secondary'; btn.textContent='Release'; btn.addEventListener('click',e=>{ e.stopPropagation(); fireCrew(ct.id); }); div.appendChild(btn); } container.appendChild(div); }); }
+function renderPapersTab(){
+  const c=document.getElementById('tab-papers'); c.innerHTML='';
+  RESEARCH.forEach(r=>{ const done=S.research.includes(r.id); const req=r.req&&!S.research.includes(r.req); const can=!done&&!req&&S.data>=r.cost; c.innerHTML+=`<div class="card${done?' completed':req?' locked':''}"><div class="card-icon">${done?'✅':req?'🔒':'📄'}</div><div class="card-info"><div class="card-name">${r.name}</div><div class="card-desc">${r.desc}</div></div>${done?'<span style="color:#66bb6a;font-size:9px">Done</span>':req?'<span style="color:#ef5350;font-size:9px">Locked</span>':`<button class="small" ${!can?'disabled':''} onclick="researchTech(RESEARCH[${RESEARCH.indexOf(r)}])">📊${r.cost}</button>`}</div>`; });
+}
 
-function renderDefenseTab(){ const container=document.getElementById('tab-defense'); container.innerHTML=''; DEFENSE_MODULES.forEach(mod=>{ const level=state.modules[mod.id]||0; let cost=Math.floor(mod.cost*Math.pow(mod.scale,level)); if(state.crew.some(c=>c.type==='devops')) cost=Math.floor(cost*0.85); const maxed=level>=mod.max,canBuy=state.credits>=cost&&!maxed; const div=document.createElement('div'); div.className='card'; div.innerHTML=`<div class="card-icon">${mod.icon}</div><div class="card-info"><div class="card-name">${mod.name} <span class="card-level">Lv.${level}/${mod.max}</span></div><div class="card-desc">${mod.effect(level)}</div>${maxed?'<span style="color:#69f0ae;font-size:10px">MAXED</span>':`<button class="small" ${!canBuy?'disabled':''}>💰 ${cost}</button>`}</div>`; if(canBuy&&!maxed) div.querySelector('button').addEventListener('click',e=>{ e.stopPropagation(); buyModule(mod); }); container.appendChild(div); }); }
+function renderSecurityTab(){
+  const c=document.getElementById('tab-security'); c.innerHTML='';
+  DEFENSE.forEach(m=>{ const l=S.modules[m.id]; let cost=Math.floor(m.cost*Math.pow(m.scale,l)); const max=l>=m.max; c.innerHTML+=`<div class="card"><div class="card-icon">${m.icon}</div><div class="card-info"><div class="card-name">${m.name} <span style="color:#5b9bd5;font-size:9px">Lv${l}/${m.max}</span></div><div class="card-desc">${m.desc(l)}</div></div>${max?'<span style="color:#66bb6a;font-size:9px">MAX</span>':`<button class="small" ${S.credits<cost?'disabled':''} onclick="buyModule(DEFENSE[${DEFENSE.indexOf(m)}])">💰${cost}</button>`}</div>`; });
+}
 
-function showToast(msg){ const toast=document.getElementById('toast'); toast.textContent=msg; toast.style.display='block'; toast.style.animation='none'; toast.offsetHeight; toast.style.animation='toastPop 3s forwards'; setTimeout(()=>toast.style.display='none',3000); }
-function addLog(msg,cls){ const log=document.getElementById('log-area'); const entry=document.createElement('div'); entry.className=`log-entry ${cls}`; entry.textContent=msg; log.appendChild(entry); setTimeout(()=>entry.remove(),4000); if(log.children.length>8) log.firstChild&&log.firstChild.remove(); }
+function renderDivisionsTab(){
+  const c=document.getElementById('tab-divisions'); c.innerHTML='<div class="section-title">Autonomous Divisions</div>';
+  if(S.teams.length===0){ c.innerHTML+='<div style="color:var(--text-dim);font-size:11px;padding:8px;">No autonomous divisions yet. Build a team of 6 to create one!</div>'; return; }
+  S.teams.forEach((t,i)=>{ c.innerHTML+=`<div class="division-card"><div class="div-name">🏢 ${t.name}</div><div class="div-meta">${t.members.length} members · ${t.projectsCompleted} projects · Status: Active</div></div>`; });
+  c.innerHTML+=`<div style="font-size:10px;color:var(--text-dim);margin-top:4px;text-align:center;">These divisions run independently.<br>No direct benefit — just like real Star Labs!</div>`;
+}
+
+// ==================== ACHIEVEMENTS ====================
+function checkAchievements(){
+  ACHIEVEMENTS.forEach(a=>{ if(!S.achievements.includes(a.id)&&a.check()){ S.achievements.push(a.id); showToast(`🏆 ${a.name}!`); addLog(`🏆 ${a.icon} ${a.name}`,'discovery'); } });
+}
+function toggleAchievements(){
+  const ov=document.getElementById('ach-overlay');
+  if(ov.style.display==='flex'){ ov.style.display='none'; return; }
+  ov.style.display='flex'; renderAchievements();
+}
+function renderAchievements(){
+  const l=document.getElementById('ach-list'); l.innerHTML='';
+  ACHIEVEMENTS.forEach(a=>{ const e=S.achievements.includes(a.id); l.innerHTML+=`<div class="ach-row${e?' earned':''}"><span>${e?a.icon:'🔒'}</span><div style="flex:1"><div style="font-size:12px;font-weight:600">${a.name}</div><div style="font-size:9px;color:var(--text-dim)">${a.desc}</div></div>${e?'<span style="color:#66bb6a">✓</span>':''}</div>`; });
+  document.getElementById('ach-count').textContent=`${S.achievements.length}/20`;
+}
+
+// ==================== EVENTS ====================
+let evTimer=null;
+function scheduleEvent(){ if(evTimer)clearTimeout(evTimer); evTimer=setTimeout(triggerEvent,35000+Math.random()*55000); }
+function triggerEvent(){
+  const ev=EVENTS[Math.floor(Math.random()*EVENTS.length)];
+  document.getElementById('event-title').textContent=ev.title; document.getElementById('event-desc').textContent=ev.desc;
+  const cc=document.getElementById('event-choices'); cc.innerHTML='';
+  ev.choices.forEach(ch=>{ const b=document.createElement('button'); b.textContent=ch.text; b.className=ch.good?'':'secondary'; b.onclick=()=>resolveEvent(ev,ch); cc.appendChild(b); });
+  document.getElementById('event-overlay').style.display='flex';
+}
+function resolveEvent(ev,ch){
+  document.getElementById('event-overlay').style.display='none'; S.eventsHandled++;
+  if(ch.cost){ if(ch.cost.compute&&S.energy<ch.cost.compute){ addLog('Not enough compute!','danger'); scheduleEvent(); return; } if(ch.cost.funding&&S.credits<ch.cost.funding){ addLog('Not enough funding!','danger'); scheduleEvent(); return; } }
+  if(ch.cost){ if(ch.cost.compute) S.energy-=ch.cost.compute; if(ch.cost.funding) S.credits-=ch.cost.funding; }
+  if(ch.reward){ if(ch.reward.data) S.data+=ch.reward.data; if(ch.reward.funding) S.credits+=ch.reward.funding; if(ch.reward.extraModels){ for(let i=0;i<ch.reward.extraModels;i++){ const s=STAR_TYPES[Math.floor(Math.random()*12)]; if(!S.stars.find(x=>x.name===s.name)) S.stars.push(s); } } }
+  addLog(ch.good?'Incident resolved!':'Incident bad outcome.',ch.good?'good':'danger'); scheduleEvent(); updateUI();
+}
+
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; t.style.animation='none'; t.offsetHeight; t.style.animation='toastPop 2.5s forwards'; setTimeout(()=>t.style.display='none',2500); }
+function addLog(msg,cls){ const l=document.getElementById('log-area'); const d=document.createElement('div'); d.className='log-entry '+(cls||''); d.textContent=msg; l.appendChild(d); setTimeout(()=>d.remove(),3500); if(l.children.length>6) l.firstChild.remove(); }
+
+// ==================== MUSIC ====================
+const bgm=document.getElementById('bgm'); bgm.volume=0.35;
+function toggleMusic(){ const b=document.getElementById('music-btn'); if(bgm.paused){ bgm.play().catch(()=>{}); b.textContent='🔊'; }else{ bgm.pause(); b.textContent='🔇'; } }
+document.addEventListener('click',()=>{ bgm.play().catch(()=>{}); },{once:true});
 
 // ==================== GAME LOOP ====================
 setInterval(()=>{
-  state.tick++;
-  let eGen=state.modules.gpu+state.modules.tpu*5;
-  if(state.researchCompleted.includes('unsupervised')) eGen+=3; if(state.researchCompleted.includes('eff_gpu')) eGen+=Math.floor(state.modules.gpu*0.3); if(state.researchCompleted.includes('neuromorphic')) eGen+=state.modules.tpu*5;
-  const engBonus=state.crew.filter(c=>c.type==='devops').length*0.25; eGen=Math.floor(eGen*(1+engBonus))-state.crew.reduce((s,c)=>s+c.upkeep,0);
-  state.energy=Math.max(0,state.energy+eGen);
-
-  state.expeditions.forEach(exp=>{ exp.progress++; if(exp.progress>=exp.maxProgress) setTimeout(()=>completeExpedition(exp),100); });
-  if(state.tick%25===0) state.day++; if(state.tick%10===0) checkAchievements();
-
-  // Combat
-  if(state.currentAlien){ state.currentAlien.attackTimer+=1;
-    if(state.currentAlien.attackTimer>=state.currentAlien.atkSpeed){
-      const shieldReduction=state.modules.firewall*0.05; const dmg=Math.floor(state.currentAlien.damage*(1-shieldReduction));
-      state.stationHP=Math.max(0,state.stationHP-dmg); addLog(`💥 ${state.currentAlien.name} breached systems for ${dmg} damage!`,'danger'); state.currentAlien.attackTimer=0;
-      if(state.stationHP<=0){ addLog('💀 SYSTEMS COMPROMISED! Rebuilding...','danger'); showToast('☠️ Systems compromised! Rebuilding...'); state.currentAlien=null; document.getElementById('combat-overlay').style.display='none'; state.credits=Math.floor(state.credits*0.5); state.data=Math.floor(state.data*0.5); state.stationHP=state.maxHP; scheduleAlienAttack(); }
-    } updateCombatUI();
+  S.tick++;
+  let eGen=S.modules.gpu+S.modules.tpu*5; if(S.research.includes('unsupervised')) eGen+=3+Math.floor(S.modules.gpu*0.3); if(S.research.includes('neuromorphic')) eGen+=S.modules.tpu*5;
+  S.energy=Math.max(0,S.energy+eGen);
+  S.projects.forEach(p=>{ p.progress++; if(p.progress>=p.max) setTimeout(()=>completeProject(p),50); });
+  if(S.tick%25===0) S.day++; if(S.tick%10===0) checkAchievements();
+  if(S.currentAlien){ S.currentAlien.attackTimer+=1;
+    if(S.currentAlien.attackTimer>=S.currentAlien.atkSpeed){ const dmg=Math.floor(S.currentAlien.damage*(1-S.modules.firewall*0.05)); S.stationHP=Math.max(0,S.stationHP-dmg); addLog(`💥 ${S.currentAlien.name} breached: ${dmg}dmg!`,'danger'); S.currentAlien.attackTimer=0;
+      if(S.stationHP<=0){ addLog('💀 Systems compromised!','danger'); S.currentAlien=null; document.getElementById('combat-overlay').style.display='none'; S.credits=Math.floor(S.credits*0.5); S.data=Math.floor(S.data*0.5); S.stationHP=S.maxHP; scheduleAlien(); } }
+    updateCombatUI();
   }
-  if(state.currentAlien&&state.modules.laser>0){ state.currentAlien.hp-=state.modules.laser*5; if(state.currentAlien.hp<=0) defeatAlien(); else updateCombatUI(); }
-  if(state.stationHP<state.maxHP&&state.modules.repair>0&&state.tick%5===0) state.stationHP=Math.min(state.maxHP,state.stationHP+state.modules.repair*3);
+  if(S.currentAlien&&S.modules.laser>0){ S.currentAlien.hp-=S.modules.laser*5; if(S.currentAlien.hp<=0) defeatAlien(); }
+  if(S.stationHP<S.maxHP&&S.modules.repair>0&&S.tick%5===0) S.stationHP=Math.min(S.maxHP,S.stationHP+S.modules.repair*3);
   updateUI();
 },1000);
 
-// ==================== INIT ====================
-updateUI(); scheduleEvent(); scheduleAlienAttack();
-addLog('Welcome to Star Labs AI! 🧠','good');
-addLog('Complete the tutorial or skip to start building AI.','');
+updateUI(); scheduleEvent(); scheduleAlien();
+addLog('🏢 Welcome to Star Labs! Build your team.','good');
+addLog('Click desks/monitors for bonus compute! 🖱️','');
 </script>
 </body>
 </html>
