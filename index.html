@@ -148,12 +148,27 @@ button.ghost{background:none;border:1px solid var(--accent);color:var(--accent)}
 .ar{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:5px;background:rgba(255,255,255,0.015);border:1px solid var(--border);margin-bottom:2px}
 .ar.earned{border-color:var(--green)}
 
-#hint{
-  position:fixed;bottom:50px;left:50%;transform:translateX(-50%);
-  font-size:10px;color:var(--accent);pointer-events:none;z-index:2;
-  opacity:0;transition:opacity 0.4s;
+#dm{
+  position:fixed;z-index:10;display:none;
+  background:var(--panel);border:1px solid var(--accent);
+  border-radius:10px;padding:8px;min-width:220px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
 }
-#hint.show{opacity:1}
+#dm .dmt{font-size:10px;color:var(--accent);font-weight:700;margin-bottom:4px;text-align:center}
+.dmi{
+  display:flex;align-items:center;gap:6px;padding:5px 8px;
+  border-radius:5px;cursor:pointer;transition:all 0.12s;
+  font-size:11px;border:1px solid transparent;
+}
+.dmi:hover{background:rgba(91,155,213,0.1);border-color:var(--accent)}
+.dmi.locked{opacity:0.3;cursor:not-allowed}
+.dmi.locked:hover{background:transparent;border-color:transparent}
+.dmi .dx{font-size:16px}
+.dmi .di{flex:1}
+.dmi .dn{font-weight:700}
+.dmi .ds{font-size:9px;color:var(--dim)}
+#dm-close{position:absolute;top:2px;right:6px;cursor:pointer;color:var(--dim);font-size:14px}
+#dm-close:hover{color:#fff}
 </style>
 </head>
 <body>
@@ -192,10 +207,8 @@ button.ghost{background:none;border:1px solid var(--accent);color:var(--accent)}
   </div>
   <div id="main">
     <div id="left">
-      <div class="sec">📋 Projects</div>
-      <div id="proj-list"></div>
-      <div class="sec" style="margin-top:4px">🧠 Models (<span id="mc">0</span>/12)</div>
-      <div id="star-list" style="font-size:10px;max-height:140px;overflow-y:auto"></div>
+      <div class="sec">🧠 MODEL ZOO (<span id="mc">0</span>/12)</div>
+      <div id="star-list" style="font-size:10px;max-height:400px;overflow-y:auto"></div>
     </div>
     <div id="center">
       <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 14px;text-align:center;pointer-events:none">
@@ -226,7 +239,7 @@ button.ghost{background:none;border:1px solid var(--accent);color:var(--accent)}
 </div>
 <div id="log"></div>
 <div id="toast"></div>
-<div id="hint">🖱️ Click ANYWHERE on the office to assign!</div>
+<div id="dm"><span id="dm-close" onclick="closeDM()">✕</span><div class="dmt">💻 Desk #<span id="dm-desk">1</span> — Choose Project</div><div id="dm-items"></div></div>
 
 <script>
 // ================ DATA ================
@@ -367,7 +380,7 @@ MODS.forEach(m=>S.mods[m.id]=0);
 DEFS.forEach(m=>S.mods[m.id]=0);
 
 // Assignment mode
-let assigningProj=null; // proj def being assigned
+let selectedDesk=null; // currently selected desk for menu
 
 function tn(){return TNAMES[S.ti]||'Team '+(S.ti+1)}
 function tmc(){return S.cr.length}
@@ -520,7 +533,7 @@ function draw(){
     cx.fillStyle='#444';cx.fillRect(d.x-8,d.y+d.h/2+8,2,10);
     cx.fillRect(d.x+6,d.y+d.h/2+8,2,10);
     // Highlight if assigning
-    if(assigningProj&&!running){
+    if(selectedDesk&&selectedDesk.id===d.id&&!running){
       cx.strokeStyle='rgba(91,155,213,0.8)';cx.lineWidth=2;cx.setLineDash([4,3]);
       cx.beginPath();cx.roundRect(d.x-d.w/2-4,d.y-d.h/2-28,d.w+8,d.h+36,6);cx.stroke();cx.setLineDash([]);
       // Pulsing "Click me" text
@@ -565,40 +578,45 @@ function sparkDesk(d){for(let i=0;i<6;i++)particles.push({x:d.x,y:d.y,l:1,vx:(Ma
 
 // Click handler
 cv.addEventListener('click',e=>{
+  if(document.getElementById('dm').style.display==='flex'){closeDM();return;}
   const mx=e.offsetX*(cv.width/cv.clientWidth),my=e.offsetY*(cv.height/cv.clientHeight);
   const desks=getDesks();
 
-  // Assignment mode: any click on canvas assigns to first free desk
-  if(assigningProj){
-    for(const d of desks){
-      const running=S.pj.find(p=>p.desk===d.id&&p.pr<p.max);
-      if(!running){launchOnDesk(assigningProj,d.id);assigningProj=null;document.getElementById('hint').classList.remove('show');return;}
-    }
-    addLog('All desks busy! Buy more computers.','d');
-    assigningProj=null;document.getElementById('hint').classList.remove('show');return;
-  }
-
-  // Check desk clicks for bonus
+  // Check desk clicks
   for(const d of desks){
     if(mx>d.x-d.w/2-20&&mx<d.x+d.w/2+20&&my>d.y-d.h/2-35&&my<d.y+d.h/2+25){
       const running=S.pj.find(p=>p.desk===d.id&&p.pr<p.max);
-      if(!running){S.e+=1;sparkDesk(d);addLog('🖱️ +1 compute','g');}
+      if(running){addLog(`Desk #${d.id+1}: ${running.pj.i} ${running.pj.n} — ${Math.floor(running.pr/running.max*100)}%`,'g');return;}
+      // Empty desk — show project menu
+      openDM(d,e.clientX,e.clientY);
       return;
     }
   }
   // Click enemy?
   if(S.ca){const a=S.ca;if(Math.hypot(mx-a.x,my-a.y)<24)attack();return;}
-  assigningProj=null;document.getElementById('hint').classList.remove('show');
 });
 
-// ================ ACTIONS ================
-let pid=0;
-function startAssignment(proj){
-  if(S.pj.filter(p=>p.pr<p.max).length>=S.pcs||S.e<proj.c)return;
-  assigningProj=proj;document.getElementById('hint').classList.add('show');
-  addLog('⬆ Click a desk to assign '+proj.n+'!','y');
+// Desk menu
+function openDM(desk,cx,cy){
+  selectedDesk=desk;
+  const dm=document.getElementById('dm');
+  document.getElementById('dm-desk').textContent=desk.id+1;
+  const items=document.getElementById('dm-items');items.innerHTML='';
+  const active=S.pj.filter(p=>p.pr<p.max).length;
+  PROJ.forEach(p=>{
+    const can=active<S.pcs&&S.e>=p.c;
+    const div=document.createElement('div');div.className='dmi'+(can?'':' locked');
+    div.innerHTML=`<span class="dx">${p.i}</span><span class="di"><span class="dn">${p.n}</span><br><span class="ds">⏱${p.t}s ⚡${p.c} ⚠${p.r}</span></span>`;
+    if(can)div.addEventListener('click',()=>{launchOnDesk(p,desk.id);closeDM();sparkDesk(desk);});
+    items.appendChild(div);
+  });
+  dm.style.display='flex';
+  dm.style.left=Math.min(cx-110,window.innerWidth-240)+'px';
+  dm.style.top=Math.max(10,cy-200)+'px';
 }
+function closeDM(){document.getElementById('dm').style.display='none';selectedDesk=null;}
 
+let pid=0;
 function launchOnDesk(proj,deskId){
   S.e-=proj.c;S.tp++;
   let dur=proj.t;if(S.rs.includes('r3'))dur=Math.floor(dur*0.8);if(S.rs.includes('r9'))dur=Math.floor(dur*0.7);
@@ -717,24 +735,7 @@ function updateUI(){
   let eg=S.mods.gpu+S.mods.tpu*5;if(S.rs.includes('r5'))eg+=3+Math.floor(S.mods.gpu*0.3);if(S.rs.includes('r7'))eg+=S.mods.tpu*5;
   document.getElementById('r-er').textContent='+'+Math.max(0,eg)+'/s';
 
-  renderProj();renderModels();renderInfra();renderTeam();renderPapers();renderSec();renderAch();
-}
-
-function renderProj(){
-  const c=document.getElementById('proj-list'),active=S.pj.filter(p=>p.pr<p.max).length;
-  c.innerHTML='';
-  PROJ.forEach(p=>{
-    const can=active<S.pcs&&S.e>=p.c;
-    const d=document.createElement('div');d.className='proj'+(can?'':' locked');
-    d.innerHTML=`<div class="pico">${p.i}</div><div class="pi"><div class="pn">${p.n}</div><div class="pm"><span>⏱${p.t}s</span><span>⚡${p.c}</span><span>⚠${p.r}</span></div></div>`;
-    d.addEventListener('click',()=>{if(can)startAssignment(p)});c.appendChild(d);
-  });
-  // Show active projects
-  S.pj.filter(p=>p.pr<p.max).forEach(p=>{
-    const dd=document.createElement('div');dd.style.cssText='padding:4px 8px;font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px';
-    dd.innerHTML=`${p.pj.i} Desk #${(p.desk||0)+1} <span style="margin-left:auto">${Math.floor(p.pr/p.max*100)}%</span>`;
-    c.appendChild(dd);
-  });
+  renderModels();renderInfra();renderTeam();renderPapers();renderSec();renderAch();
 }
 
 function renderModels(){
