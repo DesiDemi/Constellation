@@ -3,811 +3,740 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Star Labs: Research Divisions</title>
+<title>Star Labs: Research Division</title>
 <style>
-  :root {
-    --bg: #1a1d23; --panel: rgba(26, 29, 35, 0.96);
-    --border: rgba(255,255,255,0.08); --accent: #5b9bd5;
-    --gold: #f0c040; --compute: #4fc3f7; --funding: #81c784;
-    --traindata: #ce93d8; --danger: #ef5350; --success: #66bb6a;
-    --text: #d5d5d5; --text-dim: #888; --warm-white: #f5f0e8;
-    --wood: #8d6e63; --carpet: #3e4a5a; --desk: #5d4037;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; height:100vh; overflow:hidden; user-select:none; }
-  canvas { position:fixed; top:0; left:0; z-index:0; }
+:root {
+  --bg: #0f1117; --panel: rgba(15,17,23,0.95);
+  --border: rgba(255,255,255,0.06); --accent: #4da6ff;
+  --gold: #f5c842; --green: #4caf84; --red: #e05555;
+  --text: #d0d4dc; --dim: #6b7280;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;user-select:none}
+canvas{position:fixed;top:0;left:0;z-index:0}
+#ui{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;pointer-events:none}
+#ui>*{pointer-events:auto}
 
-  #ui { position:relative; z-index:1; height:100vh; display:flex; flex-direction:column; }
+#topbar{
+  display:flex;align-items:center;gap:8px;padding:6px 12px;
+  background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0;
+}
+#topbar h1{font-size:16px;font-weight:700;color:var(--accent);letter-spacing:0.5px}
+#topbar .badge{
+  background:var(--accent);color:#fff;padding:2px 8px;border-radius:10px;
+  font-size:10px;font-weight:700;
+}
+#music-btn{background:none;border:1px solid var(--border);color:#fff;font-size:12px;padding:2px 6px;border-radius:5px;cursor:pointer}
+.res{display:flex;align-items:center;gap:3px;background:rgba(255,255,255,0.025);padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.res .ico{font-size:13px}
+.spacer{flex:1}
+#day-lbl{font-size:10px;color:var(--dim)}
 
-  #topbar {
-    display:flex; align-items:center; gap:10px;
-    padding:8px 14px; background:var(--panel);
-    border-bottom:1px solid var(--border); flex-shrink:0;
-  }
-  #topbar h1 { font-size:18px; font-weight:700; color:var(--accent); letter-spacing:1px; }
-  #topbar .divider { width:1px; height:20px; background:var(--border); margin:0 4px; }
-  .team-badge {
-    background:var(--accent); color:white; padding:3px 10px;
-    border-radius:12px; font-size:11px; font-weight:700;
-    white-space:nowrap;
-  }
-  #music-btn {
-    background:transparent; border:1px solid var(--border);
-    color:white; font-size:14px; padding:3px 7px; border-radius:6px;
-    cursor:pointer; transition:all 0.2s;
-  }
-  #music-btn:hover { border-color:var(--accent); }
-  .resource {
-    display:flex; align-items:center; gap:4px;
-    background:rgba(255,255,255,0.03); padding:4px 10px;
-    border-radius:14px; font-size:12px; font-weight:600;
-  }
-  .resource .icon { font-size:14px; }
-  #day-counter { margin-left:auto; font-size:11px; color:var(--text-dim); }
-  #ach-btn {
-    background:transparent; border:1px solid var(--border);
-    color:var(--gold); font-size:14px; padding:3px 7px; border-radius:6px;
-    cursor:pointer; transition:all 0.2s;
-  }
-  #ach-btn:hover { border-color:var(--gold); }
+#main{display:flex;flex:1;min-height:0}
 
-  #main { display:flex; flex:1; min-height:0; }
+#left{
+  width:260px;min-width:260px;padding:8px;background:var(--panel);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;gap:6px;overflow-y:auto;
+}
+#right{
+  width:300px;min-width:300px;padding:8px;background:var(--panel);
+  border-left:1px solid var(--border);display:flex;flex-direction:column;gap:6px;overflow-y:auto;
+}
+#center{flex:1;position:relative}
 
-  #left-panel {
-    width:290px; min-width:290px; padding:10px;
-    background:var(--panel); border-right:1px solid var(--border);
-    display:flex; flex-direction:column; gap:8px; overflow-y:auto;
-  }
-  .section-title { font-size:10px; text-transform:uppercase; letter-spacing:2px; color:var(--text-dim); font-weight:600; margin-top:2px; }
-  .project-card {
-    background:rgba(255,255,255,0.02); border:1px solid var(--border);
-    border-radius:8px; padding:8px 10px; cursor:pointer;
-    transition:all 0.2s; display:flex; align-items:center; gap:8px;
-  }
-  .project-card:hover:not(.disabled) { background:rgba(91,155,213,0.08); border-color:var(--accent); }
-  .project-card.disabled { opacity:0.35; cursor:not-allowed; }
-  .project-card .p-icon { font-size:22px; }
-  .project-card .p-info { flex:1; }
-  .project-card .p-name { font-weight:700; font-size:13px; }
-  .project-card .p-meta { font-size:10px; color:var(--text-dim); display:flex; gap:10px; }
-  .project-card .p-bar { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; margin-top:3px; }
-  .project-card .p-bar-fill { height:100%; background:var(--success); border-radius:2px; transition:width 1s linear; }
+.sec{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--dim);font-weight:700;margin:2px 0}
+.proj{
+  background:rgba(255,255,255,0.015);border:1px solid var(--border);
+  border-radius:6px;padding:6px 8px;cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;gap:6px;
+}
+.proj:hover:not(.locked){background:rgba(77,166,255,0.06);border-color:var(--accent)}
+.proj.locked{opacity:0.3;cursor:not-allowed}
+.proj .pico{font-size:18px;min-width:22px;text-align:center}
+.proj .pi{flex:1}
+.proj .pn{font-weight:700;font-size:12px}
+.proj .pm{font-size:9px;color:var(--dim);display:flex;gap:8px}
 
-  #right-panel {
-    width:320px; min-width:320px; padding:10px;
-    background:var(--panel); border-left:1px solid var(--border);
-    display:flex; flex-direction:column; gap:8px; overflow-y:auto;
-  }
-  .tab-row { display:flex; gap:3px; }
-  .tab-btn {
-    flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--border);
-    color:var(--text-dim); padding:5px 4px; border-radius:6px;
-    font-size:10px; font-weight:600; cursor:pointer; text-align:center; transition:all 0.2s;
-  }
-  .tab-btn:hover { color:white; border-color:var(--accent); }
-  .tab-btn.active { color:white; border-color:var(--accent); background:rgba(91,155,213,0.15); }
-  .tab-content { display:none; flex-direction:column; gap:6px; }
-  .tab-content.active { display:flex; }
+.tabs{display:flex;gap:2px;flex-wrap:wrap}
+.tab{
+  flex:1;min-width:44px;background:rgba(255,255,255,0.015);border:1px solid var(--border);
+  color:var(--dim);padding:4px 2px;border-radius:5px;font-size:9px;font-weight:700;
+  cursor:pointer;text-align:center;transition:all 0.15s;
+}
+.tab:hover{color:#fff;border-color:var(--accent)}
+.tab.on{color:#fff;border-color:var(--accent);background:rgba(77,166,255,0.1)}
+.tc{display:none;flex-direction:column;gap:5px}
+.tc.on{display:flex}
 
-  .card {
-    background:rgba(255,255,255,0.02); border:1px solid var(--border);
-    border-radius:7px; padding:7px 9px; display:flex; align-items:center;
-    gap:7px; cursor:pointer; transition:all 0.15s;
-  }
-  .card:hover:not(.locked) { background:rgba(255,255,255,0.04); border-color:var(--accent); }
-  .card.locked { opacity:0.3; cursor:not-allowed; }
-  .card.hired { border-color:var(--success); }
-  .card-icon { font-size:20px; min-width:26px; text-align:center; }
-  .card-info { flex:1; }
-  .card-name { font-weight:700; font-size:12px; }
-  .card-desc { font-size:9px; color:var(--text-dim); }
+.card{
+  background:rgba(255,255,255,0.012);border:1px solid var(--border);
+  border-radius:6px;padding:6px 8px;display:flex;align-items:center;gap:6px;
+}
+.card .ci{font-size:18px;min-width:22px;text-align:center}
+.card .cx{flex:1}
+.card .cn{font-weight:700;font-size:11px}
+.card .cd{font-size:9px;color:var(--dim)}
 
-  button {
-    background:var(--accent); color:white; border:none;
-    padding:5px 12px; border-radius:5px; font-weight:700;
-    font-size:10px; cursor:pointer; transition:all 0.15s;
-  }
-  button:hover { filter:brightness(1.15); transform:scale(1.03); }
-  button:disabled { opacity:0.3; cursor:not-allowed; transform:none; filter:none; }
-  button.small { padding:3px 8px; font-size:9px; }
-  button.secondary { background:transparent; border:1px solid var(--accent); color:var(--accent); }
-  button.danger { background:var(--danger); }
+button{
+  background:var(--accent);color:#fff;border:none;padding:4px 10px;
+  border-radius:4px;font-weight:700;font-size:9px;cursor:pointer;transition:all 0.15s;
+}
+button:hover{filter:brightness(1.2)}
+button:disabled{opacity:0.25;cursor:not-allowed;filter:none}
+button.sm{padding:2px 7px;font-size:8px}
+button.danger{background:var(--red)}
+button.ghost{background:none;border:1px solid var(--accent);color:var(--accent)}
 
-  #center-panel { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; }
-  #office-label {
-    position:absolute; bottom:12px;
-    background:var(--panel); border:1px solid var(--border);
-    border-radius:10px; padding:10px 16px; text-align:center;
-    pointer-events:none;
-  }
-  #office-label h3 { font-size:14px; color:var(--accent); margin-bottom:2px; }
-  #office-label p { font-size:10px; color:var(--text-dim); }
+#toast{
+  position:fixed;top:50px;left:50%;transform:translateX(-50%);
+  background:var(--panel);border:1px solid var(--gold);color:var(--gold);
+  padding:6px 18px;border-radius:14px;font-weight:700;font-size:12px;
+  z-index:5;pointer-events:none;animation:tp 2.5s forwards;display:none;
+}
+@keyframes tp{0%{opacity:0;transform:translateX(-50%) translateY(6px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-6px)}}
 
-  #interact-hint {
-    position:fixed; bottom:50px; left:50%; transform:translateX(-50%);
-    font-size:10px; color:var(--text-dim); pointer-events:none;
-    z-index:2; opacity:0; transition:opacity 0.5s;
-  }
+#log{
+  position:fixed;bottom:30px;left:280px;right:320px;
+  max-height:70px;overflow-y:auto;pointer-events:none;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+}
+#log .le{font-size:10px;color:var(--dim);animation:lu 3s forwards;text-align:center;padding:1px 0}
+#log .le.g{color:var(--green)}#log .le.d{color:var(--red)}#log .le.y{color:var(--gold)}
+@keyframes lu{0%{opacity:1;transform:translateY(0)}80%{opacity:0.3}100%{opacity:0;transform:translateY(-10px)}}
 
-  #log-area {
-    position:fixed; bottom:40px; left:310px; right:340px;
-    max-height:80px; overflow-y:auto; pointer-events:none; z-index:2;
-  }
-  .log-entry {
-    font-size:10px; padding:1px 0; color:var(--text-dim);
-    animation:fadeUp 3.5s forwards; text-align:center;
-  }
-  @keyframes fadeUp {
-    0% { opacity:1; transform:translateY(0); } 75% { opacity:0.4; } 100% { opacity:0; transform:translateY(-12px); }
-  }
-  .log-entry.good { color:var(--success); }
-  .log-entry.discovery { color:var(--gold); }
-  .log-entry.danger { color:var(--danger); }
+#popup{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.85);z-index:8;display:none;
+  align-items:center;justify-content:center;
+}
+#popup>div{
+  background:var(--panel);border:2px solid var(--accent);border-radius:14px;
+  padding:24px;max-width:400px;text-align:center;animation:si 0.3s ease;
+}
+@keyframes si{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+#popup h2{font-size:20px;color:var(--accent);margin-bottom:6px}
+#popup p{font-size:12px;color:var(--dim);margin-bottom:12px;line-height:1.5}
+#popup .big{font-size:56px}
 
-  #toast {
-    position:fixed; top:60px; left:50%; transform:translateX(-50%);
-    background:var(--panel); border:1px solid var(--gold);
-    color:var(--gold); padding:8px 20px; border-radius:16px;
-    font-weight:700; z-index:5; pointer-events:none;
-    animation:toastPop 2.5s forwards; display:none;
-  }
-  @keyframes toastPop {
-    0% { opacity:0; transform:translateX(-50%) translateY(8px); }
-    15% { opacity:1; transform:translateX(-50%) translateY(0); }
-    80% { opacity:1; } 100% { opacity:0; transform:translateX(-50%) translateY(-8px); }
-  }
+#evt{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.8);z-index:8;display:none;
+  align-items:center;justify-content:center;
+}
+#evt>div{
+  background:var(--panel);border:2px solid var(--red);border-radius:14px;
+  padding:20px;max-width:380px;text-align:center;animation:si 0.3s ease;
+}
+#evt h3{font-size:17px;color:var(--red);margin-bottom:6px}
+#evt p{font-size:11px;color:var(--dim);margin-bottom:12px;line-height:1.4}
+#evt .chs{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
 
-  #event-overlay {
-    position:fixed; top:0; left:0; right:0; bottom:0;
-    background:rgba(0,0,0,0.8); z-index:8;
-    display:none; align-items:center; justify-content:center;
-  }
-  #event-card {
-    background:var(--panel); border:2px solid var(--danger);
-    border-radius:14px; padding:20px; max-width:400px;
-    text-align:center; animation:slideIn 0.3s ease;
-  }
-  @keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-  #event-card h3 { font-size:18px; color:var(--danger); margin-bottom:8px; }
-  #event-card p { font-size:12px; color:var(--text-dim); margin-bottom:14px; line-height:1.4; }
-  .event-choices { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+#cbt{
+  display:none;flex-direction:column;gap:4px;
+  background:rgba(224,85,85,0.04);border:2px solid var(--red);border-radius:8px;padding:8px;margin-top:4px;
+}
+#cbt .row{display:flex;align-items:center;gap:6px}
+#cbt .hpbar{width:100%;height:5px;background:rgba(255,255,255,0.06);border-radius:3px}
+#cbt .hpf{height:100%;background:var(--red);border-radius:3px;transition:width 0.3s}
 
-  #team-popup {
-    position:fixed; top:0; left:0; right:0; bottom:0;
-    background:rgba(0,0,0,0.85); z-index:9;
-    display:none; align-items:center; justify-content:center;
-  }
-  #team-popup .card {
-    background:var(--panel); border:2px solid var(--accent);
-    border-radius:16px; padding:28px; max-width:440px;
-    text-align:center; animation:slideIn 0.4s ease;
-    flex-direction:column; align-items:center; gap:14px;
-  }
-  #team-popup h2 { font-size:22px; color:var(--accent); }
-  #team-popup .big-icon { font-size:64px; }
+#ach{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:8;
+  display:none;align-items:center;justify-content:center;
+}
+#ach>div{background:var(--panel);border:1px solid var(--gold);border-radius:14px;padding:18px;max-width:400px;max-height:70vh;overflow-y:auto;animation:si 0.3s ease}
+.ar{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:5px;background:rgba(255,255,255,0.015);border:1px solid var(--border);margin-bottom:2px}
+.ar.earned{border-color:var(--green)}
 
-  #ach-overlay {
-    position:fixed; top:0; left:0; right:0; bottom:0;
-    background:rgba(0,0,0,0.8); z-index:8;
-    display:none; align-items:center; justify-content:center;
-  }
-  #ach-card {
-    background:var(--panel); border:1px solid var(--gold);
-    border-radius:14px; padding:20px; max-width:420px; max-height:75vh;
-    overflow-y:auto; animation:slideIn 0.3s ease;
-  }
-  #ach-card h3 { text-align:center; color:var(--gold); font-size:18px; margin-bottom:8px; }
-  .ach-row {
-    display:flex; align-items:center; gap:8px; padding:6px 8px;
-    border-radius:6px; background:rgba(255,255,255,0.02); border:1px solid var(--border);
-    margin-bottom:4px;
-  }
-  .ach-row.earned { border-color:var(--success); }
-
-  /* Division entries */
-  .division-card {
-    background:rgba(91,155,213,0.05); border:1px solid var(--border);
-    border-radius:8px; padding:8px; margin-bottom:4px;
-  }
-  .division-card .div-name { font-weight:700; font-size:12px; color:var(--accent); }
-  .division-card .div-meta { font-size:9px; color:var(--text-dim); margin-top:2px; }
+#hint{
+  position:fixed;bottom:50px;left:50%;transform:translateX(-50%);
+  font-size:10px;color:var(--accent);pointer-events:none;z-index:2;
+  opacity:0;transition:opacity 0.4s;
+}
+#hint.show{opacity:1}
 </style>
 </head>
 <body>
 <audio id="bgm" loop preload="auto"><source src="Dop Dip Dup.mp3" type="audio/mpeg"></audio>
-<canvas id="canvas"></canvas>
+<canvas id="cv"></canvas>
 
-<div id="team-popup" onclick="if(event.target===this)dismissTeamPopup()">
-  <div class="card">
-    <div class="big-icon" id="popup-icon">🎉</div>
-    <h2 id="popup-title">Team Complete!</h2>
-    <p id="popup-desc" style="color:var(--text-dim);line-height:1.5;"></p>
-    <button onclick="dismissTeamPopup()">Start New Team 🚀</button>
-  </div>
-</div>
+<div id="popup"><div>
+  <div class="big" id="pp-ico">🎉</div>
+  <h2 id="pp-t"></h2><p id="pp-d"></p>
+  <button onclick="closePopup()">OK</button>
+</div></div>
 
-<div id="event-overlay">
-  <div id="event-card"><h3 id="event-title"></h3><p id="event-desc"></p><div class="event-choices" id="event-choices"></div></div>
-</div>
+<div id="evt"><div>
+  <h3 id="evt-t"></h3><p id="evt-d"></p>
+  <div class="chs" id="evt-c"></div>
+</div></div>
 
-<div id="ach-overlay" onclick="if(event.target===this)toggleAchievements()">
-  <div id="ach-card"><h3>🏆 Achievements</h3><div id="ach-list"></div><button onclick="toggleAchievements()" class="secondary" style="margin-top:6px;">Close</button></div>
-</div>
+<div id="ach" onclick="if(event.target===this)toggleAch()"><div>
+  <h3 style="text-align:center;color:var(--gold);margin-bottom:6px">🏆 Achievements</h3>
+  <div id="ach-list"></div>
+  <button onclick="toggleAch()" class="ghost" style="margin-top:6px;width:100%">Close</button>
+</div></div>
 
 <div id="ui">
   <div id="topbar">
     <h1>🏢 STAR LABS</h1>
-    <span class="team-badge" id="team-badge">Team Alpha</span>
-    <span class="divider"></span>
-    <button id="music-btn" title="Toggle Music" onclick="toggleMusic()">🔊</button>
-    <div class="resource" style="color:#4fc3f7;"><span class="icon">⚡</span><span id="res-compute">50</span><span class="rate" id="rate-compute">+1/s</span></div>
-    <div class="resource" style="color:#81c784;"><span class="icon">💰</span><span id="res-funding">200</span></div>
-    <div class="resource" style="color:#ce93d8;"><span class="icon">📊</span><span id="res-traindata">0</span></div>
-    <span class="divider"></span>
-    <button id="ach-btn" title="Achievements" onclick="toggleAchievements()">🏆 <span id="ach-count">0/20</span></button>
-    <div id="day-counter">Day 1</div>
-    <div class="resource" style="color:#ef5350;gap:3px;"><span class="icon">🔒</span><span id="res-integrity">100</span>/<span id="res-maxintegrity">100</span></div>
+    <span class="badge" id="tb">Team Alpha</span>
+    <button id="music-btn" onclick="toggleMusic()">🔊</button>
+    <div class="res" style="color:#4fc3f7"><span class="ico">⚡</span><span id="r-e">100</span><span style="font-size:9px;opacity:0.6" id="r-er">+1/s</span></div>
+    <div class="res" style="color:#81c784"><span class="ico">💰</span><span id="r-c">500</span></div>
+    <div class="res" style="color:#ce93d8"><span class="ico">📊</span><span id="r-d">0</span></div>
+    <div class="res" style="color:#e05555"><span class="ico">🔒</span><span id="r-hp">100</span></div>
+    <span class="spacer"></span>
+    <span id="day-lbl">Day 1</span>
+    <button onclick="toggleAch()" style="background:none;border:1px solid var(--border);color:var(--gold);font-size:11px;padding:2px 6px;border-radius:5px">🏆 <span id="ach-n">0</span></button>
   </div>
   <div id="main">
-    <div id="left-panel">
-      <div class="section-title">📋 AI PROJECTS</div>
-      <div id="project-list"></div>
-      <div class="section-title" style="margin-top:4px;">🧠 MODEL ZOO (<span id="catalog-count">0</span>/12)</div>
-      <div id="star-catalog"></div>
+    <div id="left">
+      <div class="sec">📋 Projects</div>
+      <div id="proj-list"></div>
+      <div class="sec" style="margin-top:4px">🧠 Models (<span id="mc">0</span>/12)</div>
+      <div id="star-list" style="font-size:10px;max-height:140px;overflow-y:auto"></div>
     </div>
-    <div id="center-panel">
-      <div id="office-label"><h3 id="office-name">Your Office</h3><p id="office-desc">Team Alpha | 0/6 members</p></div>
-    </div>
-    <div id="right-panel">
-      <div class="tab-row">
-        <div class="tab-btn active" onclick="switchTab('infra')">🏗️ Infra</div>
-        <div class="tab-btn" onclick="switchTab('team')">👥 Team</div>
-        <div class="tab-btn" onclick="switchTab('papers')">📄 Papers</div>
-        <div class="tab-btn" onclick="switchTab('security')">🛡️ Security</div>
-        <div class="tab-btn" onclick="switchTab('divisions')">🏢 Divisions</div>
+    <div id="center">
+      <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 14px;text-align:center;pointer-events:none">
+        <div style="font-size:12px;font-weight:700;color:var(--accent)" id="cinfo-t">Your Office</div>
+        <div style="font-size:9px;color:var(--dim)" id="cinfo-d">🖥️ 1 computer · Team Alpha · 0/6</div>
       </div>
-      <div class="tab-content active" id="tab-infra"></div>
-      <div class="tab-content" id="tab-team"></div>
-      <div class="tab-content" id="tab-papers"></div>
-      <div class="tab-content" id="tab-security"></div>
-      <div class="tab-content" id="tab-divisions"></div>
-      <div id="combat-overlay" style="display:none;flex-direction:column;gap:6px;background:rgba(239,83,80,0.05);border:2px solid var(--danger);border-radius:10px;padding:10px;margin-top:6px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span id="alien-icon" style="font-size:24px;">🐛</span>
-          <div style="flex:1;">
-            <div style="font-weight:700;color:var(--danger);font-size:12px;" id="alien-name">Bug</div>
-            <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:3px;"><div id="alien-hp-bar" style="height:100%;background:var(--danger);border-radius:3px;width:100%;"></div></div>
-          </div>
-        </div>
-        <button onclick="attackAlien()" id="attack-btn" class="danger" style="font-size:11px;">🛡️ Patch! (<span id="attack-dmg">10</span>)</button>
-        <div style="font-size:9px;color:var(--text-dim);text-align:center;" id="alien-threat"></div>
+    </div>
+    <div id="right">
+      <div class="tabs">
+        <div class="tab on" onclick="st('infra')">🖥️ Infra</div>
+        <div class="tab" onclick="st('team')">👥 Team</div>
+        <div class="tab" onclick="st('papers')">📄 Papers</div>
+        <div class="tab" onclick="st('sec')">🛡️ Sec</div>
+        <div class="tab" onclick="st('divs')">🏢 Divs</div>
+      </div>
+      <div class="tc on" id="tc-infra"></div>
+      <div class="tc" id="tc-team"></div>
+      <div class="tc" id="tc-papers"></div>
+      <div class="tc" id="tc-sec"></div>
+      <div class="tc" id="tc-divs"></div>
+      <div id="cbt">
+        <div class="row"><span id="ca-ico" style="font-size:20px">🐛</span><div style="flex:1"><div style="font-weight:700;color:var(--red);font-size:11px" id="ca-n">Bug</div><div class="hpbar"><div class="hpf" id="ca-hp" style="width:100%"></div></div></div></div>
+        <button class="danger sm" onclick="attack()" id="ca-btn">🛡️ Patch (<span id="ca-dmg">10</span>)</button>
+        <div style="font-size:8px;color:var(--dim);text-align:center" id="ca-thr"></div>
       </div>
     </div>
   </div>
 </div>
-<div id="log-area"></div>
+<div id="log"></div>
 <div id="toast"></div>
-<div id="interact-hint">Click desks and monitors for bonus compute! 🖱️</div>
+<div id="hint">⬆ Click a desk to assign the project!</div>
 
 <script>
-// ==================== DATA ====================
-const TEAM_NAMES = ['Alpha','Beta','Gamma','Delta','Epsilon','Zeta','Eta','Theta','Iota','Kappa'];
+// ================ DATA ================
+const TNAMES=['Alpha','Beta','Gamma','Delta','Epsilon','Zeta','Eta','Theta'];
 
-const STAR_TYPES = [
-  { name:'Linear Regression', icon:'📈', rarity:'Common', data:8, credits:15 },
-  { name:'Decision Tree', icon:'🌳', rarity:'Common', data:10, credits:20 },
-  { name:'Random Forest', icon:'🌲', rarity:'Uncommon', data:18, credits:35 },
-  { name:'Support Vector Machine', icon:'🎯', rarity:'Uncommon', data:22, credits:40 },
-  { name:'Convolutional NN', icon:'👁️', rarity:'Rare', data:35, credits:60 },
-  { name:'LSTM Network', icon:'🔄', rarity:'Rare', data:45, credits:75 },
-  { name:'Transformer', icon:'⚡', rarity:'Very Rare', data:60, credits:100 },
-  { name:'GAN', icon:'🎨', rarity:'Very Rare', data:70, credits:120 },
-  { name:'Diffusion Model', icon:'🌌', rarity:'Legendary', data:100, credits:200 },
-  { name:'Mixture of Experts', icon:'🧩', rarity:'Legendary', data:90, credits:180 },
-  { name:'RL Agent', icon:'🎮', rarity:'Rare', data:50, credits:90 },
-  { name:'Foundation Model', icon:'🧠', rarity:'Legendary', data:110, credits:220 },
+const MODELS=[
+  {n:'Linear Regression',i:'📈',r:'Common',d:8,c:15},
+  {n:'Decision Tree',i:'🌳',r:'Common',d:10,c:20},
+  {n:'Random Forest',i:'🌲',r:'Uncommon',d:18,c:35},
+  {n:'SVM',i:'🎯',r:'Uncommon',d:22,c:40},
+  {n:'CNN',i:'👁️',r:'Rare',d:35,c:60},
+  {n:'LSTM',i:'🔄',r:'Rare',d:45,c:75},
+  {n:'Transformer',i:'⚡',r:'Very Rare',d:60,c:100},
+  {n:'GAN',i:'🎨',r:'Very Rare',d:70,c:120},
+  {n:'Diffusion Model',i:'🌌',r:'Legendary',d:100,c:200},
+  {n:'MoE',i:'🧩',r:'Legendary',d:90,c:180},
+  {n:'RL Agent',i:'🎮',r:'Rare',d:50,c:90},
+  {n:'Foundation Model',i:'🧠',r:'Legendary',d:110,c:220},
 ];
 
-const PROJECTS = [
-  { id:'small_exp', name:'Small Experiment', dur:7, cost:5, risk:'Low', icon:'🧪' },
-  { id:'fine_tune', name:'Model Fine-Tuning', dur:13, cost:12, risk:'Low', icon:'🔧' },
-  { id:'arch_search', name:'Architecture Search', dur:25, cost:25, risk:'Medium', icon:'🔍' },
-  { id:'large_train', name:'Large Training Run', dur:42, cost:45, risk:'Medium', icon:'🏋️' },
-  { id:'multi_agent', name:'Multi-Agent System', dur:65, cost:70, risk:'High', icon:'🤖' },
-  { id:'foundation', name:'Foundation Model', dur:100, cost:110, risk:'High', icon:'🏛️' },
-  { id:'agi_research', name:'AGI Research', dur:140, cost:170, risk:'Very High', icon:'🧬' },
-  { id:'super_intel', name:'Superintelligence Proto', dur:200, cost:250, risk:'Extreme', icon:'💡' },
+const PROJ=[
+  {id:'se',n:'Small Experiment',i:'🧪',t:7,c:5,r:'Low'},
+  {id:'ft',n:'Fine-Tuning',i:'🔧',t:13,c:12,r:'Low'},
+  {id:'as',n:'Architecture Search',i:'🔍',t:25,c:25,r:'Medium'},
+  {id:'lt',n:'Large Training Run',i:'🏋️',t:42,c:45,r:'Medium'},
+  {id:'ma',n:'Multi-Agent System',i:'🤖',t:65,c:70,r:'High'},
+  {id:'fm',n:'Foundation Model',i:'🏛️',t:100,c:110,r:'High'},
+  {id:'agi',n:'AGI Research',i:'🧬',t:140,c:170,r:'V.High'},
+  {id:'si',n:'Superintelligence',i:'💡',t:200,c:250,r:'Extreme'},
 ];
 
-const MODULES = [
-  { id:'gpu', name:'GPU Cluster', icon:'🖥️', cost:50, scale:1.55, max:10, desc:l=>`+${l} compute/s` },
-  { id:'lab', name:'AI Lab', icon:'🧪', cost:80, scale:1.65, max:8, desc:l=>`Research ${l*12}% faster` },
-  { id:'crawler', name:'Data Crawler', icon:'🕷️', cost:100, scale:1.7, max:8, desc:l=>`+${l*8}% rare models` },
-  { id:'tpu', name:'TPU Pod', icon:'⚡', cost:300, scale:1.95, max:5, desc:l=>`+${l*5} compute/s` },
-  { id:'firewall', name:'Security Layer', icon:'🛡️', cost:150, scale:1.7, max:6, desc:l=>`-${l*5}% risk` },
-  { id:'debugger', name:'Auto-Debugger', icon:'🐛', cost:200, scale:1.8, max:4, desc:l=>`${l*12}% salvage` },
-  { id:'quantum', name:'Quantum Lab', icon:'💠', cost:500, scale:2.2, max:4, desc:l=>`+${l*8}% yields` },
+const MODS=[
+  {id:'gpu',n:'GPU Cluster',i:'🖥️',c:50,s:1.5,m:10,f:l=>`+${l} comp/s`},
+  {id:'lab',n:'AI Lab',i:'🧪',c:80,s:1.6,m:8,f:l=>`Res ${l*12}% faster`},
+  {id:'crawl',n:'Data Crawler',i:'🕷️',c:100,s:1.65,m:8,f:l=>`+${l*8}% rare`},
+  {id:'tpu',n:'TPU Pod',i:'⚡',c:300,s:1.9,m:5,f:l=>`+${l*5} comp/s`},
+  {id:'shield',n:'Security Layer',i:'🛡️',c:150,s:1.65,m:6,f:l=>`-${l*5}% risk`},
+  {id:'dbg',n:'Auto-Debugger',i:'🐛',c:200,s:1.7,m:4,f:l=>`${l*12}% salvage`},
+  {id:'quant',n:'Quantum Lab',i:'💠',c:500,s:2.0,m:4,f:l=>`+${l*8}% yields`},
 ];
 
-const RESEARCH = [
-  { id:'eff_gpu', name:'Efficient Architectures', cost:25, req:null, desc:'GPU +30% output' },
-  { id:'adv_mining', name:'Advanced Data Mining', cost:50, req:'eff_gpu', desc:'Crawler +15% eff' },
-  { id:'dist_train', name:'Distributed Training', cost:70, req:'adv_mining', desc:'Projects 20% faster' },
-  { id:'automl', name:'AutoML Pipeline', cost:85, req:'adv_mining', desc:'Lab +30%' },
-  { id:'unsupervised', name:'Unsupervised Learning', cost:130, req:'dist_train', desc:'+3 comp/s, +10% funding' },
-  { id:'federated', name:'Federated Learning', cost:160, req:'automl', desc:'+1 model/project' },
-  { id:'neuromorphic', name:'Neuromorphic Computing', cost:220, req:'unsupervised', desc:'TPU +100%' },
-  { id:'multimodal', name:'Multimodal AI', cost:260, req:'federated', desc:'Double data from discoveries' },
-  { id:'transfer', name:'Transfer Learning', cost:300, req:'neuromorphic', desc:'Projects 30% faster' },
-  { id:'predictive', name:'Predictive Analytics', cost:350, req:'multimodal', desc:'+25% legendary chance' },
+const RESRCH=[
+  {id:'r1',n:'Efficient Architectures',i:'📄',c:25,q:null,d:'GPU +30%'},
+  {id:'r2',n:'Advanced Data Mining',i:'📄',c:50,q:'r1',d:'Crawler +15%'},
+  {id:'r3',n:'Distributed Training',i:'📄',c:70,q:'r2',d:'Projects 20% faster'},
+  {id:'r4',n:'AutoML',i:'📄',c:85,q:'r2',d:'Lab +30%'},
+  {id:'r5',n:'Unsupervised Learning',i:'📄',c:130,q:'r3',d:'+3 comp/s, +10% fund'},
+  {id:'r6',n:'Federated Learning',i:'📄',c:160,q:'r4',d:'+1 model/project'},
+  {id:'r7',n:'Neuromorphic',i:'📄',c:220,q:'r5',d:'TPU +100%'},
+  {id:'r8',n:'Multimodal AI',i:'📄',c:260,q:'r6',d:'2x discovery data'},
+  {id:'r9',n:'Transfer Learning',i:'📄',c:300,q:'r7',d:'Projects 30% faster'},
+  {id:'r10',n:'Predictive Analytics',i:'📄',c:350,q:'r8',d:'+25% legendary'},
 ];
 
-const CREW = [
-  { id:'ml_researcher', name:'ML Researcher', icon:'👩‍💻', cost:80, desc:'+20% data, +15% lab speed' },
-  { id:'devops', name:'DevOps Engineer', icon:'⚙️', cost:100, desc:'+25% compute, -15% costs' },
-  { id:'pm', name:'Project Manager', icon:'📋', cost:120, desc:'+15% success, +10% speed' },
-  { id:'senior_dev', name:'Senior Developer', icon:'👨‍💻', cost:140, desc:'+20% funding' },
-  { id:'data_scientist', name:'Data Scientist', icon:'📈', cost:180, desc:'+30% discoveries' },
-  { id:'research_lead', name:'Research Lead', icon:'🎓', cost:200, desc:'+40% data, -20% paper cost' },
+const CREWT=[
+  {id:'ml',n:'ML Researcher',i:'👩‍💻',c:80,d:'+20% data'},
+  {id:'do',n:'DevOps Eng',i:'⚙️',c:100,d:'+25% comp'},
+  {id:'pm',n:'Project Mgr',i:'📋',c:120,d:'+15% success'},
+  {id:'sd',n:'Sr Developer',i:'👨‍💻',c:140,d:'+20% fund'},
+  {id:'ds',n:'Data Scientist',i:'📈',c:180,d:'+30% discovery'},
+  {id:'rl',n:'Research Lead',i:'🎓',c:200,d:'+40% data'},
 ];
 
-const EVENTS = [
-  { title:'🔌 Power Outage!', desc:'Data center lost power!', choices:[
-    { text:'Divert backup (-30 comp)', cost:{compute:30}, good:true },
-    { text:'Let systems hibernate', cost:{}, good:false },
+const EVTS=[
+  {t:'🔌 Power Outage!',d:'Data center lost power!',ch:[
+    {x:'Backup power (-30 comp)',good:true,cost:{e:30}},
+    {x:'Hibernate systems',good:false},
   ]},
-  { title:'📡 Anomalous Data', desc:'Unusual patterns in training data!', choices:[
-    { text:'Investigate (-20 comp)', cost:{compute:20}, good:true, reward:{data:40} },
-    { text:'Ignore', cost:{}, good:false },
+  {t:'📡 Anomalous Data',d:'Strange patterns!',ch:[
+    {x:'Investigate (-20 comp)',good:true,cost:{e:20},rw:{d:40}},
+    {x:'Ignore',good:false},
   ]},
-  { title:'🌡️ GPU Overheating', desc:'Temperatures spiking!', choices:[
-    { text:'Emergency cooling (-50 fund)', cost:{funding:50}, good:true },
-    { text:'Throttle (-30 comp)', cost:{}, good:false, penalty:{compute:30} },
+  {t:'🌡️ Overheating GPU',d:'Temps spiking!',ch:[
+    {x:'Emergency cool (-50 fund)',good:true,cost:{c:50}},
+    {x:'Throttle (-30 comp)',good:false,pen:{e:30}},
   ]},
-  { title:'💾 Data Breach', desc:'Unauthorized access detected!', choices:[
-    { text:'Countermeasures (-15 comp)', cost:{compute:15}, good:true, reward:{funding:60} },
-    { text:'Lock systems', cost:{}, good:false },
+  {t:'💾 Data Breach',d:'Unauthorized access!',ch:[
+    {x:'Counter (-15 comp)',good:true,cost:{e:15},rw:{c:60}},
+    {x:'Lock systems',good:false},
   ]},
-  { title:'✨ Breakthrough Window', desc:'Rare insight moment!', choices:[
-    { text:'Full sprint (-40 comp)', cost:{compute:40}, good:true, reward:{data:80,extraModels:2} },
-    { text:'Standard (-10 comp)', cost:{compute:10}, good:false, reward:{data:20} },
+  {t:'✨ Breakthrough',d:'Rare insight window!',ch:[
+    {x:'Full sprint (-40 comp)',good:true,cost:{e:40},rw:{d:80,m:2}},
+    {x:'Standard (-10 comp)',good:false,cost:{e:10},rw:{d:20}},
   ]},
-  { title:'🌐 DDoS Attack', desc:'Massive DDoS!', choices:[
-    { text:'Ride it out', cost:{}, good:false },
-    { text:'Activate CDN (-45 comp)', cost:{compute:45}, good:true, reward:{data:25} },
+  {t:'🌐 DDoS Attack',d:'Massive flood!',ch:[
+    {x:'Ride it out',good:false},
+    {x:'Activate CDN (-45 comp)',good:true,cost:{e:45},rw:{d:25}},
   ]},
 ];
 
-const ACHIEVEMENTS = [
-  { id:'first_project', name:'First Commit', desc:'Launch first project', icon:'🚀', check:()=>S.totalProjects>=1 },
-  { id:'ten_projects', name:'Veteran', desc:'Complete 10 projects', icon:'🏅', check:()=>S.successful>=10 },
-  { id:'fifty_projects', name:'Director', desc:'Complete 50 projects', icon:'🎖️', check:()=>S.successful>=50 },
-  { id:'first_model', name:'Hello World', desc:'Develop first model', icon:'🧠', check:()=>S.stars.length>=1 },
-  { id:'five_models', name:'Collector', desc:'5 model types', icon:'📚', check:()=>S.stars.length>=5 },
-  { id:'all_models', name:'Encyclopedia', desc:'All 12 models', icon:'🏛️', check:()=>S.stars.length>=12 },
-  { id:'rich', name:'Well Funded', desc:'1000 funding', icon:'💰', check:()=>S.credits>=1000 },
-  { id:'first_kill', name:'Bug Squasher', desc:'Defeat first threat', icon:'🐛', check:()=>S.aliensDefeated>=1 },
-  { id:'first_team', name:'Team Builder', desc:'Form your first team', icon:'👥', check:()=>S.teams.length>=1 },
-  { id:'three_teams', name:'Division Head', desc:'Build 3 teams', icon:'🏢', check:()=>S.teams.length>=3 },
-  { id:'five_teams', name:'Lab Director', desc:'Build 5 teams', icon:'🏛️', check:()=>S.teams.length>=5 },
-  { id:'day30', name:'Tenured', desc:'Reach Day 30', icon:'📅', check:()=>S.day>=30 },
-  { id:'ten_kills', name:'Security Expert', desc:'Defeat 10 threats', icon:'🛡️', check:()=>S.aliensDefeated>=10 },
-  { id:'boss_kill', name:'Zero-Day Hero', desc:'Defeat Zero-Day', icon:'💀', check:()=>S.mothershipsDefeated>=1 },
-  { id:'first_event', name:'Crisis Manager', desc:'Handle incident', icon:'⚡', check:()=>S.eventsHandled>=1 },
-  { id:'researcher', name:'Published', desc:'3 papers', icon:'📄', check:()=>S.research.length>=3 },
-  { id:'full_research', name:'Nobel Potential', desc:'All papers', icon:'🏆', check:()=>S.research.length>=RESEARCH.length },
-  { id:'survivor', name:'Resilient', desc:'Survive <20% integrity', icon:'❤️‍🩹', check:()=>S.stationHP<=20&&S.stationHP>0 },
-  { id:'big_project', name:'Moonshot', desc:'Complete superintelligence', icon:'💡', check:()=>S.voidLeaps>=1 },
-  { id:'max_mod', name:'Fully Equipped', desc:'Max any infra', icon:'🔝', check:()=>Object.values(S.modules).some(v=>v>=10) },
+const ACHV=[
+  {id:'a1',n:'First Commit',i:'🚀',d:'Launch first project',f:()=>S.tp>=1},
+  {id:'a2',n:'Veteran',i:'🏅',d:'10 projects',f:()=>S.sp>=10},
+  {id:'a3',n:'Director',i:'🎖️',d:'50 projects',f:()=>S.sp>=50},
+  {id:'a4',n:'Hello World',i:'🧠',d:'First model',f:()=>S.md.length>=1},
+  {id:'a5',n:'Collector',i:'📚',d:'5 models',f:()=>S.md.length>=5},
+  {id:'a6',n:'Full Stack',i:'🏛️',d:'All 12 models',f:()=>S.md.length>=12},
+  {id:'a7',n:'Well Funded',i:'💰',d:'1k funding',f:()=>S.c>=1000},
+  {id:'a8',n:'Bug Squasher',i:'🐛',d:'Defeat 1 threat',f:()=>S.ad>=1},
+  {id:'a9',n:'Team Builder',i:'👥',d:'Form first team',f:()=>S.ts.length>=1},
+  {id:'a10',n:'Div Head',i:'🏢',d:'3 autonomous teams',f:()=>S.ts.length>=3},
+  {id:'a11',n:'Lab Director',i:'🏛️',d:'5 teams',f:()=>S.ts.length>=5},
+  {id:'a12',n:'Tenured',i:'📅',d:'Day 30',f:()=>S.day>=30},
+  {id:'a13',n:'Sec Expert',i:'🛡️',d:'10 threats',f:()=>S.ad>=10},
+  {id:'a14',n:'Zero-Day Hero',i:'💀',d:'Defeat Zero-Day',f:()=>S.mk>=1},
+  {id:'a15',n:'Crisis Mgr',i:'⚡',d:'Handle incident',f:()=>S.eh>=1},
+  {id:'a16',n:'Published',i:'📄',d:'3 papers',f:()=>S.rs.length>=3},
+  {id:'a17',n:'Nobel',i:'🏆',d:'All 10 papers',f:()=>S.rs.length>=10},
+  {id:'a18',n:'Survivor',i:'❤️‍🩹',d:'<20% integrity',f:()=>S.hp<=20&&S.hp>0},
+  {id:'a19',n:'Moonshot',i:'💡',d:'Finish superintelligence',f:()=>S.vl>=1},
+  {id:'a20',n:'Maxed Out',i:'🔝',d:'Max any infra',f:()=>Object.values(S.mods).some(v=>v>=10)},
 ];
 
-const ALIENS = [
-  { id:'script_kiddie', name:'Script Kiddie', icon:'🐛', hp:30, damage:4, atkSpeed:3, reward:{credits:60,data:10}, speed:0.6 },
-  { id:'hacker', name:'Hacker', icon:'👾', hp:60, damage:8, atkSpeed:2.5, reward:{credits:120,data:25}, speed:0.8 },
-  { id:'apt_group', name:'APT Group', icon:'🕵️', hp:100, damage:15, atkSpeed:2, reward:{credits:250,data:50}, speed:0.5 },
-  { id:'zero_day', name:'Zero-Day Exploit', icon:'☠️', hp:250, damage:25, atkSpeed:3, reward:{credits:600,data:150}, speed:0.3 },
+const ALIENS=[
+  {id:'sk',n:'Script Kiddie',i:'🐛',hp:30,d:4,sp:3,rw:{c:60,d:10},s:0.6},
+  {id:'hk',n:'Hacker',i:'👾',hp:60,d:8,sp:2.5,rw:{c:120,d:25},s:0.8},
+  {id:'ap',n:'APT Group',i:'🕵️',hp:100,d:15,sp:2,rw:{c:250,d:50},s:0.5},
+  {id:'zd',n:'Zero-Day Exploit',i:'☠️',hp:250,d:25,sp:3,rw:{c:600,d:150},s:0.3},
 ];
 
-const DEFENSE = [
-  { id:'laser', name:'Firewall', icon:'🔥', cost:100, scale:1.6, max:6, desc:l=>`${l*5} dmg/sec` },
-  { id:'cannon', name:'Intrusion Detection', icon:'🔍', cost:150, scale:1.7, max:5, desc:l=>`+${l*8} manual dmg` },
-  { id:'repair', name:'System Restore', icon:'🔄', cost:200, scale:1.7, max:5, desc:l=>`+${l*3} integrity/5s` },
+const DEFS=[
+  {id:'fw',n:'Firewall',i:'🔥',c:100,s:1.55,m:6,f:l=>`${l*5} dmg/sec`},
+  {id:'ids',n:'Intrusion Det.',i:'🔍',c:150,s:1.6,m:5,f:l=>`+${l*8} manual dmg`},
+  {id:'rep',n:'System Restore',i:'🔄',c:200,s:1.6,m:5,f:l=>`+${l*3} HP/5s`},
 ];
 
-// ==================== STATE ====================
-const S = {
-  energy:100, credits:500, data:0, day:1, tick:0,
-  modules:{}, research:[], crew:[], // crew = current team members
-  projects:[], stars:[], discoveries:[],
-  totalProjects:0, successful:0, failed:0,
-  eventsHandled:0, voidLeaps:0,
-  achievements:[], stationHP:100, maxHP:100,
-  aliensDefeated:0, mothershipsDefeated:0,
-  currentAlien:null,
-  teams:[], // array of {name, members:[], projectsCompleted:0}
-  teamIndex:0, // which team name we're on
+// ================ STATE ================
+const S={
+  e:100,c:500,d:0,day:1,tick:0,
+  mods:{},rs:[],cr:[], // crew = current team
+  pj:[],md:[], // projects, models discovered
+  tp:0,sp:0,fp:0,eh:0,vl:0,
+  ac:[],hp:100,mh:100,ad:0,mk:0,ca:null,
+  ts:[],ti:0, // teams, team index
+  pcs:1, // computers owned (starts at 1)
 };
-MODULES.forEach(m=>{S.modules[m.id]=0;});
-DEFENSE.forEach(m=>{S.modules[m.id]=0;});
+MODS.forEach(m=>S.mods[m.id]=0);
+DEFS.forEach(m=>S.mods[m.id]=0);
 
-function currentTeamName(){ return TEAM_NAMES[S.teamIndex]||'Team '+(S.teamIndex+1); }
-function teamMemberCount(){ return S.crew.length; }
+// Assignment mode
+let assigningProj=null; // proj def being assigned
 
-// ==================== CANVAS (OFFICE) ====================
-const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
-let deskLights=[],officePeople=[];
-function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
-resize(); window.addEventListener('resize',resize);
+function tn(){return TNAMES[S.ti]||'Team '+(S.ti+1)}
+function tmc(){return S.cr.length}
 
-// Office desks (interactive click targets)
-const desks=[];
-for(let row=0;row<5;row++){
-  for(let col=0;col<6;col++){
-    desks.push({x:150+col*160+Math.random()*40,y:80+row*120+Math.random()*30,w:70,h:45,monitorOn:false,id:row*6+col});
+// ================ CANVAS ================
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');
+let particles=[],bgDots=[];
+function rs(){cv.width=innerWidth;cv.height=innerHeight}
+rs();addEventListener('resize',rs);
+for(let i=0;i<80;i++)bgDots.push({x:Math.random()*2500,y:Math.random()*1500,r:Math.random()*1+0.3,s:Math.random()*0.3+0.1});
+
+// Desk positions (dynamic based on computer count)
+function getDesks(){
+  const w=cv.width,h=cv.height; const cx0=w/2,cy0=h/2-20;
+  const ds=[];
+  for(let i=0;i<S.pcs;i++){
+    const row=Math.floor(i/5),col=i%5;
+    const x=cx0+(col-2)*130,y=cy0+(row-1)*110;
+    ds.push({x,y,w:80,h:50,id:i});
   }
-}
-for(let i=0;i<40;i++) deskLights.push({x:Math.random()*2000-100,y:Math.random()*1200-50,r:Math.random()*1.2+0.3,phase:Math.random()*Math.PI*2});
-for(let i=0;i<8;i++) officePeople.push({desk:Math.floor(Math.random()*desks.length),phase:Math.random()*Math.PI*2});
-
-function drawOffice(cx,cy,scale){
-  ctx.save(); ctx.translate(cx,cy); ctx.scale(scale,scale);
-
-  // Floor / carpet
-  ctx.fillStyle='#3a4555'; ctx.fillRect(-150,-100,300,200);
-  for(let x=-150;x<150;x+=20){
-    for(let y=-100;y<100;y+=20){
-      ctx.fillStyle=(Math.floor((x+150)/20)+Math.floor((y+100)/20))%2===0?'#3d4859':'#374353';
-      ctx.fillRect(x,y,20,20);
-    }
-  }
-
-  // Walls
-  ctx.fillStyle='#4a5568'; ctx.fillRect(-150,-100,300,8); // top wall
-  ctx.fillStyle='#505b6e'; ctx.fillRect(-150,-100,8,200); // left wall
-  ctx.fillRect(142,-100,8,200); // right wall
-
-  // Desks
-  desks.forEach((d,i)=>{
-    const sx=cx+(d.x-150)*scale, sy=cy+(d.y-100)*scale;
-    // Draw at world space
-  });
-  ctx.restore();
+  return ds;
 }
 
 function draw(){
-  ctx.fillStyle='#1a1d23'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  cx.fillStyle='#0f1117';cx.fillRect(0,0,cv.width,cv.height);
   const t=Date.now()/1000;
 
-  // Office ceiling lights
-  deskLights.forEach(l=>{ const a=0.15+Math.sin(t*0.7+l.phase)*0.08; ctx.fillStyle=`rgba(255,240,220,${a})`; ctx.beginPath(); ctx.arc(l.x,l.y,l.r,0,Math.PI*2); ctx.fill(); });
+  // Ambient dots
+  bgDots.forEach(d=>{const a=0.3+Math.sin(t*d.s+d.x*0.01)*0.2;cx.fillStyle=`rgba(60,80,120,${a*0.5})`;cx.beginPath();cx.arc(d.x,d.y,d.r,0,Math.PI*2);cx.fill()});
 
-  const sx=canvas.width*0.5, sy=canvas.height*0.45, s=2.2;
-  // Draw floor
-  ctx.save(); ctx.translate(sx,sy); ctx.scale(s,s);
-  ctx.fillStyle='#3e4a5a'; ctx.fillRect(-180,-120,360,240);
-  for(let x=-180;x<180;x+=24){ for(let y=-120;y<120;y+=24){ ctx.fillStyle=(Math.floor((x+180)/24)+Math.floor((y+120)/24))%2===0?'#414d5e':'#3b4758'; ctx.fillRect(x,y,24,24); } }
-  ctx.fillStyle='#4a5568'; ctx.fillRect(-180,-120,360,8);
-  ctx.fillStyle='#505b6e'; ctx.fillRect(-180,-116,8,236);
-  ctx.fillRect(172,-116,8,236);
+  const desks=getDesks();
 
-  // Draw desks with monitors
+  // Draw desks
   desks.forEach(d=>{
-    const dx=d.x-150,dy=d.y-100;
+    const running=S.pj.find(p=>p.desk===d.id&&p.pr<p.max);
+    const glow=running?0.3+Math.sin(t*3)*0.1:0;
+    // Desk shadow
+    cx.fillStyle='rgba(0,0,0,0.3)';cx.fillRect(d.x-d.w/2+3,d.y-d.h/2+3,d.w,d.h);
     // Desk surface
-    ctx.fillStyle='#5d4037'; ctx.fillRect(dx-32,dy-18,64,36);
-    ctx.fillStyle='#6d4c41'; ctx.fillRect(dx-30,dy-16,60,32);
+    const dg=cx.createLinearGradient(d.x,d.y-d.h/2,d.x,d.y+d.h/2);
+    dg.addColorStop(0,'#3d3226');dg.addColorStop(0.5,'#4a3d2f');dg.addColorStop(1,'#2e241c');
+    cx.fillStyle=dg;cx.fillRect(d.x-d.w/2,d.y-d.h/2,d.w,d.h);
+    cx.strokeStyle='rgba(255,255,255,0.04)';cx.lineWidth=1;cx.strokeRect(d.x-d.w/2,d.y-d.h/2,d.w,d.h);
     // Monitor
-    ctx.fillStyle='#333'; ctx.fillRect(dx-14,dy-28,28,14);
-    ctx.fillStyle=d.monitorOn?'#4fc3f7':'#1a1a1a'; ctx.fillRect(dx-12,dy-26,24,10);
-    if(d.monitorOn){ ctx.fillStyle='rgba(79,195,247,0.3)'; ctx.fillRect(dx-12,dy-26,24,4); }
-    // Chair
-    ctx.fillStyle='#424242'; ctx.beginPath(); ctx.ellipse(dx,dy+26,16,8,0,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#333'; ctx.fillRect(dx-2,dy+10,4,16);
+    cx.fillStyle='#1a1a1a';cx.fillRect(d.x-16,d.y-d.h/2-18,32,16);
+    cx.fillStyle=running?'#1a1a2e':'#111';cx.fillRect(d.x-14,d.y-d.h/2-16,28,12);
+    if(running){
+      const pct=running.pr/running.max;
+      // Glow
+      cx.fillStyle=`rgba(77,166,255,${0.3+glow})`;cx.fillRect(d.x-14,d.y-d.h/2-16,28,12);
+      // Progress bar on monitor
+      cx.fillStyle='rgba(76,175,132,0.8)';cx.fillRect(d.x-12,d.y-d.h/2-5,24*pct,3);
+      // Project icon
+      cx.fillStyle='#fff';cx.font='10px sans-serif';cx.textAlign='center';
+      cx.fillText(running.pj.i,d.x,d.y-d.h/2-2);
+      // Progress text
+      cx.fillStyle='rgba(255,255,255,0.7)';cx.font='7px sans-serif';
+      cx.fillText(Math.floor(pct*100)+'%',d.x,d.y-d.h/2+10);
+    }
     // Keyboard
-    ctx.fillStyle='#222'; ctx.fillRect(dx-10,dy-2,20,5);
+    cx.fillStyle='#1a1a1a';cx.fillRect(d.x-14,d.y+4,28,6);
+    // Chair
+    cx.fillStyle='#333';cx.beginPath();cx.ellipse(d.x,d.y+d.h/2+12,12,6,0,0,Math.PI*2);cx.fill();
+    // Highlight if assigning
+    if(assigningProj&&!running){
+      cx.strokeStyle='rgba(77,166,255,0.7)';cx.lineWidth=2;cx.setLineDash([3,3]);
+      cx.beginPath();cx.roundRect(d.x-d.w/2-4,d.y-d.h/2-22,d.w+8,d.h+30,6);cx.stroke();cx.setLineDash([]);
+    }
   });
 
-  // People at desks
-  officePeople.forEach(p=>{
-    const d=desks[p.desk%desks.length];
-    if(!d) return;
-    const b=Math.sin(t*1.5+p.phase)*2;
-    ctx.fillStyle='#e8c9a0'; ctx.beginPath(); ctx.arc(d.x-150+b,d.y-120,5,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#555'; ctx.fillRect(d.x-153+b,d.y-115,6,10);
-  });
-
-  // Your desk (highlighted — center)
-  ctx.strokeStyle='rgba(91,155,213,0.6)'; ctx.lineWidth=2; ctx.setLineDash([3,3]);
-  ctx.beginPath(); ctx.roundRect(-40,-22,80,58,8); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle='rgba(91,155,213,0.08)'; ctx.fillRect(-40,-22,80,58);
-
-  // Ships = active projects orbiting your desk
-  S.projects.forEach((p,i)=>{
-    if(p.progress>=p.max) return;
-    const ang=(i/Math.max(S.projects.length,1))*Math.PI*2+t*0.3;
-    const dist=70+i*16;
-    const px=Math.cos(ang)*dist, py=Math.sin(ang)*dist*0.5;
-    ctx.save(); ctx.translate(px,py); ctx.rotate(ang+Math.PI/2);
-    ctx.fillStyle='#81c784'; ctx.beginPath(); ctx.moveTo(0,-5); ctx.lineTo(-2,3); ctx.lineTo(2,3); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.arc(0,0,7,-Math.PI/2,-Math.PI/2+(p.progress/p.max)*Math.PI*2); ctx.strokeStyle='rgba(129,199,132,0.6)'; ctx.lineWidth=1.2; ctx.stroke();
-    ctx.restore();
-  });
-
-  // Threat (hacker)
-  if(S.currentAlien){
-    const a=S.currentAlien; a.x-=a.speed; if(a.x<sx/s+80) a.x=sx/s+80;
-    ctx.save(); ctx.translate(a.x,a.y); const bob=Math.sin(t*4)*2;
-    ctx.fillStyle='#ef5350'; ctx.beginPath(); ctx.ellipse(0,bob,18,10,0,0,Math.PI*2); ctx.fill();
-    const hpPct=a.hp/a.maxHp; ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(-16,bob-20,32,4); ctx.fillStyle='#ef5350'; ctx.fillRect(-16,bob-20,32*hpPct,4);
-    ctx.fillStyle='white'; ctx.font='9px sans-serif'; ctx.textAlign='center'; ctx.fillText(a.name,0,bob-24);
-    ctx.restore();
-    // Laser
-    if(S.modules.laser>0){ ctx.strokeStyle='rgba(100,200,255,0.6)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(a.x*s-22*s,a.y*s-sy); ctx.stroke(); }
+  // Threat
+  if(S.ca){
+    const a=S.ca;a.x-=a.s;if(a.x<cv.width*0.25)a.x=cv.width*0.25;
+    cx.save();cx.translate(a.x,a.y);const bob=Math.sin(t*4)*2;
+    cx.fillStyle='#e05555';cx.beginPath();cx.ellipse(0,bob,16,9,0,0,Math.PI*2);cx.fill();
+    const hpP=a.hp/a.mhp;cx.fillStyle='rgba(0,0,0,0.5)';cx.fillRect(-14,bob-18,28,3);cx.fillStyle='#e05555';cx.fillRect(-14,bob-18,28*hpP,3);
+    cx.fillStyle='#fff';cx.font='8px sans-serif';cx.textAlign='center';cx.fillText(a.n,0,bob-22);
+    cx.restore();
+    if(S.mods.fw>0){
+      cx.strokeStyle='rgba(100,180,255,0.5)';cx.lineWidth=1;
+      cx.beginPath();cx.moveTo(cv.width*0.5,cv.height*0.45);cx.lineTo(a.x-14,a.y+bob);cx.stroke();
+    }
   }
 
-  ctx.restore();
+  // Particles
+  particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.l-=0.03;cx.fillStyle=`rgba(77,166,255,${p.l*0.4})`;cx.fillRect(p.x,p.y,1,1);return p.l>0});
+  if(particles.length>80)particles.splice(0,particles.length-80);
 
   requestAnimationFrame(draw);
 }
 draw();
 
-// Interactive: click desks to toggle monitors (bonus compute)
-canvas.addEventListener('click',(e)=>{
-  const rect=canvas.getBoundingClientRect();
-  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
-  const sx=canvas.width*0.5, sy=canvas.height*0.45, s=2.2;
-  desks.forEach(d=>{
-    const dx=(d.x-150)*s+sx, dy=(d.y-100)*s+sy;
-    if(mx>dx-32&&mx<dx+32&&my>dy-30&&my<dy+30){
-      d.monitorOn=!d.monitorOn;
-      if(d.monitorOn){ S.energy+=2; addLog('🖥️ Monitor turned on! +2 compute','good'); }
+// Spawn particles from desk
+function sparkDesk(d){for(let i=0;i<6;i++)particles.push({x:d.x,y:d.y,l:1,vx:(Math.random()-0.5)*1.5,vy:-Math.random()*2-1})}
+
+// Click handler
+cv.addEventListener('click',e=>{
+  const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  const desks=getDesks();
+  // Check desk clicks
+  for(const d of desks){
+    if(mx>d.x-d.w/2-10&&mx<d.x+d.w/2+10&&my>d.y-d.h/2-24&&my<d.y+d.h/2+18){
+      if(assigningProj){
+        const running=S.pj.find(p=>p.desk===d.id&&p.pr<p.max);
+        if(!running){launchOnDesk(assigningProj,d.id);assigningProj=null;document.getElementById('hint').classList.remove('show');return;}
+      }
+      // Toggle monitor interaction: click empty desk for bonus
+      const running=S.pj.find(p=>p.desk===d.id&&p.pr<p.max);
+      if(!running){S.e+=1;sparkDesk(d);addLog('🖱️ +1 compute','g');}
+      return;
     }
-  });
-  // Check if clicked on enemy
-  if(S.currentAlien){
-    const a=S.currentAlien, ax=a.x*s, ay=a.y*s;
-    if(Math.hypot(mx-ax,my-ay)<30){ attackAlien(); }
   }
+  // Click enemy?
+  if(S.ca){const a=S.ca;if(Math.hypot(mx-a.x,my-a.y)<24)attack();return;}
+  assigningProj=null;document.getElementById('hint').classList.remove('show');
 });
 
-// ==================== TABS ====================
-function switchTab(name){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-  const tabBtn=document.querySelector(`.tab-btn[onclick*="${name}"]`); if(tabBtn)tabBtn.classList.add('active');
-  document.getElementById(`tab-${name}`).classList.add('active');
-  if(name==='divisions') renderDivisionsTab();
+// ================ ACTIONS ================
+let pid=0;
+function startAssignment(proj){
+  if(S.pj.filter(p=>p.pr<p.max).length>=S.pcs||S.e<proj.c)return;
+  assigningProj=proj;document.getElementById('hint').classList.add('show');
+  addLog('⬆ Click a desk to assign '+proj.n+'!','y');
 }
 
-// ==================== TEAM SYSTEM ====================
-function checkTeamComplete(){
-  if(teamMemberCount()>=6){
-    const name=currentTeamName();
-    S.teams.push({name,members:[...S.crew],projectsCompleted:S.successful});
-    S.crew=[]; S.teamIndex++;
-    // Popup
-    document.getElementById('popup-icon').textContent='🎉';
-    document.getElementById('popup-title').textContent=`${name} is Complete!`;
-    document.getElementById('popup-desc').textContent=`Your team of 6 has become an autonomous division. They'll continue working independently. You've been promoted to lead ${currentTeamName()}!`;
-    document.getElementById('team-popup').style.display='flex';
-    document.getElementById('team-badge').textContent=currentTeamName();
-    document.getElementById('office-desc').textContent=`${currentTeamName()} | 0/6 members`;
-    addLog(`🎉 ${name} is now an autonomous division! Starting ${currentTeamName()}...`,'good');
-    showToast(`🎉 ${name} autonomous! New: ${currentTeamName()}`);
-    checkAchievements();
-  }
-}
-function dismissTeamPopup(){ document.getElementById('team-popup').style.display='none'; updateUI(); }
-
-// ==================== GAME ACTIONS ====================
-let expCounter=0;
-function launchProject(proj){
-  if(S.projects.filter(p=>p.progress<p.max).length>=6||S.energy<proj.cost) return;
-  S.energy-=proj.cost; S.totalProjects++;
-  let dur=proj.dur; if(S.research.includes('dist_train')) dur=Math.floor(dur*0.8); if(S.research.includes('transfer')) dur=Math.floor(dur*0.7);
-  const pm=teamMemberCount()>3?0.1:0;
-  dur=Math.floor(dur*(1-pm));
-  const extraStars=S.research.includes('federated')?1:0;
-  S.projects.push({proj,progress:0,max:dur,extraStars,id:`${proj.id}_${++expCounter}`});
-  addLog(`Project launched: ${proj.name}`,''); updateUI();
+function launchOnDesk(proj,deskId){
+  S.e-=proj.c;S.tp++;
+  let dur=proj.t;if(S.rs.includes('r3'))dur=Math.floor(dur*0.8);if(S.rs.includes('r9'))dur=Math.floor(dur*0.7);
+  S.pj.push({pj:proj,pr:0,max:dur,desk:deskId,es:S.rs.includes('r6')?1:0,id:++pid});
+  addLog(`📋 ${proj.n} on desk #${deskId+1}`,'');sparkDesk(getDesks()[deskId]);updateUI();
 }
 
 function completeProject(p){
-  const idx=S.projects.indexOf(p); if(idx>=0) S.projects.splice(idx,1);
-  if(p.proj.id==='super_intel') S.voidLeaps++;
-  const baseRisk={Low:0.85,Medium:0.7,High:0.55,'Very High':0.4,Extreme:0.25}[p.proj.risk]||0.7;
-  const successChance=baseRisk+S.modules.firewall*0.05+(S.modules.debugger*0.12);
-  const succeeded=Math.random()<Math.min(0.95,successChance);
-  if(succeeded){
-    S.successful++; const count=Math.floor(1+Math.random()*3)+p.extraStars;
-    let td=0,tc=0; count>0&&count;
-    for(let i=0;i<count;i++){
-      const roll=Math.random()*100; let idx;
-      if(roll<5+S.modules.crawler*8) idx=Math.floor(Math.random()*3)+8;
-      else if(roll<20+S.modules.crawler*5) idx=Math.floor(Math.random()*3)+5;
-      else if(roll<50+S.modules.crawler*3) idx=Math.floor(Math.random()*2)+3;
+  const i=S.pj.indexOf(p);if(i>=0)S.pj.splice(i,1);
+  if(p.pj.id==='si')S.vl++;
+  const br={Low:0.85,Medium:0.7,High:0.55,'V.High':0.4,Extreme:0.25}[p.pj.r]||0.7;
+  const sc=Math.min(0.95,br+S.mods.shield*0.05+S.mods.dbg*0.12);
+  if(Math.random()<sc){
+    S.sp++;const cnt=1+Math.floor(Math.random()*3)+p.es;let td=0,tc=0;
+    for(let i=0;i<cnt;i++){
+      const r=Math.random()*100;let idx;
+      if(r<5+S.mods.crawl*8)idx=Math.floor(Math.random()*3)+8;
+      else if(r<20+S.mods.crawl*5)idx=Math.floor(Math.random()*3)+5;
+      else if(r<50+S.mods.crawl*3)idx=Math.floor(Math.random()*2)+3;
       else idx=Math.floor(Math.random()*3);
-      const star=STAR_TYPES[idx]; td+=star.data; tc+=star.credits;
-      if(!S.stars.find(s=>s.name===star.name)){ S.stars.push(star); showToast(`🧠 ${star.name}!`); addLog(`Developed: ${star.icon} ${star.name} (${star.rarity})`,'discovery'); }
+      const m=MODELS[idx];td+=m.d;tc+=m.c;
+      if(!S.md.find(x=>x.n===m.n)){S.md.push(m);toast(`🧠 ${m.n}!`);addLog(`🧠 ${m.i} ${m.n} (${m.r})`,'y');}
     }
-    if(S.research.includes('multimodal')) td*=2;
-    const qm=1+S.modules.quantum*0.08; td=Math.floor(td*qm); tc=Math.floor(tc*qm);
-    S.data+=td; S.credits+=tc;
-    addLog(`✅ ${p.proj.name}: +${td} data, +${tc} funding`,'good');
-  } else { S.failed++; addLog(`❌ ${p.proj.name} failed`,'danger'); }
-  checkAchievements(); updateUI();
+    if(S.rs.includes('r8'))td*=2;
+    const qm=1+S.mods.quant*0.08;td=Math.floor(td*qm);tc=Math.floor(tc*qm);
+    S.d+=td;S.c+=tc;addLog(`✅ ${p.pj.n}: +${td}📊 +${tc}💰`,'g');
+  }else{S.fp++;addLog(`❌ ${p.pj.n} failed`,'d')}
+  const d=getDesks()[p.desk];if(d)sparkDesk(d);
+  checkAch();updateUI();
 }
 
-function buyModule(mod){
-  const lvl=S.modules[mod.id]; let cost=Math.floor(mod.cost*Math.pow(mod.scale,lvl));
-  if(S.credits<cost||lvl>=mod.max) return; S.credits-=cost; S.modules[mod.id]++;
-  addLog(`Upgraded ${mod.name} → Lv.${S.modules[mod.id]}`,'good'); checkAchievements(); updateUI();
+function buyMod(mod){
+  const l=S.mods[mod.id];let cost=Math.floor(mod.c*Math.pow(mod.s,l));
+  if(S.c<cost||l>=mod.m)return;S.c-=cost;S.mods[mod.id]++;
+  addLog(`🖥️ ${mod.n} → Lv${S.mods[mod.id]}`,'g');checkAch();updateUI();
 }
 
-function researchTech(res){
-  if(S.data<res.cost||S.research.includes(res.id)) return; if(res.req&&!S.research.includes(res.req)) return;
-  let cost=res.cost;
-  S.data-=cost; S.research.push(res.id);
-  showToast(`📄 Published: ${res.name}!`); addLog(`Published: ${res.name} — ${res.desc}`,'discovery'); checkAchievements(); updateUI();
+function buyPC(){
+  const cost=150+Math.floor(S.pcs*120*Math.pow(1.3,S.pcs));
+  if(S.c<cost||S.pcs>=20)return;S.c-=cost;S.pcs++;
+  addLog(`🖥️ Bought computer #${S.pcs}!`,'g');updateUI();
 }
 
-function hireCrew(c){ if(teamMemberCount()>=6||S.credits<c.cost) return; S.credits-=c.cost; S.crew.push(c); addLog(`Hired ${c.icon} ${c.name}! (${teamMemberCount()}/6)`,'good'); checkTeamComplete(); checkAchievements(); updateUI(); }
-function fireCrew(type){ const i=S.crew.findIndex(c=>c.id===type); if(i<0) return; S.crew.splice(i,1); addLog('Member released.',''); updateUI(); }
+function doResearch(r){
+  if(S.d<r.c||S.rs.includes(r.id))return;if(r.q&&!S.rs.includes(r.q))return;
+  S.d-=r.c;S.rs.push(r.id);toast(`📄 ${r.n}!`);addLog(`📄 Published: ${r.n} — ${r.d}`,'y');checkAch();updateUI();
+}
 
-// ==================== COMBAT ====================
-let combatTimer=null;
+function hireCrew(cr){
+  if(tmc()>=6||S.c<cr.c)return;const hired=S.cr.filter(c=>c.id===cr.id).length;if(hired>=1)return;
+  S.c-=cr.c;S.cr.push(cr);addLog(`👥 ${cr.i} ${cr.n} (${tmc()}/6)`,'g');
+  if(tmc()>=6)completeTeam();checkAch();updateUI();
+}
+function fireCrew(id){const i=S.cr.findIndex(c=>c.id===id);if(i<0)return;S.cr.splice(i,1);addLog('Released','');updateUI()}
+
+function completeTeam(){
+  const name=tn();S.ts.push({n:name,members:[...S.cr],pcs:S.sp});S.cr=[];S.ti++;
+  document.getElementById('pp-ico').textContent='🎉';
+  document.getElementById('pp-t').textContent=name+' is Autonomous!';
+  document.getElementById('pp-d').textContent='Your team of 6 now runs independently. You lead '+tn()+' now. Just like real Star Labs — divisions don\'t interact!';
+  document.getElementById('popup').style.display='flex';
+  addLog(`🎉 ${name} autonomous! New: ${tn()}`,'y');toast(`🎉 ${name} → ${tn()}!`);
+  checkAch();updateUI();
+}
+function closePopup(){document.getElementById('popup').style.display='none';updateUI()}
+
+// ================ COMBAT ================
+let ctimer=null;
 function spawnAlien(){
-  if(S.currentAlien) return; let mx=0; if(S.day>5) mx=1; if(S.day>15) mx=2; if(S.day>30) mx=3;
-  const at=ALIENS[Math.floor(Math.random()*(mx+1))];
-  S.currentAlien={type:at,hp:at.hp,maxHp:at.hp,name:at.name,icon:at.icon,damage:at.damage,reward:at.reward,atkSpeed:at.atkSpeed,speed:at.speed,x:canvas.width*0.7/2.2,y:-30+Math.random()*20,attackTimer:0};
-  showToast(`⚠️ ${at.icon} ${at.name} detected!`); addLog(`🚨 ${at.icon} ${at.name} attacking!`,'danger'); updateCombatUI();
+  if(S.ca)return;let mx=0;if(S.day>5)mx=1;if(S.day>15)mx=2;if(S.day>30)mx=3;
+  const a=ALIENS[Math.floor(Math.random()*(mx+1))];
+  S.ca={type:a,hp:a.hp,mhp:a.hp,n:a.n,i:a.i,d:a.d,sp:a.sp,rw:a.rw,s:a.s,x:cv.width*0.85,y:cv.height*0.35+Math.random()*80,at:0};
+  toast(`⚠️ ${a.i} ${a.n}!`);addLog(`🚨 ${a.i} ${a.n} attacking!`,'d');updateCbt();
 }
-function attackAlien(){
-  if(!S.currentAlien) return; const dmg=10+S.modules.cannon*8;
-  S.currentAlien.hp-=dmg; addLog(`🛡️ Patched for ${dmg} dmg!`,'');
-  if(S.currentAlien.hp<=0) defeatAlien(); updateCombatUI();
+function attack(){
+  if(!S.ca)return;const dmg=10+S.mods.ids*8;S.ca.hp-=dmg;
+  if(S.ca.hp<=0)defeatAlien();updateCbt();
 }
 function defeatAlien(){
-  const a=S.currentAlien; S.aliensDefeated++; if(a.type.id==='zero_day') S.mothershipsDefeated++;
-  S.credits+=a.reward.credits||0; S.data+=a.reward.data||0;
-  showToast(`✅ ${a.name} neutralized!`); addLog(`✅ ${a.name} patched! +${a.reward.credits}💰`,'good');
-  if(Math.random()<0.25){ const s=STAR_TYPES[Math.floor(Math.random()*12)]; if(!S.stars.find(x=>x.name===s.name)){ S.stars.push(s); showToast(`🧠 Salvaged: ${s.name}!`); } }
-  S.currentAlien=null; document.getElementById('combat-overlay').style.display='none'; scheduleAlien(); checkAchievements(); updateUI();
+  const a=S.ca;S.ad++;if(a.type.id==='zd')S.mk++;
+  S.c+=a.rw.c||0;S.d+=a.rw.d||0;toast(`✅ ${a.n} patched!`);
+  addLog(`✅ +${a.rw.c}💰 +${a.rw.d}📊`,'g');
+  if(Math.random()<0.25){const m=MODELS[Math.floor(Math.random()*12)];if(!S.md.find(x=>x.n===m.n)){S.md.push(m);toast(`🧠 ${m.n}!`)}}
+  S.ca=null;document.getElementById('cbt').style.display='none';schedAlien();checkAch();updateUI();
 }
-function updateCombatUI(){
-  if(!S.currentAlien) return; const a=S.currentAlien;
-  document.getElementById('combat-overlay').style.display='flex'; document.getElementById('alien-icon').textContent=a.icon; document.getElementById('alien-name').textContent=a.name;
-  document.getElementById('alien-hp-bar').style.width=(a.hp/a.maxHp*100)+'%';
-  document.getElementById('attack-dmg').textContent=10+S.modules.cannon*8;
-  document.getElementById('alien-threat').textContent=`⚠️ Exploiting in ${Math.ceil(Math.max(0,a.atkSpeed-a.attackTimer))}s for ${a.damage}dmg`;
+function updateCbt(){
+  if(!S.ca)return;const a=S.ca;
+  document.getElementById('cbt').style.display='flex';document.getElementById('ca-ico').textContent=a.i;
+  document.getElementById('ca-n').textContent=a.n;
+  document.getElementById('ca-hp').style.width=(a.hp/a.mhp*100)+'%';
+  document.getElementById('ca-dmg').textContent=10+S.mods.ids*8;
+  document.getElementById('ca-thr').textContent=`⚠️ In ${Math.ceil(Math.max(0,a.sp-a.at))}s — ${a.d}dmg`;
 }
-function scheduleAlien(){ if(combatTimer) clearTimeout(combatTimer); combatTimer=setTimeout(spawnAlien,40000+Math.random()*60000); }
+function schedAlien(){if(ctimer)clearTimeout(ctimer);ctimer=setTimeout(spawnAlien,35000+Math.random()*65000)}
 
-// ==================== UI ====================
+// ================ UI ================
+function st(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));
+  document.querySelector(`.tab[onclick="st('${n}')"]`).classList.add('on');
+  document.getElementById('tc-'+n).classList.add('on');
+  if(n==='divs')renderDivs();
+}
+
 function updateUI(){
-  document.getElementById('res-compute').textContent=Math.floor(S.energy);
-  document.getElementById('res-funding').textContent=Math.floor(S.credits);
-  document.getElementById('res-traindata').textContent=Math.floor(S.data);
-  document.getElementById('day-counter').textContent=`Day ${S.day}`;
-  document.getElementById('res-integrity').textContent=Math.floor(S.stationHP);
-  document.getElementById('res-maxintegrity').textContent=S.maxHP;
-  document.getElementById('team-badge').textContent=currentTeamName();
-  document.getElementById('office-name').textContent=`${currentTeamName()} Office`;
-  document.getElementById('office-desc').textContent=`${currentTeamName()} | ${teamMemberCount()}/6 members`;
-  renderProjects(); renderStarCatalog(); renderInfraTab(); renderTeamTab(); renderPapersTab(); renderSecurityTab(); renderAchievements();
-  document.getElementById('catalog-count').textContent=S.stars.length;
-  let eGen=S.modules.gpu+S.modules.tpu*5; if(S.research.includes('unsupervised')) eGen+=3+Math.floor(S.modules.gpu*0.3); if(S.research.includes('neuromorphic')) eGen+=S.modules.tpu*5;
-  document.getElementById('rate-compute').textContent=`+${Math.max(0,eGen)}/s`;
+  document.getElementById('r-e').textContent=Math.floor(S.e);
+  document.getElementById('r-c').textContent=Math.floor(S.c);
+  document.getElementById('r-d').textContent=Math.floor(S.d);
+  document.getElementById('r-hp').textContent=Math.floor(S.hp);
+  document.getElementById('day-lbl').textContent='Day '+S.day;
+  document.getElementById('tb').textContent=tn();
+  document.getElementById('cinfo-t').textContent=tn()+' Office';
+  document.getElementById('cinfo-d').textContent=`🖥️ ${S.pcs} computer${S.pcs>1?'s':''} · ${tn()} · ${tmc()}/6 members`;
+  document.getElementById('mc').textContent=S.md.length;
+
+  let eg=S.mods.gpu+S.mods.tpu*5;if(S.rs.includes('r5'))eg+=3+Math.floor(S.mods.gpu*0.3);if(S.rs.includes('r7'))eg+=S.mods.tpu*5;
+  document.getElementById('r-er').textContent='+'+Math.max(0,eg)+'/s';
+
+  renderProj();renderModels();renderInfra();renderTeam();renderPapers();renderSec();renderAch();
 }
 
-function renderProjects(){
-  const c=document.getElementById('project-list'), active=S.projects.filter(p=>p.progress<p.max).length;
+function renderProj(){
+  const c=document.getElementById('proj-list'),active=S.pj.filter(p=>p.pr<p.max).length;
   c.innerHTML='';
-  PROJECTS.forEach(proj=>{
-    const can=active<6&&S.energy>=proj.cost;
-    const div=document.createElement('div'); div.className='project-card'+(!can?' disabled':'');
-    const activeInst=S.projects.filter(p=>p.proj.id===proj.id&&p.progress<p.max);
-    let inner=`<div class="p-icon">${proj.icon}</div><div class="p-info"><div class="p-name">${proj.name}</div><div class="p-meta"><span>⏱${proj.dur}s</span><span>⚡${proj.cost}</span><span>⚠${proj.risk}</span></div>`;
-    activeInst.forEach(p=>{ inner+=`<div class="p-bar"><div class="p-bar-fill" style="width:${(p.progress/p.max)*100}%"></div></div><span style="font-size:9px;color:#66bb6a">${Math.floor((p.progress/p.max)*100)}%</span>`; });
-    inner+='</div>';
-    div.innerHTML=inner;
-    div.addEventListener('click',()=>{ if(can)launchProject(proj); }); c.appendChild(div);
+  PROJ.forEach(p=>{
+    const can=active<S.pcs&&S.e>=p.c;
+    const d=document.createElement('div');d.className='proj'+(can?'':' locked');
+    d.innerHTML=`<div class="pico">${p.i}</div><div class="pi"><div class="pn">${p.n}</div><div class="pm"><span>⏱${p.t}s</span><span>⚡${p.c}</span><span>⚠${p.r}</span></div></div>`;
+    d.addEventListener('click',()=>{if(can)startAssignment(p)});c.appendChild(d);
+  });
+  // Show active projects
+  S.pj.filter(p=>p.pr<p.max).forEach(p=>{
+    const dd=document.createElement('div');dd.style.cssText='padding:4px 8px;font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px';
+    dd.innerHTML=`${p.pj.i} Desk #${(p.desk||0)+1} <span style="margin-left:auto">${Math.floor(p.pr/p.max*100)}%</span>`;
+    c.appendChild(dd);
   });
 }
 
-function renderStarCatalog(){
-  const c=document.getElementById('star-catalog'); c.innerHTML='';
-  STAR_TYPES.forEach(s=>{ const d=S.stars.some(x=>x.name===s.name); c.innerHTML+=`<div style="display:flex;align-items:center;gap:6px;padding:3px 6px;font-size:11px;opacity:${d?1:0.3}"><span>${d?s.icon:'❓'}</span><span>${d?s.name:'???'}</span><span style="font-size:9px;color:#888;margin-left:auto">${d?s.rarity:''}</span></div>`; });
+function renderModels(){
+  const c=document.getElementById('star-list');c.innerHTML='';
+  MODELS.forEach(m=>{const f=S.md.some(x=>x.n===m.n);c.innerHTML+=`<div style="display:flex;align-items:center;gap:4px;padding:2px 0;opacity:${f?1:0.3};font-size:10px"><span>${f?m.i:'❓'}</span><span>${f?m.n:'???'}</span><span style="color:var(--dim);font-size:8px;margin-left:auto">${f?m.r:''}</span></div>`});
 }
 
-function renderInfraTab(){
-  const c=document.getElementById('tab-infra'); c.innerHTML='';
-  MODULES.forEach(m=>{ const l=S.modules[m.id]; let cost=Math.floor(m.cost*Math.pow(m.scale,l)); const max=l>=m.max; c.innerHTML+=`<div class="card"><div class="card-icon">${m.icon}</div><div class="card-info"><div class="card-name">${m.name} <span style="color:#5b9bd5;font-size:9px">Lv${l}/${m.max}</span></div><div class="card-desc">${m.desc(l)}</div></div>${max?'<span style="color:#66bb6a;font-size:9px">MAX</span>':`<button class="small" ${S.credits<cost?'disabled':''} onclick="buyModule(MODULES[${MODULES.indexOf(m)}])">💰${cost}</button>`}</div>`; });
+function renderInfra(){
+  const c=document.getElementById('tc-infra');c.innerHTML='';
+  // Computers
+  c.innerHTML+=`<div class="card" style="cursor:pointer" onclick="buyPC()"><div class="ci">🖥️</div><div class="cx"><div class="cn">Office Computers</div><div class="cd">${S.pcs} owned · Run projects</div></div><button class="sm" ${S.c<150+Math.floor(S.pcs*120*Math.pow(1.3,S.pcs))||S.pcs>=20?'disabled':''}>💰${150+Math.floor(S.pcs*120*Math.pow(1.3,S.pcs))}</button></div>`;
+  MODS.forEach(m=>{
+    const l=S.mods[m.id];let cost=Math.floor(m.c*Math.pow(m.s,l));const mx=l>=m.m;
+    c.innerHTML+=`<div class="card"><div class="ci">${m.i}</div><div class="cx"><div class="cn">${m.n} <span style="color:var(--accent);font-size:8px">Lv${l}/${m.m}</span></div><div class="cd">${m.f(l)}</div></div>${mx?'<span style="color:var(--green);font-size:9px">MAX</span>':`<button class="sm" ${S.c<cost?'disabled':''} onclick="buyMod(MODS[${MODS.indexOf(m)}])">💰${cost}</button>`}</div>`;
+  });
 }
 
-function renderTeamTab(){
-  const c=document.getElementById('tab-team'); c.innerHTML=`<div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">${currentTeamName()} — ${teamMemberCount()}/6 members</div>`;
-  CREW.forEach(cr=>{ const hired=S.crew.filter(c=>c.id===cr.id).length; const can=teamMemberCount()<6&&S.credits>=cr.cost&&hired<1; c.innerHTML+=`<div class="card${hired?' hired':''}"><div class="card-icon">${cr.icon}</div><div class="card-info"><div class="card-name">${cr.name}${hired?' <span style="color:#66bb6a">✓</span>':''}</div><div class="card-desc">${cr.desc}</div></div><div style="display:flex;gap:3px;">${can?`<button class="small" onclick="hireCrew(CREW[${CREW.indexOf(cr)}])">💰${cr.cost}</button>`:''}${hired?`<button class="small secondary" onclick="fireCrew('${cr.id}')">✕</button>`:''}</div></div>`; });
+function renderTeam(){
+  const c=document.getElementById('tc-team');c.innerHTML=`<div style="font-size:9px;color:var(--dim);margin-bottom:2px">${tn()} — ${tmc()}/6 members</div>`;
+  CREWT.forEach(cr=>{
+    const h=S.cr.filter(c=>c.id===cr.id).length;const can=tmc()<6&&S.c>=cr.c&&h<1;
+    c.innerHTML+=`<div class="card${h?' hired':''}"><div class="ci">${cr.i}</div><div class="cx"><div class="cn">${cr.n}${h?' ✓':''}</div><div class="cd">${cr.d}</div></div><div style="display:flex;gap:2px">${can?`<button class="sm" onclick="hireCrew(CREWT[${CREWT.indexOf(cr)}])">💰${cr.c}</button>`:''}${h?`<button class="sm ghost" onclick="fireCrew('${cr.id}')">✕</button>`:''}</div></div>`;
+  });
 }
 
-function renderPapersTab(){
-  const c=document.getElementById('tab-papers'); c.innerHTML='';
-  RESEARCH.forEach(r=>{ const done=S.research.includes(r.id); const req=r.req&&!S.research.includes(r.req); const can=!done&&!req&&S.data>=r.cost; c.innerHTML+=`<div class="card${done?' completed':req?' locked':''}"><div class="card-icon">${done?'✅':req?'🔒':'📄'}</div><div class="card-info"><div class="card-name">${r.name}</div><div class="card-desc">${r.desc}</div></div>${done?'<span style="color:#66bb6a;font-size:9px">Done</span>':req?'<span style="color:#ef5350;font-size:9px">Locked</span>':`<button class="small" ${!can?'disabled':''} onclick="researchTech(RESEARCH[${RESEARCH.indexOf(r)}])">📊${r.cost}</button>`}</div>`; });
+function renderPapers(){
+  const c=document.getElementById('tc-papers');c.innerHTML='';
+  RESRCH.forEach(r=>{
+    const done=S.rs.includes(r.id);const lk=r.q&&!S.rs.includes(r.q);
+    c.innerHTML+=`<div class="card${done?' completed':lk?' locked':''}"><div class="ci">${done?'✅':lk?'🔒':'📄'}</div><div class="cx"><div class="cn">${r.n}</div><div class="cd">${r.d}</div></div>${done?'<span style="color:var(--green);font-size:9px">✓</span>':lk?'<span style="color:var(--red);font-size:9px">Locked</span>':`<button class="sm" ${S.d<r.c?'disabled':''} onclick="doResearch(RESRCH[${RESRCH.indexOf(r)}])">📊${r.c}</button>`}</div>`;
+  });
 }
 
-function renderSecurityTab(){
-  const c=document.getElementById('tab-security'); c.innerHTML='';
-  DEFENSE.forEach(m=>{ const l=S.modules[m.id]; let cost=Math.floor(m.cost*Math.pow(m.scale,l)); const max=l>=m.max; c.innerHTML+=`<div class="card"><div class="card-icon">${m.icon}</div><div class="card-info"><div class="card-name">${m.name} <span style="color:#5b9bd5;font-size:9px">Lv${l}/${m.max}</span></div><div class="card-desc">${m.desc(l)}</div></div>${max?'<span style="color:#66bb6a;font-size:9px">MAX</span>':`<button class="small" ${S.credits<cost?'disabled':''} onclick="buyModule(DEFENSE[${DEFENSE.indexOf(m)}])">💰${cost}</button>`}</div>`; });
+function renderSec(){
+  const c=document.getElementById('tc-sec');c.innerHTML='';
+  DEFS.forEach(m=>{
+    const l=S.mods[m.id];let cost=Math.floor(m.c*Math.pow(m.s,l));const mx=l>=m.m;
+    c.innerHTML+=`<div class="card"><div class="ci">${m.i}</div><div class="cx"><div class="cn">${m.n} <span style="color:var(--accent);font-size:8px">Lv${l}/${m.m}</span></div><div class="cd">${m.f(l)}</div></div>${mx?'<span style="color:var(--green);font-size:9px">MAX</span>':`<button class="sm" ${S.c<cost?'disabled':''} onclick="buyMod(DEFS[${DEFS.indexOf(m)}])">💰${cost}</button>`}</div>`;
+  });
 }
 
-function renderDivisionsTab(){
-  const c=document.getElementById('tab-divisions'); c.innerHTML='<div class="section-title">Autonomous Divisions</div>';
-  if(S.teams.length===0){ c.innerHTML+='<div style="color:var(--text-dim);font-size:11px;padding:8px;">No autonomous divisions yet. Build a team of 6 to create one!</div>'; return; }
-  S.teams.forEach((t,i)=>{ c.innerHTML+=`<div class="division-card"><div class="div-name">🏢 ${t.name}</div><div class="div-meta">${t.members.length} members · ${t.projectsCompleted} projects · Status: Active</div></div>`; });
-  c.innerHTML+=`<div style="font-size:10px;color:var(--text-dim);margin-top:4px;text-align:center;">These divisions run independently.<br>No direct benefit — just like real Star Labs!</div>`;
+function renderDivs(){
+  const c=document.getElementById('tc-divs');c.innerHTML='<div class="sec">Autonomous Divisions</div>';
+  if(!S.ts.length){c.innerHTML+='<div style="color:var(--dim);font-size:10px;padding:6px">No divisions yet. Build a team of 6!</div>';return}
+  S.ts.forEach(t=>{c.innerHTML+=`<div class="card"><div class="ci">🏢</div><div class="cx"><div class="cn">${t.n}</div><div class="cd">${t.members.length} members · Active · Independent</div></div></div>`});
+  c.innerHTML+='<div style="font-size:9px;color:var(--dim);margin-top:4px;text-align:center">Teams are completely independent.<br>Just like real Star Labs divisions.</div>';
 }
 
-// ==================== ACHIEVEMENTS ====================
-function checkAchievements(){
-  ACHIEVEMENTS.forEach(a=>{ if(!S.achievements.includes(a.id)&&a.check()){ S.achievements.push(a.id); showToast(`🏆 ${a.name}!`); addLog(`🏆 ${a.icon} ${a.name}`,'discovery'); } });
+function checkAch(){
+  ACHV.forEach(a=>{if(!S.ac.includes(a.id)&&a.f()){S.ac.push(a.id);toast(`🏆 ${a.n}!`);addLog(`🏆 ${a.i} ${a.n}`,'y')}});
+  document.getElementById('ach-n').textContent=S.ac.length;
 }
-function toggleAchievements(){
-  const ov=document.getElementById('ach-overlay');
-  if(ov.style.display==='flex'){ ov.style.display='none'; return; }
-  ov.style.display='flex'; renderAchievements();
+function toggleAch(){
+  const o=document.getElementById('ach');
+  if(o.style.display==='flex'){o.style.display='none';return}o.style.display='flex';renderAch();
 }
-function renderAchievements(){
-  const l=document.getElementById('ach-list'); l.innerHTML='';
-  ACHIEVEMENTS.forEach(a=>{ const e=S.achievements.includes(a.id); l.innerHTML+=`<div class="ach-row${e?' earned':''}"><span>${e?a.icon:'🔒'}</span><div style="flex:1"><div style="font-size:12px;font-weight:600">${a.name}</div><div style="font-size:9px;color:var(--text-dim)">${a.desc}</div></div>${e?'<span style="color:#66bb6a">✓</span>':''}</div>`; });
-  document.getElementById('ach-count').textContent=`${S.achievements.length}/20`;
+function renderAch(){
+  const l=document.getElementById('ach-list');l.innerHTML='';
+  ACHV.forEach(a=>{const e=S.ac.includes(a.id);l.innerHTML+=`<div class="ar${e?' earned':''}"><span>${e?a.i:'🔒'}</span><div style="flex:1"><div style="font-size:11px;font-weight:600">${a.n}</div><div style="font-size:8px;color:var(--dim)">${a.d}</div></div>${e?'<span style="color:var(--green)">✓</span>':''}</div>`});
 }
 
-// ==================== EVENTS ====================
-let evTimer=null;
-function scheduleEvent(){ if(evTimer)clearTimeout(evTimer); evTimer=setTimeout(triggerEvent,35000+Math.random()*55000); }
-function triggerEvent(){
-  const ev=EVENTS[Math.floor(Math.random()*EVENTS.length)];
-  document.getElementById('event-title').textContent=ev.title; document.getElementById('event-desc').textContent=ev.desc;
-  const cc=document.getElementById('event-choices'); cc.innerHTML='';
-  ev.choices.forEach(ch=>{ const b=document.createElement('button'); b.textContent=ch.text; b.className=ch.good?'':'secondary'; b.onclick=()=>resolveEvent(ev,ch); cc.appendChild(b); });
-  document.getElementById('event-overlay').style.display='flex';
+// ================ EVENTS ================
+let etimer=null;
+function schedEvt(){if(etimer)clearTimeout(etimer);etimer=setTimeout(triggerEvt,30000+Math.random()*50000)}
+function triggerEvt(){
+  const ev=EVTS[Math.floor(Math.random()*EVTS.length)];
+  document.getElementById('evt-t').textContent=ev.t;document.getElementById('evt-d').textContent=ev.d;
+  const cc=document.getElementById('evt-c');cc.innerHTML='';
+  ev.ch.forEach(ch=>{const b=document.createElement('button');b.textContent=ch.x;b.className=ch.good?'':'ghost';b.onclick=()=>resolveEvt(ev,ch);cc.appendChild(b)});
+  document.getElementById('evt').style.display='flex';
 }
-function resolveEvent(ev,ch){
-  document.getElementById('event-overlay').style.display='none'; S.eventsHandled++;
-  if(ch.cost){ if(ch.cost.compute&&S.energy<ch.cost.compute){ addLog('Not enough compute!','danger'); scheduleEvent(); return; } if(ch.cost.funding&&S.credits<ch.cost.funding){ addLog('Not enough funding!','danger'); scheduleEvent(); return; } }
-  if(ch.cost){ if(ch.cost.compute) S.energy-=ch.cost.compute; if(ch.cost.funding) S.credits-=ch.cost.funding; }
-  if(ch.reward){ if(ch.reward.data) S.data+=ch.reward.data; if(ch.reward.funding) S.credits+=ch.reward.funding; if(ch.reward.extraModels){ for(let i=0;i<ch.reward.extraModels;i++){ const s=STAR_TYPES[Math.floor(Math.random()*12)]; if(!S.stars.find(x=>x.name===s.name)) S.stars.push(s); } } }
-  addLog(ch.good?'Incident resolved!':'Incident bad outcome.',ch.good?'good':'danger'); scheduleEvent(); updateUI();
+function resolveEvt(ev,ch){
+  document.getElementById('evt').style.display='none';S.eh++;
+  if(ch.cost){if(ch.cost.e&&S.e<ch.cost.e){addLog('Not enough compute!','d');schedEvt();return}if(ch.cost.c&&S.c<ch.cost.c){addLog('Not enough funding!','d');schedEvt();return}}
+  if(ch.cost){if(ch.cost.e)S.e-=ch.cost.e;if(ch.cost.c)S.c-=ch.cost.c}
+  if(ch.rw){if(ch.rw.d)S.d+=ch.rw.d;if(ch.rw.c)S.c+=ch.rw.c;if(ch.rw.m){for(let i=0;i<ch.rw.m;i++){const m=MODELS[Math.floor(Math.random()*12)];if(!S.md.find(x=>x.n===m.n))S.md.push(m)}}}
+  if(ch.pen){if(ch.pen.e)S.e=Math.max(0,S.e-ch.pen.e)}
+  addLog(ch.good?'✅ Resolved!':'❌ Bad outcome.',ch.good?'g':'d');schedEvt();updateUI();
 }
 
-function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; t.style.animation='none'; t.offsetHeight; t.style.animation='toastPop 2.5s forwards'; setTimeout(()=>t.style.display='none',2500); }
-function addLog(msg,cls){ const l=document.getElementById('log-area'); const d=document.createElement('div'); d.className='log-entry '+(cls||''); d.textContent=msg; l.appendChild(d); setTimeout(()=>d.remove(),3500); if(l.children.length>6) l.firstChild.remove(); }
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';t.style.animation='none';t.offsetHeight;t.style.animation='tp 2.5s forwards';setTimeout(()=>t.style.display='none',2500)}
+function addLog(m,c){const l=document.getElementById('log');const d=document.createElement('div');d.className='le '+(c||'');d.textContent=m;l.appendChild(d);setTimeout(()=>d.remove(),3000);if(l.children.length>6)l.firstChild.remove()}
 
-// ==================== MUSIC ====================
-const bgm=document.getElementById('bgm'); bgm.volume=0.35;
-function toggleMusic(){ const b=document.getElementById('music-btn'); if(bgm.paused){ bgm.play().catch(()=>{}); b.textContent='🔊'; }else{ bgm.pause(); b.textContent='🔇'; } }
-document.addEventListener('click',()=>{ bgm.play().catch(()=>{}); },{once:true});
+// Music
+const bgm=document.getElementById('bgm');bgm.volume=0.3;
+function toggleMusic(){const b=document.getElementById('music-btn');if(bgm.paused){bgm.play().catch(()=>{});b.textContent='🔊'}else{bgm.pause();b.textContent='🔇'}}
+document.addEventListener('click',()=>{bgm.play().catch(()=>{})},{once:true});
 
-// ==================== GAME LOOP ====================
+// ================ LOOP ================
 setInterval(()=>{
   S.tick++;
-  let eGen=S.modules.gpu+S.modules.tpu*5; if(S.research.includes('unsupervised')) eGen+=3+Math.floor(S.modules.gpu*0.3); if(S.research.includes('neuromorphic')) eGen+=S.modules.tpu*5;
-  S.energy=Math.max(0,S.energy+eGen);
-  S.projects.forEach(p=>{ p.progress++; if(p.progress>=p.max) setTimeout(()=>completeProject(p),50); });
-  if(S.tick%25===0) S.day++; if(S.tick%10===0) checkAchievements();
-  if(S.currentAlien){ S.currentAlien.attackTimer+=1;
-    if(S.currentAlien.attackTimer>=S.currentAlien.atkSpeed){ const dmg=Math.floor(S.currentAlien.damage*(1-S.modules.firewall*0.05)); S.stationHP=Math.max(0,S.stationHP-dmg); addLog(`💥 ${S.currentAlien.name} breached: ${dmg}dmg!`,'danger'); S.currentAlien.attackTimer=0;
-      if(S.stationHP<=0){ addLog('💀 Systems compromised!','danger'); S.currentAlien=null; document.getElementById('combat-overlay').style.display='none'; S.credits=Math.floor(S.credits*0.5); S.data=Math.floor(S.data*0.5); S.stationHP=S.maxHP; scheduleAlien(); } }
-    updateCombatUI();
+  let eg=S.mods.gpu+S.mods.tpu*5;if(S.rs.includes('r5'))eg+=3+Math.floor(S.mods.gpu*0.3);if(S.rs.includes('r7'))eg+=S.mods.tpu*5;
+  S.e=Math.max(0,S.e+eg);
+  S.pj.forEach(p=>{p.pr++;if(p.pr>=p.max)setTimeout(()=>completeProject(p),50)});
+  if(S.tick%25===0)S.day++;if(S.tick%10===0)checkAch();
+
+  if(S.ca){S.ca.at+=1;
+    if(S.ca.at>=S.ca.sp){const dmg=Math.floor(S.ca.d*(1-S.mods.shield*0.05));S.hp=Math.max(0,S.hp-dmg);addLog(`💥 ${S.ca.n}: ${dmg} damage`,'d');S.ca.at=0;
+      if(S.hp<=0){addLog('💀 Systems compromised! Rebuilding...','d');S.ca=null;document.getElementById('cbt').style.display='none';S.c=Math.floor(S.c*0.5);S.d=Math.floor(S.d*0.5);S.hp=S.mh;schedAlien()}}
+    updateCbt();
   }
-  if(S.currentAlien&&S.modules.laser>0){ S.currentAlien.hp-=S.modules.laser*5; if(S.currentAlien.hp<=0) defeatAlien(); }
-  if(S.stationHP<S.maxHP&&S.modules.repair>0&&S.tick%5===0) S.stationHP=Math.min(S.maxHP,S.stationHP+S.modules.repair*3);
+  if(S.ca&&S.mods.fw>0){S.ca.hp-=S.mods.fw*5;if(S.ca.hp<=0)defeatAlien()}
+  if(S.hp<S.mh&&S.mods.rep>0&&S.tick%5===0)S.hp=Math.min(S.mh,S.hp+S.mods.rep*3);
   updateUI();
 },1000);
 
-updateUI(); scheduleEvent(); scheduleAlien();
-addLog('🏢 Welcome to Star Labs! Build your team.','good');
-addLog('Click desks/monitors for bonus compute! 🖱️','');
+updateUI();schedEvt();schedAlien();
+addLog('🏢 Welcome to Star Labs! Build your team.','g');
+addLog('🖥️ Click a project, then click a desk!','');
 </script>
 </body>
 </html>
