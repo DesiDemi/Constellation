@@ -226,7 +226,7 @@ button.ghost{background:none;border:1px solid var(--accent);color:var(--accent)}
 </div>
 <div id="log"></div>
 <div id="toast"></div>
-<div id="hint">⬆ Click a desk to assign the project!</div>
+<div id="hint">🖱️ Click ANYWHERE on the office to assign!</div>
 
 <script>
 // ================ DATA ================
@@ -565,17 +565,22 @@ function sparkDesk(d){for(let i=0;i<6;i++)particles.push({x:d.x,y:d.y,l:1,vx:(Ma
 
 // Click handler
 cv.addEventListener('click',e=>{
-  const r=cv.getBoundingClientRect(),sx=cv.width/r.width,sy=cv.height/r.height;
-  const mx=(e.clientX-r.left)*sx,my=(e.clientY-r.top)*sy;
+  const mx=e.offsetX*(cv.width/cv.clientWidth),my=e.offsetY*(cv.height/cv.clientHeight);
   const desks=getDesks();
-  // Check desk clicks
+
+  // Assignment mode: any click on canvas assigns to first free desk
+  if(assigningProj){
+    for(const d of desks){
+      const running=S.pj.find(p=>p.desk===d.id&&p.pr<p.max);
+      if(!running){launchOnDesk(assigningProj,d.id);assigningProj=null;document.getElementById('hint').classList.remove('show');return;}
+    }
+    addLog('All desks busy! Buy more computers.','d');
+    assigningProj=null;document.getElementById('hint').classList.remove('show');return;
+  }
+
+  // Check desk clicks for bonus
   for(const d of desks){
-    if(mx>d.x-d.w/2-10&&mx<d.x+d.w/2+10&&my>d.y-d.h/2-24&&my<d.y+d.h/2+18){
-      if(assigningProj){
-        const running=S.pj.find(p=>p.desk===d.id&&p.pr<p.max);
-        if(!running){launchOnDesk(assigningProj,d.id);assigningProj=null;document.getElementById('hint').classList.remove('show');return;}
-      }
-      // Toggle monitor interaction: click empty desk for bonus
+    if(mx>d.x-d.w/2-20&&mx<d.x+d.w/2+20&&my>d.y-d.h/2-35&&my<d.y+d.h/2+25){
       const running=S.pj.find(p=>p.desk===d.id&&p.pr<p.max);
       if(!running){S.e+=1;sparkDesk(d);addLog('🖱️ +1 compute','g');}
       return;
